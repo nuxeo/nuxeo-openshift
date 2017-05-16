@@ -1,0 +1,10 @@
+kind: StorageClass
+apiVersion: storage.k8s.io/v1beta1
+metadata:
+  name: aws-fast
+provisioner: kubernetes.io/aws-ebs
+parameters:
+  type: io1 
+  zone: us-west-2a
+  iopsPerGB: "10" 
+  encrypted: "false"
