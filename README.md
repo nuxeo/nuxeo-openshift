@@ -22,6 +22,29 @@ This is a work in progress.
     # Creates a new project and deploys the nuxeo template in it
     oc new-project nuxeo
     oc new-app nuxeo
+    
+## Current state
+
+The template deploys a Nuxeo cluster based on persistent backing services (MongoDB, Elasticsearch and Redis). The application is then available at http://nuxeo.apps.io.nuxeo.com. All storage is backed by AWS EBS which are provisionned dynamically (see [aws-storage-class.yaml](aws-storage-class.aml)
+
+Several limitations for now :
+
+ * Stateful services use EBS storage which is provisionned by the AWS Storage class. Unfortunately it's not possible to specify several AZ for the EBS. As a result, all storage pods are scheduled on the AZ where the storage is present. [PR is waiting](https://github.com/kubernetes/kubernetes/pull/38505) to be able to specify several zones in Kubernetes.
+ * Blob storage is not managed in the cluster. It should be mounted on a GlusterFS or NFS storage.
+ * Log should be written on a volume and well managed (retention time etc...)
+
+## TODO
+
+ * Add obvious paremeters (size of disks, DNS etc...)
+ * Add dependencies between services
+ * Test rolling upgrade
+ * Add GlusterFS storage (aka CNS in OpenShift) to handle BlobManager
+ * Put env variables in resources definitions rather than in Dockerfile
+ * Add health and readiness checks
+ * Harmonize object labels
+
+
+
 
 # Licensing
 
