@@ -42,7 +42,7 @@ Several limitations for now :
  * Put env variables in resources definitions rather than in Dockerfile
  * Add health and readiness checks
  * Harmonize object labels
-
+ * Idea: put part of nuxeo.conf in ConfigMap to make it more easily editable
 
 
 
