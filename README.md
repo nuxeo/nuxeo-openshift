@@ -7,22 +7,21 @@ In order to run it, you need a [configured OpenShift cluster on AWS](https://git
 This is a work in progress.
 
 
+
 ## How to run
    
     # Create a specific Security Context Constraint needed for ES
+    oc adm policy add-cluster-role-to-user cluster-admin system:serviceaccount:nuxeo:default       
     oc create -f es-scc.yaml
-    oc create -f backing/es-discovery-svc.yaml
-    oc create -f backing/es-svc.yaml
-    oc adm policy add-scc-to-user es-scc system:serviceaccount:nuxeo:default
-    oc create -f backing/es-master.yaml
-    
-    # Define a aws-fast storage class used by the stateful sets
+    # Defines the `aws-fast` storage class, update file to fit your needs
     oc create -f aws-storage-class.yaml
-    oc create -f backing/es-data-svc.yaml
-    oc create -f backing/mongo-statefulset.yaml
-    oc create -f backing/redis.yaml
     
-    oc new-app https://github.com/nuxeo-sandbox/nuxeo-openshift
+    # Creates the nuxeo template
+    oc create -f nuxeo-template -n openshift    
+    
+    # Creates a new project and deploys the nuxeo template in it
+    oc new-project nuxeo
+    oc new-app nuxeo
 
 # Licensing
 

@@ -1,0 +1,534 @@
+apiVersion: v1
+kind: Template
+metadata:  
+  name: nuxeo
+  creationTimeStamp: null
+  annotations:
+    description: This templates setup a full Nuxeo cluster with persistent storage on top of MongoDB, ElasticSearch and Redis.
+    iconClass: icon-java
+    tags: instant-app, java, nuxeo
+objects:
+- apiVersion: v1
+  kind: ImageStream
+  metadata:      
+    creationTimestamp: null
+    name: nuxeo
+  spec:
+    dockerImageRepository: nuxeo
+  status:
+    dockerImageRepository: ""    
+
+- apiVersion: v1
+  kind: ImageStream
+  metadata:      
+    creationTimestamp: null
+    name: nuxeo-openshift
+  spec: {}
+  status:
+    dockerImageRepository: ""    
+
+- apiVersion: v1
+  kind: BuildConfig
+  metadata:
+    creationTimestamp: null
+    labels:
+      app: nuxeo-openshift
+    name: nuxeo-openshift
+  spec:
+    triggers:
+    - github:
+        secret: 7KxLAIT9uOhNPC_0ZrrU
+      type: GitHub
+    - generic:
+        secret: DFpdvhrEf3hVSX6NcyX0
+      type: Generic
+    - type: ConfigChange
+    - imageChange: {}
+      type: ImageChange
+    source:
+      git:
+        #TODO Add parameter
+        uri: https://github.com/nuxeo-sandbox/nuxeo-openshift
+      type: Git
+    strategy:
+      dockerStrategy:
+        from:
+          kind: ImageStreamTag
+          name: nuxeo:8.10
+      type: Docker    
+    output:
+      to:
+        kind: ImageStreamTag
+        name: nuxeo-openshift:latest
+    postCommit: {}
+    resources: {}
+  status:
+    lastVersion: 0
+- apiVersion: v1
+  kind: DeploymentConfig
+  metadata:
+    creationTimestamp: null
+    generation: 1
+    labels:
+      app: nuxeo-openshift
+    name: nuxeo-openshift
+  spec:
+    strategy:
+      type: Rolling
+      activeDeadlineSeconds: 21600
+      resources: {}
+      rollingParams:
+        intervalSeconds: 1
+        maxSurge: 25%
+        maxUnavailable: 25%
+        timeoutSeconds: 600
+        updatePeriodSeconds: 1
+    replicas: 2
+    selector:
+      app: nuxeo-openshift
+      deploymentconfig: nuxeo-openshift
+    
+    template:
+      metadata:
+        creationTimestamp: null
+        labels:
+          app: nuxeo-openshift
+          deploymentconfig: nuxeo-openshift
+      spec:
+        containers:
+        - image: nuxeo-8.10
+          imagePullPolicy: Always
+          name: nuxeo-openshift
+          ports:
+          - containerPort: 8787
+            protocol: TCP
+          - containerPort: 8080
+            protocol: TCP
+          resources: {}
+          terminationMessagePath: /dev/termination-log
+        dnsPolicy: ClusterFirst
+        restartPolicy: Always
+        securityContext: {}
+        terminationGracePeriodSeconds: 30
+    test: false
+    triggers:
+    - type: ConfigChange
+    - imageChangeParams:
+        automatic: true
+        containerNames:
+        - nuxeo-openshift
+        from:
+          kind: ImageStreamTag
+          name: nuxeo-openshift:latest
+          namespace: nuxeo
+      type: ImageChange
+  status: {}
+
+- apiVersion: v1
+  kind: Service
+  metadata:
+    name: nuxeo-openshift
+    labels:
+      component: nuxeo
+      role: lb
+  spec:
+    type: LoadBalancer
+    selector:
+      app: nuxeo-openshift    
+    ports:
+    - name: 8080-tcp
+      port: 8080
+      protocol: TCP
+
+- apiVersion: v1
+  kind: Route
+  metadata:
+    name: nuxeo-route  
+  spec:
+    # TODO: Add parameter
+    host: nuxeo.apps.io.nuxeo.com
+    to:
+      kind: Service
+      name: nuxeo-openshift
+      weight: 100
+    port:
+      targetPort: 8080-tcp
+    wildcardPolicy: None
+
+- apiVersion: v1
+  kind: Service
+  metadata:
+    name: elasticsearch-discovery
+    labels:
+      component: elasticsearch
+      role: master
+  spec:
+    selector:
+      component: elasticsearch
+      role: master
+    ports:
+    - name: transport
+      port: 9300
+      protocol: TCP
+
+- apiVersion: v1
+  kind: Service
+  metadata:
+    name: elasticsearch
+    labels:
+      component: elasticsearch
+      role: client
+  spec:
+    type: LoadBalancer
+    selector:
+      component: elasticsearch
+      role: client
+    ports:
+    - name: http
+      port: 9200
+      protocol: TCP
+
+- apiVersion: extensions/v1beta1
+  kind: Deployment
+  metadata:
+    name: es-master
+    labels:
+      component: elasticsearch
+      role: master
+  spec:
+    replicas: 3
+    template:
+      metadata:
+        labels:
+          component: elasticsearch
+          role: master
+        annotations:
+          pod.beta.kubernetes.io/init-containers: '[
+            {
+            "name": "sysctl",
+              "image": "busybox",
+              "imagePullPolicy": "IfNotPresent",
+              "command": ["sysctl", "-w", "vm.max_map_count=262144"],
+              "securityContext": {
+                "privileged": true
+              }
+            }
+          ]'
+      spec:
+        containers:
+        - name: es-master
+          securityContext:
+            privileged: false
+            capabilities:
+              add:
+                - IPC_LOCK
+                - SYS_RESOURCE
+          image: quay.io/pires/docker-elasticsearch-kubernetes:2.4.1
+          imagePullPolicy: Always
+          env:
+          - name: NAMESPACE
+            valueFrom:
+              fieldRef:
+                fieldPath: metadata.namespace
+          - name: NODE_NAME
+            valueFrom:
+              fieldRef:
+                fieldPath: metadata.name
+          - name: "CLUSTER_NAME"
+            value: "elasticsearch"
+          - name: "NUMBER_OF_MASTERS"
+            value: "2"
+          - name: NODE_MASTER
+            value: "true"
+          - name: NODE_INGEST
+            value: "false"
+          - name: NODE_DATA
+            value: "false"
+          - name: HTTP_ENABLE
+            value: "false"
+          - name: "ES_JAVA_OPTS"
+            value: "-Xms256m -Xmx256m"
+          ports:
+          - containerPort: 9300
+            name: transport
+            protocol: TCP
+          volumeMounts:
+          - name: storage
+            mountPath: /data
+        volumes:
+            - emptyDir:
+                medium: ""
+              name: "storage"
+
+- apiVersion: v1
+  kind: Service
+  metadata:
+    name: elasticsearch-data
+    labels:
+      component: elasticsearch
+      role: data
+  spec:
+    ports:
+    - port: 9300
+      name: transport
+    clusterIP: None
+    selector:
+      component: elasticsearch
+      role: data
+
+
+- apiVersion: apps/v1beta1
+  kind: StatefulSet
+  metadata:
+    name: es-data
+    labels:
+      component: elasticsearch
+      role: data
+  spec:
+    serviceName: elasticsearch-data
+    replicas: 3
+    template:
+      metadata:
+        labels:
+          component: elasticsearch
+          role: data
+        annotations:
+          pod.beta.kubernetes.io/init-containers: '[
+            {
+            "name": "sysctl",
+              "image": "busybox",
+              "imagePullPolicy": "IfNotPresent",
+              "command": ["sysctl", "-w", "vm.max_map_count=262144"],
+              "securityContext": {
+                "privileged": true
+              }
+            }
+          ]'
+      spec:
+        containers:
+        - name: es-data
+          securityContext:
+            privileged: true
+            capabilities:
+              add:
+                - IPC_LOCK
+          image: quay.io/pires/docker-elasticsearch-kubernetes:2.4.1
+          imagePullPolicy: Always
+          env:
+          - name: NAMESPACE
+            valueFrom:
+              fieldRef:
+                fieldPath: metadata.namespace
+          - name: NODE_NAME
+            valueFrom:
+              fieldRef:
+                fieldPath: metadata.name
+          - name: "CLUSTER_NAME"
+            value: "elasticsearch"
+          - name: NODE_MASTER
+            value: "false"
+          - name: NODE_INGEST
+            value: "false"
+          - name: HTTP_ENABLE
+            value: "false"
+          - name: "ES_JAVA_OPTS"
+            # TODO: review values
+            value: "-Xms256m -Xmx256m"
+          ports:
+          - containerPort: 9300
+            name: transport
+            protocol: TCP
+          volumeMounts:
+          - name: storage
+            mountPath: /data
+    volumeClaimTemplates:
+    - metadata:
+        name: storage
+        annotations:
+          volume.beta.kubernetes.io/storage-class: aws-fast
+      spec:
+        accessModes: [ "ReadWriteOnce" ]
+        resources:
+          requests:
+            # TODO Add parameter
+            storage: 10Gi
+
+
+
+- apiVersion: v1
+  kind: Service
+  metadata:
+    name: mongo
+    labels:
+      name: mongo
+  spec:
+    ports:
+    - port: 27017
+      targetPort: 27017
+    clusterIP: None
+    selector:
+      role: mongo
+
+- apiVersion: apps/v1beta1
+  kind: StatefulSet
+  metadata:
+    name: mongo
+  spec:
+    serviceName: "mongo"
+    replicas: 3
+    template:
+      metadata:
+        labels:
+          role: mongo
+          environment: test
+      spec:
+        terminationGracePeriodSeconds: 10
+        containers:
+          - name: mongo
+            image: mongo
+            command:
+              - mongod
+              - "--replSet"
+              - rs0
+              - "--smallfiles"
+              - "--noprealloc"
+            ports:
+              - containerPort: 27017
+            volumeMounts:
+              - name: mongo-persistent-storage
+                mountPath: /data/db
+          - name: mongo-sidecar
+            image: cvallance/mongo-k8s-sidecar
+            env:
+              - name: MONGO_SIDECAR_POD_LABELS
+                value: "role=mongo,environment=test"
+    volumeClaimTemplates:
+    - metadata:
+        name: mongo-persistent-storage
+        annotations:
+          volume.beta.kubernetes.io/storage-class: aws-fast
+      spec:
+        accessModes: [ "ReadWriteOnce" ]
+        resources:
+          requests:
+            # TODO: add parameter
+            storage: 10Gi
+
+
+- apiVersion: v1
+  kind: Service
+  metadata:
+    annotations:
+      service.alpha.kubernetes.io/tolerate-unready-endpoints: "true"
+    name: redis
+    labels:
+      app: redis
+  spec:
+    ports:
+    - port: 6379
+      name: peer
+    # *.redis.default.svc.cluster.local
+    clusterIP: None
+    selector:
+      app: redis
+
+- apiVersion: apps/v1beta1
+  kind: StatefulSet
+  metadata:
+    name: rd
+  spec:
+    serviceName: "redis"
+    replicas: 1
+    template:
+      metadata:
+        labels:
+          app: redis
+        annotations:
+          pod.alpha.kubernetes.io/initialized: "true"
+          pod.alpha.kubernetes.io/init-containers: '[
+              {
+                  "name": "install",
+                  "image": "gcr.io/google_containers/redis-install:0.1",
+                  "imagePullPolicy": "Always",
+                  "args": ["--version=3.2.0", "--install-into=/opt", "--work-dir=/work-dir"],
+                  "volumeMounts": [
+                      {
+                          "name": "opt",
+                          "mountPath": "/opt"
+                      },
+                      {
+                          "name": "workdir",
+                          "mountPath": "/work-dir"
+                      }
+                  ]
+              },
+              {
+                  "name": "bootstrap",
+                  "image": "debian:jessie",
+                  "command": ["/work-dir/peer-finder"],
+                  "args": ["-on-start=\"/work-dir/on-start.sh\"", "-service=redis"],
+                  "env": [
+                    {
+                        "name": "POD_NAMESPACE",
+                        "valueFrom": {
+                            "fieldRef": {
+                                "apiVersion": "v1",
+                                "fieldPath": "metadata.namespace"
+                            }
+                        }
+                     }
+                  ],
+                  "volumeMounts": [
+                      {
+                          "name": "opt",
+                          "mountPath": "/opt"
+                      },
+                      {
+                          "name": "workdir",
+                          "mountPath": "/work-dir"
+                      }
+                  ]
+              }
+          ]'
+      spec:
+        containers:
+        - name: redis
+          image: debian:jessie
+          ports:
+          - containerPort: 6379
+            name: peer
+          command:
+          - /opt/redis/redis-server
+          args:
+          - /opt/redis/redis.conf
+          readinessProbe:
+            exec:
+              command:
+              - sh
+              - -c
+              - "/opt/redis/redis-cli -h $(hostname) ping"
+            initialDelaySeconds: 15
+            timeoutSeconds: 5
+          volumeMounts:
+          - name: datadir
+            mountPath: /data
+          - name: opt
+            mountPath: /opt
+        volumes:
+        - name: opt
+          emptyDir: {}
+        - name: workdir
+          emptyDir: {}
+    volumeClaimTemplates:
+    - metadata:
+        name: datadir      
+        annotations:
+          volume.beta.kubernetes.io/storage-class: aws-fast
+      spec:
+        accessModes: [ "ReadWriteOnce" ]
+        resources:
+          requests:
+            # TODO: Add parameter
+            storage: 5Gi
+
+

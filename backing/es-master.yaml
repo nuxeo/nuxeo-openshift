@@ -33,7 +33,7 @@ spec:
             add:
               - IPC_LOCK
               - SYS_RESOURCE
-        image: quay.io/pires/docker-elasticsearch-kubernetes:5.4.0
+        image: quay.io/pires/docker-elasticsearch-kubernetes:2.4.1
         imagePullPolicy: Always
         env:
         - name: NAMESPACE
@@ -45,7 +45,7 @@ spec:
             fieldRef:
               fieldPath: metadata.name
         - name: "CLUSTER_NAME"
-          value: "myesdb"
+          value: "elasticsearch"
         - name: "NUMBER_OF_MASTERS"
           value: "2"
         - name: NODE_MASTER

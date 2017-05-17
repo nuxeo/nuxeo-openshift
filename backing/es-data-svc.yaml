@@ -7,9 +7,8 @@ metadata:
     role: data
 spec:
   ports:
-  - port: 9300
+  - port: 8080
     name: transport
   clusterIP: None
   selector:
-    component: elasticsearch
-    role: data
+    app: nuxeo-openshift

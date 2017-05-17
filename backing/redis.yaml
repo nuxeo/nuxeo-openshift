@@ -22,7 +22,7 @@ metadata:
   name: rd
 spec:
   serviceName: "redis"
-  replicas: 3
+  replicas: 1
   template:
     metadata:
       labels:
@@ -107,7 +107,7 @@ spec:
   - metadata:
       name: datadir      
       annotations:
-        volume.beta.kubernetes.io/storage-class: fast
+        volume.beta.kubernetes.io/storage-class: aws-fast
     spec:
       accessModes: [ "ReadWriteOnce" ]
       resources:

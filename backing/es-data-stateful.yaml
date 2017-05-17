@@ -33,7 +33,7 @@ spec:
           capabilities:
             add:
               - IPC_LOCK
-        image: quay.io/pires/docker-elasticsearch-kubernetes:5.4.0
+        image: quay.io/pires/docker-elasticsearch-kubernetes:2.4.1
         imagePullPolicy: Always
         env:
         - name: NAMESPACE
@@ -45,7 +45,7 @@ spec:
             fieldRef:
               fieldPath: metadata.name
         - name: "CLUSTER_NAME"
-          value: "myesdb"
+          value: "elasticsearch"
         - name: NODE_MASTER
           value: "false"
         - name: NODE_INGEST
@@ -65,7 +65,7 @@ spec:
   - metadata:
       name: storage
       annotations:
-        volume.beta.kubernetes.io/storage-class: fast      
+        volume.beta.kubernetes.io/storage-class: aws-fast
     spec:
       accessModes: [ "ReadWriteOnce" ]
       resources:

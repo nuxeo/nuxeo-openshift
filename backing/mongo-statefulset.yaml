@@ -10,6 +10,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+# http://blog.kubernetes.io/2017/01/running-mongodb-on-kubernetes-with-statefulsets.html
 ---
 apiVersion: v1
 kind: Service
@@ -62,7 +63,7 @@ spec:
   - metadata:
       name: mongo-persistent-storage
       annotations:
-        volume.beta.kubernetes.io/storage-class: fast
+        volume.beta.kubernetes.io/storage-class: aws-fast
     spec:
       accessModes: [ "ReadWriteOnce" ]
       resources:
