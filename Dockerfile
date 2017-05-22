@@ -7,3 +7,4 @@ ENV NUXEO_ES_HOSTS=elasticsearch-discovery.nuxeo.svc:9300
 ENV NUXEO_ES_CLUSTER_NAME: elasticsearch
 ENV NUXEO_ES_REPLICAS: 2
 ENV NUXEO_REDIS_HOST=rd-0.redis.nuxeo.svc
+ENV NUXEO_BINARY_STORE=/binaries

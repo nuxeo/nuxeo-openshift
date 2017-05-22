@@ -95,6 +95,7 @@ objects:
           app: nuxeo-openshift
           deploymentconfig: nuxeo-openshift
       spec:
+
         containers:
         - image: nuxeo-8.10
           imagePullPolicy: Always
@@ -106,10 +107,19 @@ objects:
             protocol: TCP
           resources: {}
           terminationMessagePath: /dev/termination-log
+          volumeMounts:
+          - name: binaries-storage
+            mountPath: /binaries
+        volumes:
+        - name: binaries-storage
+          persistentVolumeClaim:
+            claimName: binaries-storage
         dnsPolicy: ClusterFirst
         restartPolicy: Always
         securityContext: {}
         terminationGracePeriodSeconds: 30
+        
+        
     test: false
     triggers:
     - type: ConfigChange
@@ -122,6 +132,20 @@ objects:
           name: nuxeo-openshift:latest
           namespace: nuxeo
       type: ImageChange
+    volumeClaimTemplates:
+      - metadata:
+          name: binaries-storage
+          annotations:
+            volume.beta.kubernetes.io/storage-class: gluster-cns-slow
+        spec:
+          accessModes: [ "ReadWriteMany" ]
+          resources:
+            requests:
+              # TODO: Add parameter
+              storage: 50Gi
+
+
+
   status: {}
 
 - apiVersion: v1
