@@ -64,6 +64,21 @@ objects:
     resources: {}
   status:
     lastVersion: 0
+
+- apiVersion: v1
+  kind: PersistentVolumeClaim
+  metadata:
+    annotations:
+      volume.beta.kubernetes.io/storage-class: gluster-cns-slow
+    creationTimestamp: null
+    name: binaries-storage
+  spec:
+    accessModes:
+    - ReadWriteMany
+    resources:
+      requests:
+        storage: 50Gi
+
 - apiVersion: v1
   kind: DeploymentConfig
   metadata:
@@ -132,20 +147,6 @@ objects:
           name: nuxeo-openshift:latest
           namespace: nuxeo
       type: ImageChange
-    volumeClaimTemplates:
-      - metadata:
-          name: binaries-storage
-          annotations:
-            volume.beta.kubernetes.io/storage-class: gluster-cns-slow
-        spec:
-          accessModes: [ "ReadWriteMany" ]
-          resources:
-            requests:
-              # TODO: Add parameter
-              storage: 50Gi
-
-
-
   status: {}
 
 - apiVersion: v1
