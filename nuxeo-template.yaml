@@ -189,17 +189,17 @@ objects:
           - name: NUXEO_TEMPLATES
             value: "default,mongodb"
           - name: NUXEO_CUSTOM_PARAM
-            value: nuxeo.mongodb.server=mongodb://${APPLICATION_NAME}-mongo-0.nuxeo-mongo:27017,${APPLICATION_NAME}-mongo-1.nuxeo-mongo:27017,${APPLICATION_NAME}-mongo-2.nuxeo-mongo:27017
+            value: nuxeo.mongodb.server=mongodb://${APPLICATION_NAME}-mongo-0.${APPLICATION_NAME}-mongo:27017,${APPLICATION_NAME}-mongo-1.${APPLICATION_NAME}-mongo:27017,${APPLICATION_NAME}-mongo-2.${APPLICATION_NAME}-mongo:27017
           - name: NUXEO_PACKAGES
             value: nuxeo-jsf-ui nuxeo-web-ui
           - name: NUXEO_ES_HOSTS
-            value: nuxeo-elasticsearch-discovery:9300
+            value: ${APPLICATION_NAME}-elasticsearch-discovery:9300
           - name: NUXEO_ES_CLUSTER_NAME
             value: elasticsearch
           - name: NUXEO_ES_REPLICAS
-            value: 2
+            value: "2"
           - name: NUXEO_REDIS_HOST
-            value: nuxeo-redis-0.nuxeo-redis
+            value: ${APPLICATION_NAME}-redis-0.${APPLICATION_NAME}-redis
           - name: NUXEO_BINARY_STORE
             value: /binaries
 
@@ -347,6 +347,8 @@ objects:
             value: "true"
           - name: "ES_JAVA_OPTS"
             value: "-Xms256m -Xmx256m"
+          - name: DISCOVERY_SERVICE
+            value: ${APPLICATION_NAME}-elasticsearch-discovery
           ports:
           - containerPort: 9200
             name: http
@@ -446,6 +448,8 @@ objects:
             value: "false"
           - name: "ES_JAVA_OPTS"
             value: "-Xms256m -Xmx256m"
+          - name: DISCOVERY_SERVICE
+            value: ${APPLICATION_NAME}-elasticsearch-discovery
           ports:
           - containerPort: 9300
             name: transport
@@ -486,7 +490,7 @@ objects:
       component: elasticsearch
       role: data
   spec:
-    serviceName: elasticsearch-data
+    serviceName: ${APPLICATION_NAME}-elasticsearch-data
     replicas: 3
     template:
       metadata:
@@ -533,6 +537,8 @@ objects:
             value: "false"
           - name: HTTP_ENABLE
             value: "false"
+          - name: DISCOVERY_SERVICE
+            value: ${APPLICATION_NAME}-elasticsearch-discovery
           - name: "ES_JAVA_OPTS"
             # TODO: review values
             value: "-Xms256m -Xmx256m"
@@ -579,7 +585,7 @@ objects:
   metadata:
     name: ${APPLICATION_NAME}-mongo
   spec:
-    serviceName: "mongo"
+    serviceName: ${APPLICATION_NAME}-mongo
     replicas: 3
     template:
       metadata:
@@ -606,7 +612,7 @@ objects:
             image: cvallance/mongo-k8s-sidecar
             env:
               - name: MONGO_SIDECAR_POD_LABELS
-                value: "role=mongo,environment=test"
+                value: "app=${APPLICATION_NAME},component=mongo"
     volumeClaimTemplates:
     - metadata:
         name: data
@@ -647,7 +653,7 @@ objects:
     name: ${APPLICATION_NAME}-redis
   spec:
     serviceName: ${APPLICATION_NAME}-redis
-    replicas: 1
+    replicas: 2
     template:
       metadata:
         labels:
