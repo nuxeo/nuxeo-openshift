@@ -601,9 +601,10 @@ objects:
   metadata:
     annotations:
       service.alpha.kubernetes.io/tolerate-unready-endpoints: "true"
-    name: redis
+    name: ${APPLICATION_NAME}-redis
     labels:
-      app: redis
+      app: ${APPLICATION_NAME}
+      component: redis
   spec:
     ports:
     - port: 6379
@@ -611,19 +612,21 @@ objects:
     # *.redis.default.svc.cluster.local
     clusterIP: None
     selector:
-      app: redis
+      app: ${APPLICATION_NAME}
+      component: redis
 
 - apiVersion: apps/v1beta1
   kind: StatefulSet
   metadata:
-    name: rd
+    name: ${APPLICATION_NAME}-redis
   spec:
-    serviceName: "redis"
+    serviceName: ${APPLICATION_NAME}-redis
     replicas: 1
     template:
       metadata:
         labels:
-          app: redis
+          app: ${APPLICATION_NAME}
+          component: redis
         annotations:
           pod.alpha.kubernetes.io/initialized: "true"
           pod.alpha.kubernetes.io/init-containers: '[
@@ -647,7 +650,7 @@ objects:
                   "name": "bootstrap",
                   "image": "debian:jessie",
                   "command": ["/work-dir/peer-finder"],
-                  "args": ["-on-start=\"/work-dir/on-start.sh\"", "-service=redis"],
+                  "args": ["-on-start=\"/work-dir/on-start.sh\"", "-service=${APPLICATION_NAME}-redis"],
                   "env": [
                     {
                         "name": "POD_NAMESPACE",
