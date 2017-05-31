@@ -37,10 +37,10 @@ Several limitations for now :
 
  * ~~Add obvious paremeters (size of disks, DNS etc...)~~
  * Add dependencies between services
- * Test rolling upgrade
+ * ~~Test rolling upgrade~~
  * ~~Add GlusterFS storage (aka CNS in OpenShift) to handle BlobManager~~
  * ~~Put env variables in resources definitions rather than in Dockerfile~~
- * Add health and readiness checks
+ * ~~Add health and readiness checks~~
  * ~~Harmonize object labels~~
  * Idea: put part of nuxeo.conf in ConfigMap to make it more easily editable
  * Provide a Dockerfile to allow studio project installation with Nuxeo Connect credentials.
