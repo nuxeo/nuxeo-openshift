@@ -270,7 +270,7 @@ objects:
   metadata:
     labels:
       app: ${APPLICATION_NAME}
-    name: nuxeo-route  
+    name: ${APPLICATION_NAME}-nuxeo-route  
   spec:
     # TODO: Add parameter
     host: ${APPLICATION_URL}
