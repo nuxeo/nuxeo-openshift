@@ -66,6 +66,8 @@ objects:
   kind: Secret
   metadata:
     name: ${APPLICATION_NAME}-studio
+    labels:
+      app: ${APPLICATION_NAME}
   stringData:
     studio-project: ${NUXEO_STUDIO_PROJECT}
     studio-version: ${NUXEO_STUDIO_VERSION}
