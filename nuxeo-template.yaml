@@ -40,9 +40,17 @@ parameters:
     name: VOLUME_MONGODB_CAPACITY
     value: 5Gi
     required: true
+  - description: Name of the MongoDB replica set
+    name: MONGODB_REPLICASET_NAME
+    value: rs0
+    required: true
   - description: Size of persistent storage for Elasticsearch.
     name: VOLUME_ELASTICSEARCH_CAPACITY
     value: 10Gi
+    required: true
+  - description: Elasticsearch cluster name
+    name: ELASTICSEARCH_CLUSTER_NAME
+    value: nuxeo
     required: true
   - description: Size of persistent storage for Binaries.
     name: VOLUME_BINARIES_CAPACITY
@@ -195,7 +203,7 @@ objects:
           - name: NUXEO_ES_HOSTS
             value: ${APPLICATION_NAME}-elasticsearch-discovery:9300
           - name: NUXEO_ES_CLUSTER_NAME
-            value: elasticsearch
+            value: ${ELASTICSEARCH_CLUSTER_NAME}
           - name: NUXEO_ES_REPLICAS
             value: "2"
           - name: NUXEO_REDIS_HOST
@@ -348,7 +356,7 @@ objects:
               fieldRef:
                 fieldPath: metadata.name
           - name: "CLUSTER_NAME"
-            value: "elasticsearch"
+            value: ${ELASTICSEARCH_CLUSTER_NAME}
           - name: NODE_MASTER
             value: "false"
           - name: NODE_DATA
@@ -445,7 +453,7 @@ objects:
               fieldRef:
                 fieldPath: metadata.name
           - name: "CLUSTER_NAME"
-            value: "elasticsearch"
+            value: ${ELASTICSEARCH_CLUSTER_NAME}
           - name: "NUMBER_OF_MASTERS"
             value: "2"
           - name: NODE_MASTER
@@ -540,7 +548,7 @@ objects:
               fieldRef:
                 fieldPath: metadata.name
           - name: "CLUSTER_NAME"
-            value: "elasticsearch"
+            value: ${ELASTICSEARCH_CLUSTER_NAME}
           - name: NODE_MASTER
             value: "false"
           - name: NODE_INGEST
@@ -610,7 +618,7 @@ objects:
             command:
               - mongod
               - "--replSet"
-              - rs0
+              - ${MONGODB_REPLICASET_NAME}
               - "--smallfiles"
               - "--noprealloc"
             ports:
