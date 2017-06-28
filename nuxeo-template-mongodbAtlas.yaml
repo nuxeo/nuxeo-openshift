@@ -19,6 +19,9 @@ parameters:
     name: SOURCE_REPOSITORY_URL
     value: https://github.com/nuxeo-sandbox/nuxeo-openshift
     required: true
+  - description: The folder in the repository holding the Dockerfile, if the Dockerfile is not at the root
+    name: SOURCE_REPOSITORY_DIR
+    required: false  
   - description: Mongo cluster to use
     name: MONGO_URI
     required: true
@@ -26,18 +29,22 @@ parameters:
     name: MONGO_USER
     required: true
   - description: Mongo databse to use
-    name: MONGO_DBNAME
+    name: MONGO_PASSWORD
     required: true
   - description: The reference to checkout.
     name: SOURCE_REPOSITORY_REF
     value: master
     required: true
-  - description: A Nuxeo Connect userId passed to the build of the image.
-    name: NUXEO_CONNECT_USERNAME
-    required: false
-  - description: The password of the Nuxeo Connect account passed to the build of the image.
-    name: NUXEO_CONNECT_PASSWORD
-    required: false
+  - description: The name of the current openshift project ( needed because of a bug)
+    name: PROJECT_NAME
+    required: true
+  - description: list of packages to install
+    name: NUXEO_PACKAGES
+    required: true
+    value: nuxeo-jsf-ui nuxeo-web-ui  
+  - description: Nuxeo CLID 
+    name: NUXEO_CLID
+    required: false 
   - description: The name of the studio project passed to the build of the image.
     name: NUXEO_STUDIO_PROJECT
     required: false
@@ -66,8 +73,7 @@ objects:
   stringData:
     studio-project: ${NUXEO_STUDIO_PROJECT}
     studio-version: ${NUXEO_STUDIO_VERSION}
-    connect-user: ${NUXEO_CONNECT_USERNAME}
-    connect-password: ${NUXEO_CONNECT_PASSWORD}
+
 
 - apiVersion: v1
   kind: ImageStream
@@ -111,6 +117,7 @@ objects:
         uri: ${SOURCE_REPOSITORY_URL}
         ref: ${SOURCE_REPOSITORY_REF}
       type: Git
+      contextDir: ${SOURCE_REPOSITORY_DIR}
     strategy:
       dockerStrategy:
         from:
@@ -194,9 +201,9 @@ objects:
           - name: NUXEO_TEMPLATES
             value: "default,mongodb"
           - name: NUXEO_CUSTOM_PARAM
-            value: nuxeo.mongodb.server=mongodb://${MONGO_USER}:${MONGO_DBNAME}@${MONGO_URI}
+            value: nuxeo.mongodb.server=mongodb://${MONGO_USER}:${MONGO_PASSWORD}@${MONGO_URI}
           - name: NUXEO_PACKAGES
-            value: nuxeo-jsf-ui nuxeo-web-ui
+            value: ${NUXEO_PACKAGES}
           - name: NUXEO_ES_HOSTS
             value: ${APPLICATION_NAME}-elasticsearch-discovery:9300
           - name: NUXEO_ES_CLUSTER_NAME
@@ -207,6 +214,8 @@ objects:
             value: ${APPLICATION_NAME}-redis-0.${APPLICATION_NAME}-redis
           - name: NUXEO_BINARY_STORE
             value: /binaries
+          - name: NUXEO_CLID
+            value: ${NUXEO_CLID}  
 
           ports:
           - containerPort: 8787
@@ -248,7 +257,7 @@ objects:
         from:
           kind: ImageStreamTag
           name: ${APPLICATION_NAME}-image-stream:latest
-          namespace: nuxeo-atlas
+          namespace: ${PROJECT_NAME}
       type: ImageChange
   status: {}
 
