@@ -17,7 +17,7 @@ This is a work in progress.
     oc create -f aws-storage-class.yaml
     
     # Creates the nuxeo template
-    oc create -f nuxeo-template -n openshift    
+    oc create -f nuxeo-template-s2i -n openshift    
     
     # Creates a new project and deploys the nuxeo template in it
     oc new-project nuxeo
@@ -42,8 +42,8 @@ Several limitations for now :
  * ~~Put env variables in resources definitions rather than in Dockerfile~~
  * ~~Add health and readiness checks~~
  * ~~Harmonize object labels~~
- * Idea: put part of nuxeo.conf in ConfigMap to make it more easily editable
- * Provide a Dockerfile to allow studio project installation with Nuxeo Connect credentials.
+ * ~~Idea: put part of nuxeo.conf in ConfigMap to make it more easily editable~~
+ * ~~Provide a way to allow studio project installation with Nuxeo Connect credentials.~~
 
 
 
