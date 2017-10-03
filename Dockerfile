@@ -1,3 +1,0 @@
-FROM nuxeo:8.10
-USER root
-USER 1000

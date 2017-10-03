@@ -1,9 +1,10 @@
 apiVersion: v1
 kind: ImageStream
 metadata:
-  name: nuxeo-s2i
+  name: nuxeo-s2i  
+  namespace: openshift
   annotations:
-    openshift.io/display-name: Nuxeo
+    openshift.io/display-name: Nuxeo S2i build
 spec:
   tags:
     - name: "latest"

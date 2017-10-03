@@ -3,11 +3,11 @@
 # reopened with the relevant failures.
 #
 allowHostDirVolumePlugin: false
-allowHostIPC: false
+allowHostIPC: true
 allowHostNetwork: false
 allowHostPID: false
 allowHostPorts: false
-allowPrivilegedContainer: false
+allowPrivilegedContainer: true
 allowedCapabilities: null
 apiVersion: v1
 defaultAddCapabilities:
@@ -15,8 +15,6 @@ defaultAddCapabilities:
   - SYS_RESOURCE
 fsGroup:
   type: RunAsAny
-groups:
-- system:cluster-admins
 kind: SecurityContextConstraints
 metadata:
   annotations:
@@ -25,18 +23,11 @@ metadata:
   name: es-scc  
 priority: 10
 readOnlyRootFilesystem: false
-requiredDropCapabilities:
-- MKNOD
-- SYS_CHROOT
 runAsUser:
   type: RunAsAny
 seLinuxContext:
   type: MustRunAs
 supplementalGroups:
   type: RunAsAny
-volumes:
-- configMap
-- downwardAPI
-- emptyDir
-- persistentVolumeClaim
-- secret
+volumes: 
+  - '*'

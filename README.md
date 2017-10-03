@@ -10,41 +10,32 @@ This is a work in progress.
 
 ## How to run
    
-    # Create a specific Security Context Constraint needed for ES
-    oc adm policy add-cluster-role-to-user cluster-admin system:serviceaccount:nuxeo:default       
-    oc create -f es-scc.yaml
-    # Defines the `aws-fast` storage class, update file to fit your needs
-    oc create -f aws-storage-class.yaml
-    
-    # Creates the nuxeo template
-    oc create -f nuxeo-template-s2i -n openshift    
-    
-    # Creates a new project and deploys the nuxeo template in it
-    oc new-project nuxeo
-    oc new-app nuxeo
+    # oc create -f aws-storage-class.yaml
+    storageclass "aws-fast" created
+
+    # oc create -f es-scc.yaml
+    securitycontextconstraints "es-scc" created
+    # oc create -f nuxeo-backing-template.yaml -n openshift
+    template "nuxeo-backings"
+    # oc new-project nuxeo
+    Now using project "nuxeo" on server "https://....:443".
+
+    You can add applications to this project with the 'new-app' command. For example, try:
+
+        oc new-app centos/ruby-22-centos7~https://github.com/openshift/ruby-ex.git
+
+    to build a new example application in Ruby.
+    # oc create sa elasticsearch
+    serviceaccount "elasticsearch" created
+    # oc adm policy add-scc-to-user es-scc system:serviceaccount:nuxeo:elasticsearch
+    # oc adm policy add-role-to-user view system:serviceaccount:nuxeo:elasticsearch
+
+
+
     
 ## Current state
 
-The template deploys a Nuxeo cluster based on persistent backing services (MongoDB, Elasticsearch and Redis). The application is then available at http://nuxeo.apps.io.nuxeo.com. All storage is backed by AWS EBS which are provisionned dynamically (see [aws-storage-class.yaml](aws-storage-class.aml)
-
-Several limitations for now :
-
- * Stateful services use EBS storage which is provisionned by the AWS Storage class. Unfortunately it's not possible to specify several AZ for the EBS. As a result, all storage pods are scheduled on the AZ where the storage is present. [PR is waiting](https://github.com/kubernetes/kubernetes/pull/38505) to be able to specify several zones in Kubernetes.
- * Blob storage is not managed in the cluster. It should be mounted on a GlusterFS or NFS storage.
- * Log should be written on a volume and well managed (retention time etc...)
-
-## TODO
-
- * ~~Add obvious paremeters (size of disks, DNS etc...)~~
- * Add dependencies between services
- * ~~Test rolling upgrade~~
- * ~~Add GlusterFS storage (aka CNS in OpenShift) to handle BlobManager~~
- * ~~Put env variables in resources definitions rather than in Dockerfile~~
- * ~~Add health and readiness checks~~
- * ~~Harmonize object labels~~
- * ~~Idea: put part of nuxeo.conf in ConfigMap to make it more easily editable~~
- * ~~Provide a way to allow studio project installation with Nuxeo Connect credentials.~~
-
+The template deploys a Nuxeo cluster based on persistent backing services (MongoDB, Elasticsearch and Kafka/Zookeeper). All storage is backed by AWS EBS which are provisionned dynamically (see [aws-storage-class.yaml](aws-storage-class.aml)
 
 
 # Licensing
