@@ -1,9 +1,10 @@
 apiVersion: v1
 kind: Template
 metadata:  
-  name: nuxeo
+  name: nuxeo-cluster
+  namespace: openshift
   annotations:
-    description: This templates setup a full Nuxeo cluster with persistent storage on top of MongoDB, ElasticSearch and Redis.
+    description: This templates setup a Nuxeo cluster backed by a Nuxeo backings template. 
     iconClass: icon-java
     tags: java, nuxeo
 parameters:
@@ -11,17 +12,13 @@ parameters:
     name: APPLICATION_NAME
     value: nuxeo
     required: true
-  - description: The name for the application.
+  - description: The URL of the application
     name: APPLICATION_URL
     value: nuxeo.apps.io.nuxeo.com
     required: true
-  - description: The URL of the repository with your the Dockerfile to deploy.
-    name: SOURCE_REPOSITORY_URL
-    value: https://github.com/nuxeo-sandbox/nuxeo-openshift
-    required: true
-  - description: The reference to checkout.
-    name: SOURCE_REPOSITORY_REF
-    value: master
+  - description: Backings template name
+    name: NUXEO_BACKINGS_NAME
+    value: nuxeo-backings
     required: true
   - description: A Nuxeo Connect userId passed to the build of the image.
     name: NUXEO_CONNECT_USERNAME
@@ -36,17 +33,9 @@ parameters:
     name: NUXEO_STUDIO_VERSION
     required: false
     value: 0.0.0-SNAPSHOT
-  - description: Size of persistent storage for MongoDB.
-    name: VOLUME_MONGODB_CAPACITY
-    value: 5Gi
-    required: true
   - description: Name of the MongoDB replica set
     name: MONGODB_REPLICASET_NAME
     value: rs0
-    required: true
-  - description: Size of persistent storage for Elasticsearch.
-    name: VOLUME_ELASTICSEARCH_CAPACITY
-    value: 10Gi
     required: true
   - description: Elasticsearch cluster name
     name: ELASTICSEARCH_CLUSTER_NAME
@@ -56,16 +45,13 @@ parameters:
     name: VOLUME_BINARIES_CAPACITY
     value: 50Gi
     required: true
-  - description: Size of persistent storage for Redis.
-    name: VOLUME_REDIS_CAPACITY
-    value: 5Gi
 
 
 objects:
 - apiVersion: v1
   kind: Secret
   metadata:
-    name: ${APPLICATION_NAME}-studio
+    name: ${APPLICATION_NAME}-connect
     labels:
       app: ${APPLICATION_NAME}
   stringData:
@@ -83,54 +69,7 @@ objects:
       app: ${APPLICATION_NAME}
   spec:
     dockerImageRepository: nuxeo
-  status:
-    dockerImageRepository: ""    
 
-- apiVersion: v1
-  kind: ImageStream
-  metadata:      
-    creationTimestamp: null
-    name: ${APPLICATION_NAME}-image-stream
-    labels:
-      app: ${APPLICATION_NAME}
-  spec: {}
-  status:
-    dockerImageRepository: ""    
-
-- apiVersion: v1
-  kind: BuildConfig
-  metadata:
-    creationTimestamp: null
-    labels:
-      app: ${APPLICATION_NAME}
-      component: build
-    name: ${APPLICATION_NAME}-build
-  spec:
-    triggers:
-    - type: ConfigChange
-    - imageChange: {}
-      type: ImageChange
-    source:
-      git:
-        #TODO Add parameter
-        uri: ${SOURCE_REPOSITORY_URL}
-        ref: ${SOURCE_REPOSITORY_REF}
-      type: Git
-    strategy:
-      dockerStrategy:
-        from:
-          kind: ImageStreamTag
-          name: ${APPLICATION_NAME}-nuxeo:8.10
-        env:
-      type: Docker    
-    output:
-      to:
-        kind: ImageStreamTag
-        name: ${APPLICATION_NAME}-image-stream:latest
-    postCommit: {}
-    resources: {}
-  status:
-    lastVersion: 0
 
 - apiVersion: v1
   kind: PersistentVolumeClaim
@@ -148,6 +87,27 @@ objects:
     resources:
       requests:
         storage: ${VOLUME_BINARIES_CAPACITY}
+
+- apiVersion: v1
+  kind: ConfigMap
+  metadata:
+    name: ${APPLICATION_NAME}-conf   
+    labels:
+      app: ${APPLICATION_NAME}
+      role: config
+  data:
+    nuxeo.conf: |
+      # Additional nuxeo.conf parameters      
+    init.sh: |
+      #!/bin/sh
+
+      if [ ! -f $NUXEO_DATA/instance.clid -a -f /opt/nuxeo/connect/connect.properties ]; then
+        . /opt/nuxeo/connect/connect.properties
+        if [ -n "$NUXEO_CONNECT_USERNAME" -a -n "$NUXEO_CONNECT_PASSWORD" -a -n "$NUXEO_STUDIO_PROJECT" ]; then  
+          echo "---> Registering instance on connect"
+          /docker-entrypoint.sh nuxeoctl register $NUXEO_CONNECT_USERNAME $NUXEO_STUDIO_PROJECT dev openshift $NUXEO_CONNECT_PASSWORD
+        fi
+      fi
 
 - apiVersion: v1
   kind: DeploymentConfig
@@ -184,79 +144,93 @@ objects:
           deploymentconfig: ${APPLICATION_NAME}-nuxeo
       spec:
         containers:
-        - image: ${APPLICATION_NAME}-image-stream:latest
+        - image: ${APPLICATION_NAME}-nuxeo:9.2
           imagePullPolicy: Always
+          livenessProbe:
+            httpGet:
+              path: /nuxeo/runningstatus
+              port: 8080
+              scheme: HTTP
+            initialDelaySeconds: 30
+            timeoutSeconds: 1
+            periodSeconds: 10
+            successThreshold: 1
+            failureThreshold: 3
+          readinessProbe:
+            failureThreshold: 3
+            httpGet:
+              path: /nuxeo/runningstatus
+              port: 8080
+              scheme: HTTP
+            initialDelaySeconds: 20
+            periodSeconds: 10
+            successThreshold: 1
+            timeoutSeconds: 2
           name: ${APPLICATION_NAME}-appserver
           env:
-          - name: NAMESPACE
-            valueFrom:
-              fieldRef:
-                fieldPath: metadata.namespace
-          - name: NODE_NAME
-            valueFrom:
-              fieldRef:
-                fieldPath: metadata.name
           - name: NUXEO_TEMPLATES
-            value: "default,mongodb"
+            value: "default,mongodb,mongodb-audit,kafka,mqueues-workmanager"
           - name: NUXEO_CUSTOM_PARAM
-            value: nuxeo.mongodb.server=mongodb://${APPLICATION_NAME}-mongo-0.${APPLICATION_NAME}-mongo:27017,${APPLICATION_NAME}-mongo-1.${APPLICATION_NAME}-mongo:27017,${APPLICATION_NAME}-mongo-2.${APPLICATION_NAME}-mongo:27017
+            value: |
+              nuxeo.mongodb.server=mongodb://${NUXEO_BACKINGS_NAME}-mongo-0.${NUXEO_BACKINGS_NAME}-mongo:27017,${NUXEO_BACKINGS_NAME}-mongo-1.${NUXEO_BACKINGS_NAME}-mongo:27017,${NUXEO_BACKINGS_NAME}-mongo-2.${NUXEO_BACKINGS_NAME}-mongo:27017
+              nuxeo.mongodb.dbname=${APPLICATION_NAME}
+              kafka.zkServers=${NUXEO_BACKINGS_NAME}-zookeeper:2181              
+              kafka.bootstrap.servers=${NUXEO_BACKINGS_NAME}-kafka-0.${NUXEO_BACKINGS_NAME}-kafka:9092,${NUXEO_BACKINGS_NAME}-kafka-1.${NUXEO_BACKINGS_NAME}-kafka:9092,${NUXEO_BACKINGS_NAME}-kafka-2.${NUXEO_BACKINGS_NAME}-kafka:9092
+              kafka.topicPrefix=${APPLICATION_NAME}-
+              elasticsearch.httpReadOnly.baseUrl=http://${NUXEO_BACKINGS_NAME}-elasticsearch:9200
+              elasticsearch.indexName=${APPLICATION_NAME}
+              # No Redis, so we don't use DBS cache
+              nuxeo.dbs.cache.enabled=false
+              
           - name: NUXEO_PACKAGES
-            value: nuxeo-jsf-ui nuxeo-web-ui
+            value: nuxeo-jsf-ui nuxeo-web-ui nuxeo-mqueues nuxeo-mongodb-ext
           - name: NUXEO_ES_HOSTS
-            value: ${APPLICATION_NAME}-elasticsearch-discovery:9300
-          - name: NUXEO_ES_CLUSTER_NAME
+            value: ${NUXEO_BACKINGS_NAME}-elasticsearch-discovery:9300
+          - name: NUXEO_ES_CLUSTERNAME
             value: ${ELASTICSEARCH_CLUSTER_NAME}
           - name: NUXEO_ES_REPLICAS
             value: "2"
-          - name: NUXEO_REDIS_HOST
-            value: ${APPLICATION_NAME}-redis-0.${APPLICATION_NAME}-redis
           - name: NUXEO_BINARY_STORE
             value: /binaries
 
           ports:
-          - containerPort: 8787
-            protocol: TCP
           - containerPort: 8080
             protocol: TCP
-          resources: {}
-          terminationMessagePath: /dev/termination-log
           volumeMounts:
           - name: ${APPLICATION_NAME}-binaries
             mountPath: /binaries
+          - name: nuxeoconf
+            mountPath: /docker-entrypoint-initnuxeo.d
+          - name: connect-secret
+            mountPath: /opt/nuxeo/connect
         volumes:
         - name: ${APPLICATION_NAME}-binaries
           persistentVolumeClaim:
             claimName: ${APPLICATION_NAME}-binaries
-        livenessProbe:
-          httpGet:
-            path: /nuxeo/runningstatus
-            port: 8080
-            scheme: HTTP
-          initialDelaySeconds: 30
-          timeoutSeconds: 1
-          periodSeconds: 10
-          successThreshold: 1
-          failureThreshold: 3
+        - name: nuxeoconf
+          configMap:
+            name: ${APPLICATION_NAME}-conf  
+        - name: connect-secret
+          secret:
+            secretName: ${APPLICATION_NAME}-connect
+
         dnsPolicy: ClusterFirst
         restartPolicy: Always
-        securityContext: {}
         terminationGracePeriodSeconds: 30
         
         
     test: false
     triggers:
     - type: ConfigChange
-    - imageChangeParams:
+    - type: ImageChange
+      imageChangeParams:
         automatic: true
         containerNames:
         - ${APPLICATION_NAME}-appserver
         from:
           kind: ImageStreamTag
-          name: ${APPLICATION_NAME}-image-stream:latest
-          namespace: nuxeo
-      type: ImageChange
-  status: {}
-
+          name: ${APPLICATION_NAME}-nuxeo:9.2
+      
 - apiVersion: v1
   kind: Service
   metadata:
@@ -290,481 +264,4 @@ objects:
     port:
       targetPort: 8080-tcp
     wildcardPolicy: None
-
-- apiVersion: v1
-  kind: Service
-  metadata:
-    name: ${APPLICATION_NAME}-elasticsearch-discovery
-    labels:
-      app: ${APPLICATION_NAME}
-      component: elasticsearch
-      role: master
-  spec:
-    selector:
-      app: ${APPLICATION_NAME}
-      component: elasticsearch
-      role: master
-    ports:
-    - name: transport
-      port: 9300
-      protocol: TCP
-
-- apiVersion: extensions/v1beta1
-  kind: Deployment
-  metadata:
-    name: ${APPLICATION_NAME}-es-client
-    labels:
-      app: ${APPLICATION_NAME}
-      component: elasticsearch
-      role: client
-  spec:
-    replicas: 2
-    template:
-      metadata:
-        labels:
-          app: ${APPLICATION_NAME}
-          component: elasticsearch
-          role: client
-        annotations:
-          pod.beta.kubernetes.io/init-containers: '[
-            {
-            "name": "sysctl",
-              "image": "busybox",
-              "imagePullPolicy": "IfNotPresent",
-              "command": ["sysctl", "-w", "vm.max_map_count=262144"],
-              "securityContext": {
-                "privileged": true
-              }
-            }
-          ]'
-      spec:
-        containers:
-        - name: ${APPLICATION_NAME}-es-client
-          securityContext:
-            privileged: false
-            capabilities:
-              add:
-                - IPC_LOCK
-                - SYS_RESOURCE
-          image: quay.io/pires/docker-elasticsearch-kubernetes:2.4.1
-          imagePullPolicy: Always
-          env:
-          - name: NAMESPACE
-            valueFrom:
-              fieldRef:
-                fieldPath: metadata.namespace
-          - name: NODE_NAME
-            valueFrom:
-              fieldRef:
-                fieldPath: metadata.name
-          - name: "CLUSTER_NAME"
-            value: ${ELASTICSEARCH_CLUSTER_NAME}
-          - name: NODE_MASTER
-            value: "false"
-          - name: NODE_DATA
-            value: "false"
-          - name: HTTP_ENABLE
-            value: "true"
-          - name: "ES_JAVA_OPTS"
-            value: "-Xms256m -Xmx256m"
-          - name: DISCOVERY_SERVICE
-            value: ${APPLICATION_NAME}-elasticsearch-discovery
-          ports:
-          - containerPort: 9200
-            name: http
-            protocol: TCP
-          - containerPort: 9300
-            name: transport
-            protocol: TCP
-          volumeMounts:
-          - name: storage
-            mountPath: /data
-        volumes:
-            - emptyDir:
-                medium: ""
-              name: "storage"
-
-
-- apiVersion: v1
-  kind: Service
-  metadata:
-    name: ${APPLICATION_NAME}-elasticsearch
-    labels:
-      app: ${APPLICATION_NAME}
-      component: elasticsearch
-      role: client
-  spec:
-    type: LoadBalancer
-    selector:
-      app: ${APPLICATION_NAME}
-      component: elasticsearch
-      role: client
-    ports:
-    - name: http
-      port: 9200
-      protocol: TCP
-
-
-
-- apiVersion: extensions/v1beta1
-  kind: Deployment
-  metadata:
-    name: ${APPLICATION_NAME}-es-master
-    labels:
-      app: ${APPLICATION_NAME}
-      component: elasticsearch
-      role: master
-  spec:
-    replicas: 3
-    template:
-      metadata:
-        labels:
-          app: ${APPLICATION_NAME}
-          component: elasticsearch
-          role: master
-        annotations:
-          pod.beta.kubernetes.io/init-containers: '[
-            {
-            "name": "sysctl",
-              "image": "busybox",
-              "imagePullPolicy": "IfNotPresent",
-              "command": ["sysctl", "-w", "vm.max_map_count=262144"],
-              "securityContext": {
-                "privileged": true
-              }
-            }
-          ]'
-      spec:
-        containers:
-        - name: es-master
-          securityContext:
-            privileged: false
-            capabilities:
-              add:
-                - IPC_LOCK
-                - SYS_RESOURCE
-          image: quay.io/pires/docker-elasticsearch-kubernetes:2.4.1
-          imagePullPolicy: Always
-          env:
-          - name: NAMESPACE
-            valueFrom:
-              fieldRef:
-                fieldPath: metadata.namespace
-          - name: NODE_NAME
-            valueFrom:
-              fieldRef:
-                fieldPath: metadata.name
-          - name: "CLUSTER_NAME"
-            value: ${ELASTICSEARCH_CLUSTER_NAME}
-          - name: "NUMBER_OF_MASTERS"
-            value: "2"
-          - name: NODE_MASTER
-            value: "true"
-          - name: NODE_INGEST
-            value: "false"
-          - name: NODE_DATA
-            value: "false"
-          - name: HTTP_ENABLE
-            value: "false"
-          - name: "ES_JAVA_OPTS"
-            value: "-Xms256m -Xmx256m"
-          - name: DISCOVERY_SERVICE
-            value: ${APPLICATION_NAME}-elasticsearch-discovery
-          ports:
-          - containerPort: 9300
-            name: transport
-            protocol: TCP
-          volumeMounts:
-          - name: storage
-            mountPath: /data
-        volumes:
-            - emptyDir:
-                medium: ""
-              name: "storage"
-
-- apiVersion: v1
-  kind: Service
-  metadata:
-    name: ${APPLICATION_NAME}-elasticsearch-data
-    labels:
-      app: ${APPLICATION_NAME}
-      component: elasticsearch
-      role: data
-  spec:
-    ports:
-    - port: 9300
-      name: transport
-    clusterIP: None
-    selector:
-      app: ${APPLICATION_NAME}
-      component: elasticsearch
-      role: data
-
-
-- apiVersion: apps/v1beta1
-  kind: StatefulSet
-  metadata:
-    name: ${APPLICATION_NAME}-elasticsearch
-    labels:
-      app: ${APPLICATION_NAME}
-      component: elasticsearch
-      role: data
-  spec:
-    serviceName: ${APPLICATION_NAME}-elasticsearch-data
-    replicas: 3
-    template:
-      metadata:
-        labels:
-          app: ${APPLICATION_NAME}
-          component: elasticsearch
-          role: data
-        annotations:
-          pod.beta.kubernetes.io/init-containers: '[
-            {
-            "name": "sysctl",
-              "image": "busybox",
-              "imagePullPolicy": "IfNotPresent",
-              "command": ["sysctl", "-w", "vm.max_map_count=262144"],
-              "securityContext": {
-                "privileged": true
-              }
-            }
-          ]'
-      spec:
-        containers:
-        - name: es-data
-          securityContext:
-            privileged: true
-            capabilities:
-              add:
-                - IPC_LOCK
-          image: quay.io/pires/docker-elasticsearch-kubernetes:2.4.1
-          imagePullPolicy: Always
-          env:
-          - name: NAMESPACE
-            valueFrom:
-              fieldRef:
-                fieldPath: metadata.namespace
-          - name: NODE_NAME
-            valueFrom:
-              fieldRef:
-                fieldPath: metadata.name
-          - name: "CLUSTER_NAME"
-            value: ${ELASTICSEARCH_CLUSTER_NAME}
-          - name: NODE_MASTER
-            value: "false"
-          - name: NODE_INGEST
-            value: "false"
-          - name: HTTP_ENABLE
-            value: "false"
-          - name: DISCOVERY_SERVICE
-            value: ${APPLICATION_NAME}-elasticsearch-discovery
-          - name: "ES_JAVA_OPTS"
-            # TODO: review values
-            value: "-Xms256m -Xmx256m"
-          ports:
-          - containerPort: 9300
-            name: transport
-            protocol: TCP
-          volumeMounts:
-          - name: data
-            mountPath: /data
-    volumeClaimTemplates:
-    - metadata:
-        name: data
-        labels:
-          app: ${APPLICATION_NAME}   
-        annotations:
-          volume.beta.kubernetes.io/storage-class: aws-fast
-      spec:
-        accessModes: [ "ReadWriteOnce" ]
-        resources:
-          requests:
-            storage: ${VOLUME_ELASTICSEARCH_CAPACITY}
-
-
-
-- apiVersion: v1
-  kind: Service
-  metadata:
-    name: ${APPLICATION_NAME}-mongo
-    labels:
-      app: ${APPLICATION_NAME}
-      component: mongo
-  spec:
-    ports:
-    - port: 27017
-      targetPort: 27017
-    clusterIP: None
-    selector:
-      app: ${APPLICATION_NAME}
-      component: mongo
-
-- apiVersion: apps/v1beta1
-  kind: StatefulSet
-  metadata:
-    name: ${APPLICATION_NAME}-mongo
-  spec:
-    serviceName: ${APPLICATION_NAME}-mongo
-    replicas: 3
-    template:
-      metadata:
-        labels:
-          app: ${APPLICATION_NAME}
-          component: mongo          
-      spec:
-        terminationGracePeriodSeconds: 10
-        containers:
-          - name: mongo
-            image: mongo
-            command:
-              - mongod
-              - "--replSet"
-              - ${MONGODB_REPLICASET_NAME}
-              - "--smallfiles"
-              - "--noprealloc"
-            ports:
-              - containerPort: 27017
-            volumeMounts:
-              - name: data
-                mountPath: /data/db
-          - name: mongo-sidecar
-            image: cvallance/mongo-k8s-sidecar
-            env:
-              - name: MONGO_SIDECAR_POD_LABELS
-                value: "app=${APPLICATION_NAME},component=mongo"
-    volumeClaimTemplates:
-    - metadata:
-        name: data
-        labels:
-          app: ${APPLICATION_NAME}   
-        annotations:
-          volume.beta.kubernetes.io/storage-class: aws-fast
-      spec:
-        accessModes: [ "ReadWriteOnce" ]
-        resources:
-          requests:
-            # TODO: add parameter
-            storage: ${VOLUME_MONGODB_CAPACITY}
-
-
-- apiVersion: v1
-  kind: Service
-  metadata:
-    annotations:
-      service.alpha.kubernetes.io/tolerate-unready-endpoints: "true"
-    name: ${APPLICATION_NAME}-redis
-    labels:
-      app: ${APPLICATION_NAME}
-      component: redis
-  spec:
-    ports:
-    - port: 6379
-      name: peer
-    # *.redis.default.svc.cluster.local
-    clusterIP: None
-    selector:
-      app: ${APPLICATION_NAME}
-      component: redis
-
-- apiVersion: apps/v1beta1
-  kind: StatefulSet
-  metadata:
-    name: ${APPLICATION_NAME}-redis
-  spec:
-    serviceName: ${APPLICATION_NAME}-redis
-    replicas: 2
-    template:
-      metadata:
-        labels:
-          app: ${APPLICATION_NAME}
-          component: redis
-        annotations:
-          pod.alpha.kubernetes.io/initialized: "true"
-          pod.alpha.kubernetes.io/init-containers: '[
-              {
-                  "name": "install",
-                  "image": "gcr.io/google_containers/redis-install:0.1",
-                  "imagePullPolicy": "Always",
-                  "args": ["--version=3.2.0", "--install-into=/opt", "--work-dir=/work-dir"],
-                  "volumeMounts": [
-                      {
-                          "name": "opt",
-                          "mountPath": "/opt"
-                      },
-                      {
-                          "name": "workdir",
-                          "mountPath": "/work-dir"
-                      }
-                  ]
-              },
-              {
-                  "name": "bootstrap",
-                  "image": "debian:jessie",
-                  "command": ["/work-dir/peer-finder"],
-                  "args": ["-on-start=\"/work-dir/on-start.sh\"", "-service=${APPLICATION_NAME}-redis"],
-                  "env": [
-                    {
-                        "name": "POD_NAMESPACE",
-                        "valueFrom": {
-                            "fieldRef": {
-                                "apiVersion": "v1",
-                                "fieldPath": "metadata.namespace"
-                            }
-                        }
-                     }
-                  ],
-                  "volumeMounts": [
-                      {
-                          "name": "opt",
-                          "mountPath": "/opt"
-                      },
-                      {
-                          "name": "workdir",
-                          "mountPath": "/work-dir"
-                      }
-                  ]
-              }
-          ]'
-      spec:
-        containers:
-        - name: redis
-          image: debian:jessie
-          ports:
-          - containerPort: 6379
-            name: peer
-          command:
-          - /opt/redis/redis-server
-          args:
-          - /opt/redis/redis.conf
-          readinessProbe:
-            exec:
-              command:
-              - sh
-              - -c
-              - "/opt/redis/redis-cli -h $(hostname) ping"
-            initialDelaySeconds: 15
-            timeoutSeconds: 5
-          volumeMounts:
-          - name: datadir
-            mountPath: /data
-          - name: opt
-            mountPath: /opt
-        volumes:
-        - name: opt
-          emptyDir: {}
-        - name: workdir
-          emptyDir: {}
-    volumeClaimTemplates:
-    - metadata:
-        name: datadir      
-        annotations:
-          volume.beta.kubernetes.io/storage-class: aws-fast
-      spec:
-        accessModes: [ "ReadWriteOnce" ]
-        resources:
-          requests:
-            # TODO: Add parameter
-            storage: 5Gi
-
 
