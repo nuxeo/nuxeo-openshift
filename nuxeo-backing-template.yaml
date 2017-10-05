@@ -1,12 +1,30 @@
 apiVersion: v1
 kind: Template
+message: |-
+  The following backing services for Nuxeo have been created in your project:
+
+    * a MongoDB cluster
+    * an Elasticsearch Cluster
+    * a Kafka Cluster backed by Zookeeper
+
+  These services can be used by a Nuxeo cluster. You can use the `nuxeo-cluster` and 
+  refer the backing services name : ${APPLICATION_NAME} 
+  
+  For more information about using this template, see https://github.com/nuxeo/nuxeo-openshift
 metadata:  
   name: nuxeo-backings
   namespace: openshift
   annotations:
     description: |
       This templates setup the backing service needed to run a Nuxeo cluster. Once  MongoDB, ElasticSearch and Kafka are 
-      started and ready, you can start one of the Nuxeo cluster flavor (image based or S2i based)
+      started and ready, you can start one of the Nuxeo cluster flavor (image based or S2i based).
+    openshift.io/display-name: Backing services for Nuxeo
+    template.openshift.io/documentation-url: https://github.com/nuxeo/nuxeo-openshift
+    template.openshift.io/long-description: |-
+      This templates setup the backing service needed to run a Nuxeo cluster. Once  MongoDB, ElasticSearch and Kafka are 
+      started and ready, you can start one of the Nuxeo cluster flavor (image based or S2i based).
+    template.openshift.io/provider-display-name: Nuxeo
+    template.openshift.io/support-url: https://answers.nuxeo.com/
     iconClass: icon-java
     tags: java, nuxeo
 parameters:

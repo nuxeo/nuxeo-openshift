@@ -1,10 +1,25 @@
 apiVersion: v1
 kind: Template
+message: |-
+  A nuxeo deployment has been created. Once ready it will be accessible at  http://${APPLICATION_URL}.
+
+  The default admin user is:
+
+    User: Administrator
+    Password: Administrator
+
+  For more information on Nuxeo, you can go to https://doc.nuxeo.com/
 metadata:  
   name: nuxeo-cluster
   namespace: openshift
   annotations:
     description: This templates setup a Nuxeo cluster backed by a Nuxeo backings template. 
+    openshift.io/display-name: Nuxeo Cluster deployment
+    template.openshift.io/documentation-url: https://github.com/nuxeo/nuxeo-openshift
+    template.openshift.io/long-description: |-
+      This templates setup a Nuxeo cluster backed by a Nuxeo backings template. 
+    template.openshift.io/provider-display-name: Nuxeo
+    template.openshift.io/support-url: https://answers.nuxeo.com/
     iconClass: icon-java
     tags: java, nuxeo
 parameters:
@@ -55,10 +70,12 @@ objects:
     labels:
       app: ${APPLICATION_NAME}
   stringData:
-    studio-project: ${NUXEO_STUDIO_PROJECT}
-    studio-version: ${NUXEO_STUDIO_VERSION}
-    connect-user: ${NUXEO_CONNECT_USERNAME}
-    connect-password: ${NUXEO_CONNECT_PASSWORD}
+    connect.properties: |-
+      NUXEO_STUDIO_PROJECT=${NUXEO_STUDIO_PROJECT}
+      NUXEO_STUDIO_PROJECT_VERSION=${NUXEO_STUDIO_VERSION}
+      NUXEO_CONNECT_USERNAME=${NUXEO_CONNECT_USERNAME}
+      NUXEO_CONNECT_PASSWORD=${NUXEO_CONNECT_PASSWORD}
+
 
 - apiVersion: v1
   kind: ImageStream
@@ -105,7 +122,7 @@ objects:
         . /opt/nuxeo/connect/connect.properties
         if [ -n "$NUXEO_CONNECT_USERNAME" -a -n "$NUXEO_CONNECT_PASSWORD" -a -n "$NUXEO_STUDIO_PROJECT" ]; then  
           echo "---> Registering instance on connect"
-          /docker-entrypoint.sh nuxeoctl register $NUXEO_CONNECT_USERNAME $NUXEO_STUDIO_PROJECT dev openshift $NUXEO_CONNECT_PASSWORD
+          nuxeoctl register $NUXEO_CONNECT_USERNAME $NUXEO_STUDIO_PROJECT dev openshift $NUXEO_CONNECT_PASSWORD
         fi
       fi
 
@@ -144,7 +161,7 @@ objects:
           deploymentconfig: ${APPLICATION_NAME}-nuxeo
       spec:
         containers:
-        - image: ${APPLICATION_NAME}-nuxeo:9.2
+        - image: ${APPLICATION_NAME}-nuxeo:latest
           imagePullPolicy: Always
           livenessProbe:
             httpGet:
@@ -229,7 +246,7 @@ objects:
         - ${APPLICATION_NAME}-appserver
         from:
           kind: ImageStreamTag
-          name: ${APPLICATION_NAME}-nuxeo:9.2
+          name: ${APPLICATION_NAME}-nuxeo:latest
       
 - apiVersion: v1
   kind: Service
