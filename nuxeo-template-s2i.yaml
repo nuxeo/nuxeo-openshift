@@ -108,7 +108,9 @@ objects:
         COPY ./connect.properties /opt/nuxeo/connect/connect.properties
         RUN /build/install.sh
         # Clean credential after using it
+        USER root
         RUN rm -f /opt/nuxeo/connect/connect.properties
+        USER 1000
       images:
         - from:
             kind: ImageStreamTag
