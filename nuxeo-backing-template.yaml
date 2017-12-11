@@ -680,10 +680,14 @@ objects:
             mountPath: /etc/kafka
           - name: data-${APPLICATION_NAME}
             mountPath: /var/lib/zookeeper/data
+          - name: log
+            mountPath: /var/lib/zookeeper/log
         volumes:
         - name: config
           configMap:
             name: ${APPLICATION_NAME}-zookeeper-config
+        - name: log
+          emptyDir: {}
     volumeClaimTemplates:
     - metadata:
         name: data-${APPLICATION_NAME}
@@ -759,11 +763,15 @@ objects:
             mountPath: /etc/kafka
           - name: data
             mountPath: /var/lib/zookeeper/data
+          - name: log
+            mountPath: /var/lib/zookeeper/log
         volumes:
         - name: config
           configMap:
             name: ${APPLICATION_NAME}-zookeeper-config
         - name: data
+          emptyDir: {}
+        - name: log
           emptyDir: {}
 
 
