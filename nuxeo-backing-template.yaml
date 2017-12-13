@@ -485,7 +485,7 @@ objects:
         terminationGracePeriodSeconds: 10
         containers:
           - name: mongo
-            image: mongo
+            image: mongo:3.4
             command:
               - mongod
               - "--replSet"
@@ -802,6 +802,9 @@ objects:
         else
           sed -i "s/#init#broker.rack=#init#/broker.rack=$ZONE/" /etc/kafka/server.properties
         fi
+        
+        NODEIP=$(kubectl get node "$NODE_NAME" -o jsonpath='{.status.addresses[?(@.type=="InternalIP")].address}')
+        sed -i "s/#init#nodeip#/$NODEIP/" /etc/kafka/server.properties
       }
 
     server.properties: |-
@@ -841,6 +844,11 @@ objects:
       #   EXAMPLE:
       #     listeners = PLAINTEXT://your.host.name:9092
       #listeners=PLAINTEXT://:9092
+
+      listener.security.protocol.map=CLIENT:PLAINTEXT,REPLICATION:PLAINTEXT
+      advertised.listeners=CLIENT://:9092,REPLICATION://#init#nodeip#:32094
+      listeners=CLIENT://:9092,REPLICATION://:9094
+      inter.broker.listener.name=CLIENT
 
       # Hostname and port the broker will advertise to producers and consumers. If not set,
       # it uses the value for "listeners" if configured.  Otherwise, it will use the value
