@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: kafka-ingress
+spec:
+  ports:
+  - name: kafka
+    port: 9094
+    nodePort: 32094
+  type: NodePort
+  selector:
+    app: nuxeo-backings
+    component: kafka
+
+
