@@ -642,7 +642,7 @@ objects:
         terminationGracePeriodSeconds: 10
         initContainers:
         - name: init-config
-          image: solsson/kafka:0.11.0.1@sha256:3a77b3396b0890b0b0db880136c16bc83922588ed1d9a9ed82e32c1ae7621770
+          image: solsson/kafka:1.0.0
           command: ['/bin/bash', '/etc/kafka/init.sh']
           volumeMounts:
           - name: config
@@ -651,7 +651,7 @@ objects:
             mountPath: /var/lib/zookeeper/data
         containers:
         - name: zookeeper
-          image: solsson/kafka:0.11.0.1@sha256:3a77b3396b0890b0b0db880136c16bc83922588ed1d9a9ed82e32c1ae7621770
+          image: solsson/kafka:1.0.0
           env:
           - name: KAFKA_LOG4J_OPTS
             value: -Dlog4j.configuration=file:/etc/kafka/log4j.properties
@@ -722,7 +722,7 @@ objects:
         terminationGracePeriodSeconds: 10
         initContainers:
         - name: init-config
-          image: solsson/kafka:0.11.0.1@sha256:3a77b3396b0890b0b0db880136c16bc83922588ed1d9a9ed82e32c1ae7621770
+          image: solsson/kafka:1.0.0
           command: ['/bin/bash', '/etc/kafka/init.sh']
           env:
           - name: ID_OFFSET
@@ -734,7 +734,7 @@ objects:
             mountPath: /var/lib/zookeeper/data
         containers:
         - name: zookeeper
-          image: solsson/kafka:0.11.0.1@sha256:3a77b3396b0890b0b0db880136c16bc83922588ed1d9a9ed82e32c1ae7621770
+          image: solsson/kafka:1.0.0
           env:
           - name: KAFKA_LOG4J_OPTS
             value: -Dlog4j.configuration=file:/etc/kafka/log4j.properties
@@ -953,7 +953,7 @@ objects:
       # The default value for this is 3 seconds.
       # We override this to 0 here as it makes for a better out-of-the-box experience for development and testing.
       # However, in production environments the default value of 3 seconds is more suitable as this will help to avoid unnecessary, and potentially expensive, rebalances during application startup.
-      group.initial.rebalance.delay.ms=0
+      group.initial.rebalance.delay.ms=3000
 
     log4j.properties: |-
       # Licensed to the Apache Software Foundation (ASF) under one or more
@@ -1098,7 +1098,7 @@ objects:
             mountPath: /etc/kafka
         containers:
         - name: broker
-          image: solsson/kafka:0.11.0.1@sha256:3a77b3396b0890b0b0db880136c16bc83922588ed1d9a9ed82e32c1ae7621770
+          image: solsson/kafka:1.0.0
           env:
           - name: KAFKA_LOG4J_OPTS
             value: -Dlog4j.configuration=file:/etc/kafka/log4j.properties
@@ -1114,7 +1114,7 @@ objects:
           - --override
           -   log.dirs=/var/lib/kafka/data/topics
           - --override
-          -   auto.create.topics.enable=false
+          -   auto.create.topics.enable=true
           resources:
             requests:
               cpu: 100m
