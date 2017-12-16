@@ -12,14 +12,14 @@ data:
     connector.class=MongodbSource
     # TODO: put all collection we want to mirror
     databases=nuxeo.default
-    topic.prefix=mongo-connect
+    topic.prefix=nxmirror-mongo
     port=27017
     tasks.max=1
     batch.size=1
     schema.name=default
-    host=nuxeo-backings-mongodb-0.nuxeo-backings-mongodb
+    host=nxactive-mongodb-0.nxactive-mongodb
     converter.class":"org.apache.kafka.connect.mongodb.converter.JsonStructConverter",
-    uri=mongodb:nuxeo-backings-mongo-0.nuxeo-backings-mongo:27017,nuxeo-backings-mongo-1.nuxeo-backings-mongo:27017,nuxeo-backings-mongo-2.nuxeo-backings-mongo:27017
+    uri=mongodb://nxactive-mongo-0.nxactive-mongo:27017,nxactive-mongo-1.nxactive-mongo:27017,nxactive-mongo-2.nxactive-mongo:27017
   connect.properties: |-
     ##
     # Licensed to the Apache Software Foundation (ASF) under one or more
@@ -43,7 +43,7 @@ data:
     # the `bootstrap.servers` and those specifying replication factors.
 
     # A list of host/port pairs to use for establishing the initial connection to the Kafka cluster.
-    bootstrap.servers=nuxeo-backings-kafka-0.nuxeo-backings-kafka:9092,nuxeo-backings-kafka-1.nuxeo-backings-kafka:9092,nuxeo-backings-kafka-2.nuxeo-backings-kafka:9092
+    bootstrap.servers=nxactive-kafka-0.nxactive-kafka:9092,nxactive-kafka-1.nxactive-kafka:9092,nxactive-kafka-2.nxactive-kafka:9092
 
     # unique name for the cluster, used in forming the Connect cluster group. Note that this must not conflict with consumer group IDs
     group.id=mongodb-connect-cluster

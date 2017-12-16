@@ -11,15 +11,15 @@ data:
     name=mongodb-oplog
     connector.class=MongodbSink
     tasks.max=1
-    uri=mongodb:nuxeo-backings-mongo-0.nuxeo-backings-mongo:27017,nuxeo-backings-mongo-1.nuxeo-backings-mongo:27017,nuxeo-backings-mongo-2.nuxeo-backings-mongo:27017
+    uri=mongodb://nxpassive-mongo-0.nxpassive-mongo:27017,nxpassive-mongo-1.nxpassive-mongo:27017,nxpassive-mongo-2.nxpassive-mongo:27017
     bulk.size=100
     mongodb.database=nuxeo
     mongodb.collections=default
     converter.class=org.apache.kafka.connect.mongodb.converter.JsonStructConverter
-    topics=mongo-connect_nuxeo_default
+    topics=nxmirror-mongo_default_nuxeo
 
     ##Host and port are mandatory but never used when uri is specified
-    host=mongodb:nuxeo-backings-mongo-0.nuxeo-backings-mongo
+    host=nxpassive-mongo-0.nxpassive-mongo
     port=27017
     
 
@@ -46,7 +46,7 @@ data:
     # the `bootstrap.servers` and those specifying replication factors.
 
     # A list of host/port pairs to use for establishing the initial connection to the Kafka cluster.
-    bootstrap.servers=nuxeo-backings-kafka-0.nuxeo-backings-kafka:9092,nuxeo-backings-kafka-1.nuxeo-backings-kafka:9092,nuxeo-backings-kafka-2.nuxeo-backings-kafka:9092
+    bootstrap.servers=nxpassive-kafka-0.nxpassive-kafka:9092,nxpassive-kafka-1.nxpassive-kafka:9092,nxpassive-kafka-2.nxpassive-kafka:9092
 
     # unique name for the cluster, used in forming the Connect cluster group. Note that this must not conflict with consumer group IDs
     group.id=mongodb-connect-cluster
@@ -200,7 +200,7 @@ metadata:
   name: mongodb-connect-route  
 spec:
   # TODO: Add parameter
-  host: mongodb-connect.apps.dev.nuxeo.io
+  host: mongodb-passive.apps.io.nuxeo.com
   to:
     kind: Service
     name: mongodb-connect

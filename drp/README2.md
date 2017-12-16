@@ -3,16 +3,22 @@
 
 ## Prerequisite
 
-Have two Openshift environment:
+Have two Openshift project:
 
- - active: the one that is used as primary and that will be shut down
- - passive: the one on which we replicate all datasources
+ - nx-active: the one that is used as primary and that will be shut down
+ - nx-passive: the one on which we replicate all datasources
 
 ## Steps
 
 ### Nuxeo stack installation
 
-- Launch a Nuxeo backing template (with default values) on active and passive openshift
+- Launch a Nuxeo backing template (with default values) on active and passive project
+
+```
+oc new-app nxactive -n nx-active
+oc new-app nxpassive -n nx-passive
+```
+
 - Launch a Nuxeo template (with default values) on active and passive openshift
 - Launch a Nuxeo-s2i template with https://github.com/nuxeo-sandbox/nuxeo-ha-test
 - Access Nuxeo on both environment WITHOUT creating any document
@@ -30,7 +36,7 @@ On ACTIVE, expose a fixed Kafka port on the app node:
 
 On ACTIVE create a `nxmirror-test` topic and fill with messages
 
-    oc rsh nuxeo-backings-zoo-0 bin/kafka-topics.sh --create --zookeeper localhost:2181 --replication-factor 3 --partitions 1 --topic nxmirror-test
+    oc rsh nuxeo-backings-zoo-0 bin/kafka-topics.sh --create --zookeeper localhost:2181 --replication-factor 1 --partitions 1 --topic nxmirror-test
 
     oc rsh nuxeo-backings-kafka-0 bin/kafka-console-producer.sh --broker-list localhost:9092 --topic nxmirror-test
     > one

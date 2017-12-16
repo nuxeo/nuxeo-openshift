@@ -191,7 +191,7 @@ objects:
               add:
                 - IPC_LOCK
                 - SYS_RESOURCE
-          image: nuxeo/docker-elasticsearch-kubernetes:2.4.5
+          image: nuxeo/docker-elasticsearch-kubernetes:5.6.4
           imagePullPolicy: Always
           env:
           - name: NAMESPACE
@@ -291,7 +291,7 @@ objects:
               add:
                 - IPC_LOCK
                 - SYS_RESOURCE
-          image: nuxeo/docker-elasticsearch-kubernetes:2.4.5
+          image: nuxeo/docker-elasticsearch-kubernetes:5.6.4
           imagePullPolicy: Always
           env:
           - name: NAMESPACE
@@ -390,7 +390,7 @@ objects:
             capabilities:
               add:
                 - IPC_LOCK
-          image: nuxeo/docker-elasticsearch-kubernetes:2.4.5
+          image: nuxeo/docker-elasticsearch-kubernetes:5.6.4
           imagePullPolicy: Always
           env:
           - name: NAMESPACE

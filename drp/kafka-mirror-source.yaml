@@ -11,3 +11,4 @@ spec:
   selector:
     app: nuxeo-backings
     component: kafka
+
