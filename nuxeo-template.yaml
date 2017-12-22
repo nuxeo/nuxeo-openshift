@@ -186,23 +186,26 @@ objects:
           name: ${APPLICATION_NAME}-appserver
           env:
           - name: NUXEO_TEMPLATES
-            value: "default,mongodb,mongodb-audit,kafka,mqueues-workmanager"
+            value: "default,mongodb,mongodb-audit"
           - name: NUXEO_CUSTOM_PARAM
             value: |
               nuxeo.mongodb.server=mongodb://${NUXEO_BACKINGS_NAME}-mongo-0.${NUXEO_BACKINGS_NAME}-mongo:27017,${NUXEO_BACKINGS_NAME}-mongo-1.${NUXEO_BACKINGS_NAME}-mongo:27017,${NUXEO_BACKINGS_NAME}-mongo-2.${NUXEO_BACKINGS_NAME}-mongo:27017
               nuxeo.mongodb.dbname=${APPLICATION_NAME}
+              kafka.enabled=true
+              nuxeo.stream.work.enabled=true
               kafka.zkServers=${NUXEO_BACKINGS_NAME}-zookeeper:2181              
               kafka.bootstrap.servers=${NUXEO_BACKINGS_NAME}-kafka-0.${NUXEO_BACKINGS_NAME}-kafka:9092,${NUXEO_BACKINGS_NAME}-kafka-1.${NUXEO_BACKINGS_NAME}-kafka:9092,${NUXEO_BACKINGS_NAME}-kafka-2.${NUXEO_BACKINGS_NAME}-kafka:9092
               kafka.topicPrefix=${APPLICATION_NAME}-
+              elasticsearch.client=RestClient
               elasticsearch.httpReadOnly.baseUrl=http://${NUXEO_BACKINGS_NAME}-elasticsearch:9200
               elasticsearch.indexName=${APPLICATION_NAME}
               # No Redis, so we don't use DBS cache
               nuxeo.dbs.cache.enabled=false
               
           - name: NUXEO_PACKAGES
-            value: nuxeo-jsf-ui nuxeo-web-ui nuxeo-mqueues nuxeo-mongodb-ext
+            value: nuxeo-jsf-ui nuxeo-web-ui
           - name: NUXEO_ES_HOSTS
-            value: ${NUXEO_BACKINGS_NAME}-elasticsearch-discovery:9300
+            value: ${NUXEO_BACKINGS_NAME}-elasticsearch-discovery:9200
           - name: NUXEO_ES_CLUSTERNAME
             value: ${ELASTICSEARCH_CLUSTER_NAME}
           - name: NUXEO_ES_REPLICAS

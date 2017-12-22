@@ -8,12 +8,12 @@ metadata:
 
 data:
   consumer.properties: |-
-    bootstrap.servers=10.20.5.4:32094,10.20.6.43:32094,10.20.4.22:32094
+    bootstrap.servers=nxactive-kafka-0.nxactive-kafka.nx-active.svc:9092,nxactive-kafka-1.nxactive-kafka.nx-active.svc:9092,nxactive-kafka-2.nxactive-kafka.nx-active.svc:9092
     group.id=drp-MirrorMaker-group
     exclude.internal.topics=true      
     client.id=mirror_maker_consumer
   producer.properties: |-
-    bootstrap.servers=nuxeo-backings-kafka-0.nuxeo-backings-kafka:9092,nuxeo-backings-kafka-1.nuxeo-backings-kafka:9092,nuxeo-backings-kafka-2.nuxeo-backings-kafka:9092
+    bootstrap.servers=nxpassive-kafka-0.nxpassive-kafka:9092,nxpassive-kafka-1.nxpassive-kafka:9092,nxpassive-kafka-2.nxpassive-kafka:9092
     acks=1
     batch.size=1
     client.id=mirror_maker_producer    
