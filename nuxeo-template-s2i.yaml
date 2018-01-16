@@ -80,7 +80,7 @@ objects:
       secrets:
       - destinationDir: /opt/nuxeo/connect
         secret:
-          name: nuxeo-connect
+          name: ${APPLICATION_NAME}-connect
     strategy:
       type: Source
       sourceStrategy:
@@ -94,6 +94,50 @@ objects:
         name: ${APPLICATION_NAME}-app-build:latest
 
 - apiVersion: v1
+  kind: ImageStream
+  metadata:  
+    name: ${APPLICATION_NAME}-base-image
+    labels:
+      app: ${APPLICATION_NAME}
+  spec: {}
+
+- apiVersion: v1
+  kind: BuildConfig
+  metadata:
+    labels:
+      app: ${APPLICATION_NAME}
+      component: build
+    name: ${APPLICATION_NAME}-base-image-build
+  spec:
+    nodeSelector: null
+    output:
+      to:
+        kind: ImageStreamTag
+        name: '${APPLICATION_NAME}-base-image:latest'
+    postCommit: {}
+    resources: {}
+    runPolicy: Serial
+    source:
+      dockerfile: |-
+          FROM nuxeo:9.10
+          USER root
+
+          # Reinstall ImageMagick with the RSVG delegate
+          RUN apt-get update && \
+              apt-get remove -y imagemagick && \
+              apt-get install -y --no-install-recommends librsvg2-bin && \
+              apt-get install -y imagemagick && \
+              apt-get install -y --no-install-recommends vim libnss-wrapper && \
+              wget http://apt.nuxeo.org/pool/releases/ffmpeg-nuxeo_2.8.5-1_amd64.deb && \
+              dpkg -i ffmpeg-nuxeo_2.8.5-1_amd64.deb && \
+              rm -f ffmpeg-nuxeo_2.8.5-1_amd64.deb
+          USER 1000
+      type: Dockerfile
+    strategy:
+      dockerStrategy: {}
+      type: Docker
+
+- apiVersion: v1
   kind: BuildConfig
   metadata:
     name: ${APPLICATION_NAME}-app-assemble
@@ -103,13 +147,19 @@ objects:
   spec:
     source:
       dockerfile: |-
-        FROM nuxeo:${NUXEO_VERSION}
+        FROM ${APPLICATION_NAME}-base-image:latest
+        USER root
         COPY build /build
+        RUN chmod -R 777 /build
+        USER 1000
         COPY ./connect.properties /opt/nuxeo/connect/connect.properties
         RUN /build/install.sh
         # Clean credential after using it
         USER root
-        RUN rm -f /opt/nuxeo/connect/connect.properties
+        RUN rm -f /opt/nuxeo/connect/connect.properties && \
+            rm -rf /opt/nuxeo/server/nxserver/config && \
+            chgrp -fR 0 /opt/nuxeo/server/ && \
+            chmod -fR g+rwX /opt/nuxeo/server/
         USER 1000
       images:
         - from:
@@ -121,22 +171,18 @@ objects:
       secrets:
         - destinationDir: ./
           secret:
-            name: nuxeo-connect
+            name: ${APPLICATION_NAME}-connect
       type: Dockerfile
     strategy:
       dockerStrategy:
         forcePull: true
         from:
-          kind: DockerImage
-          name: nuxeo:${NUXEO_VERSION}
-      type: Docker
-    triggers:
-    - type: ImageChange
-      imageChange:
-        from:
           kind: ImageStreamTag
-          name: ${APPLICATION_NAME}-app-build:latest
+          name: ${APPLICATION_NAME}-base-image:latest
+      type: Docker
     output:
       to:
         kind: ImageStreamTag
         name: '${APPLICATION_NAME}-nuxeo:latest'
+    successfulBuildsHistoryLimit: 2 
+    failedBuildsHistoryLimit: 2 

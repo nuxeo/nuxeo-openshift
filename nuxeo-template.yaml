@@ -118,6 +118,20 @@ objects:
     init.sh: |
       #!/bin/sh
 
+      ## Need to use nss_wrapper in order to make LibreOffice conversion works
+      ## cf https://docs.openshift.com/enterprise/3.2/creating_images/guidelines.html
+      export USER_ID=$(id -u)
+      export GROUP_ID=$(id -g)
+
+      cat > /tmp/passwd <<EOT
+      root:x:0:0:root:/root:/bin/bash
+      nuxeo:x:${USER_ID}:${GROUP_ID}:Nuxeo server:/opt/nuxeo/server:/bin/bash
+      EOT
+
+      export LD_PRELOAD=/usr/lib/libnss_wrapper.so
+      export NSS_WRAPPER_PASSWD=/tmp/passwd
+      export NSS_WRAPPER_GROUP=/etc/group
+
       if [ ! -f $NUXEO_DATA/instance.clid -a -f /opt/nuxeo/connect/connect.properties ]; then
         . /opt/nuxeo/connect/connect.properties
         if [ -n "$NUXEO_CONNECT_USERNAME" -a -n "$NUXEO_CONNECT_PASSWORD" -a -n "$NUXEO_STUDIO_PROJECT" ]; then  
