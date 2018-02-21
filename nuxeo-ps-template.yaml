@@ -1172,7 +1172,7 @@ objects:
                 stage('drop db') {
                   sh "oc get pod -l component=mongo --template='{{range .items}}{{.metadata.name}}{{end}}' > podname"
                   podMongo = readFile('podname').trim()
-                  sh '''oc exec ''' + podMongo + ''' -- bash -c 'mongo nuxeo-dev --eval "printjson(db.dropDatabase())"'   '''
+                  sh '''oc exec ''' + podMongo + ''' -- bash -c 'mongo ${APPLICATION-NAME}-dev --eval "printjson(db.dropDatabase())"'   '''
                 }
                 stage('drop es indexes') {
                   sh "oc get pod -l component=elasticsearch --template='{{range .items}}{{.metadata.name}}{{end}}' > podname"
@@ -1233,7 +1233,7 @@ objects:
                 stage('drop db') {
                   sh "oc get pod -l component=mongo --template='{{range .items}}{{.metadata.name}}{{end}}' > podname"
                   podMongo = readFile('podname').trim()
-                  sh '''oc exec ''' + podMongo + ''' -- bash -c 'mongo nuxeo-uat --eval "printjson(db.dropDatabase())"'   '''
+                  sh '''oc exec ''' + podMongo + ''' -- bash -c 'mongo ${APPLICATION-NAME}-uat --eval "printjson(db.dropDatabase())"'   '''
                 }
                 stage('drop es indexes') {
                   sh "oc get pod -l component=elasticsearch --template='{{range .items}}{{.metadata.name}}{{end}}' > podname"
