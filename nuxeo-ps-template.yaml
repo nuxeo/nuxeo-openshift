@@ -1143,3 +1143,125 @@ objects:
       type: GitHub
     successfulBuildsHistoryLimit: 10 
     failedBuildsHistoryLimit: 5
+
+- apiVersion: v1
+  kind: BuildConfig
+  metadata:
+    labels:
+      name: ${APPLICATION-NAME}-reset-dev
+    name: ${APPLICATION-NAME}-reset-dev
+  spec:
+    strategy:
+      jenkinsPipelineStrategy:
+        jenkinsfile: |-
+          properties([
+            [$class: 'BuildDiscarderProperty', strategy: [$class: 'LogRotator', daysToKeepStr: '5', numToKeepStr: '5', artifactNumToKeepStr: '1']]
+          ])
+          try {
+            timeout(time: 60, unit: 'MINUTES') {
+              node {
+                stage("confirm") {
+                  input message: "Do you really want to reset data for DEV environment ? All data will be lost !", id: "approval"
+                }
+              }
+              node {
+                project = env.PROJECT_NAME
+                stage("stop nuxeo pod") {
+                  sh "oc scale dc/${APPLICATION-NAME}-dev-nuxeo --replicas=0"
+                }
+                stage('drop db') {
+                  sh "oc get pod -l component=mongo --template='{{range .items}}{{.metadata.name}}{{end}}' > podname"
+                  podMongo = readFile('podname').trim()
+                  sh '''oc exec ''' + podMongo + ''' -- bash -c 'mongo nuxeo-dev --eval "printjson(db.dropDatabase())"'   '''
+                }
+                stage('drop es indexes') {
+                  sh "oc get pod -l component=elasticsearch --template='{{range .items}}{{.metadata.name}}{{end}}' > podname"
+                  podElastic = readFile('podname').trim()
+                  sh '''oc exec ''' + podElastic + ''' -- bash -c "curl -XDELETE http://localhost:9200/${APPLICATION-NAME}-dev-uidgen"'''
+                  sh '''oc exec ''' + podElastic + ''' -- bash -c "curl -XDELETE http://localhost:9200/${APPLICATION-NAME}-dev-audit"'''
+                  sh '''oc exec ''' + podElastic + ''' -- bash -c "curl -XDELETE http://localhost:9200/${APPLICATION-NAME}-dev"'''
+                }
+                stage("restart nuxeo pod") {
+                  sh "oc scale dc/${APPLICATION-NAME}-dev-nuxeo --replicas=1"
+                }
+                stage("wait for pod") {
+                    isAwait = true
+                    while (isAwait) {
+                      sh "oc get dc/${APPLICATION-NAME}-dev-nuxeo --template='{{.status.availableReplicas}}'  > status"
+                      status = readFile('status').trim()
+                      if (status.toString().equals("1")) {
+                          isAwait = false
+                      } else {
+                          sleep(time: 30, unit: 'SECONDS')
+                      }
+                    }
+                  }
+              }
+            }
+          } catch (err) {
+             echo "in catch block"
+             echo "Caught: ${err}"
+             currentBuild.result = 'FAILURE'
+             throw err
+          }
+
+- apiVersion: v1
+  kind: BuildConfig
+  metadata:
+    labels:
+      name: ${APPLICATION-NAME}-reset-uat
+    name: ${APPLICATION-NAME}-reset-uat
+  spec:
+    strategy:
+      jenkinsPipelineStrategy:
+        jenkinsfile: |-
+          properties([
+            [$class: 'BuildDiscarderProperty', strategy: [$class: 'LogRotator', daysToKeepStr: '5', numToKeepStr: '5', artifactNumToKeepStr: '1']]
+          ])
+          try {
+            timeout(time: 60, unit: 'MINUTES') {
+              node {
+                stage("confirm") {
+                  input message: "Do you really want to reset data for DEV environment ? All data will be lost !", id: "approval"
+                }
+              }
+              node {
+                project = env.PROJECT_NAME
+                stage("stop nuxeo pod") {
+                  sh "oc scale dc/${APPLICATION-NAME}-uat-nuxeo --replicas=0"
+                }
+                stage('drop db') {
+                  sh "oc get pod -l component=mongo --template='{{range .items}}{{.metadata.name}}{{end}}' > podname"
+                  podMongo = readFile('podname').trim()
+                  sh '''oc exec ''' + podMongo + ''' -- bash -c 'mongo nuxeo-uat --eval "printjson(db.dropDatabase())"'   '''
+                }
+                stage('drop es indexes') {
+                  sh "oc get pod -l component=elasticsearch --template='{{range .items}}{{.metadata.name}}{{end}}' > podname"
+                  podElastic = readFile('podname').trim()
+                  sh '''oc exec ''' + podElastic + ''' -- bash -c "curl -XDELETE http://localhost:9200/${APPLICATION-NAME}-uat-uidgen"'''
+                  sh '''oc exec ''' + podElastic + ''' -- bash -c "curl -XDELETE http://localhost:9200/${APPLICATION-NAME}-uat-audit"'''
+                  sh '''oc exec ''' + podElastic + ''' -- bash -c "curl -XDELETE http://localhost:9200/${APPLICATION-NAME}-uat"'''
+                }
+                stage("restart nuxeo pod") {
+                  sh "oc scale dc/${APPLICATION-NAME}-uat-nuxeo --replicas=1"
+                }
+                stage("wait for pod") {
+                    isAwait = true
+                    while (isAwait) {
+                      sh "oc get dc/${APPLICATION-NAME}-uat-nuxeo --template='{{.status.availableReplicas}}'  > status"
+                      status = readFile('status').trim()
+                      if (status.toString().equals("1")) {
+                          isAwait = false
+                      } else {
+                          sleep(time: 30, unit: 'SECONDS')
+                      }
+                    }
+                  }
+              }
+            }
+          } catch (err) {
+             echo "in catch block"
+             echo "Caught: ${err}"
+             currentBuild.result = 'FAILURE'
+             throw err
+          }
