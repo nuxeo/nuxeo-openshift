@@ -233,7 +233,7 @@ objects:
 - apiVersion: v1
   kind: Service
   metadata:
-    name: ${NUXEO_BACKINGS_NAME}-zookeeper-headless
+    name: ${NUXEO_BACKINGS_NAME}-zookeeper
     labels:
       app: ${NUXEO_BACKINGS_NAME}
       component: zookeeper
@@ -258,7 +258,7 @@ objects:
       app: ${NUXEO_BACKINGS_NAME}
       component: zookeeper
   spec:
-    serviceName: ${NUXEO_BACKINGS_NAME}-zookeeper-headless
+    serviceName: ${NUXEO_BACKINGS_NAME}-zookeeper
     replicas: ${ZOOKEEPER_SERVER_COUNT}
     podManagementPolicy: Parallel
     updateStrategy:
@@ -381,11 +381,10 @@ objects:
         component: kafka
     maxUnavailable: "${KAFKA_MAX_UNAVAILABLE}"
 
-# Source: kafka/templates/service-headless.yaml
 - apiVersion: v1
   kind: Service
   metadata:
-    name: ${NUXEO_BACKINGS_NAME}-kafka-broker-headless
+    name: ${NUXEO_BACKINGS_NAME}-kafka
     labels:
       app: ${NUXEO_BACKINGS_NAME}
       component: kafka
@@ -409,7 +408,7 @@ objects:
       app: ${NUXEO_BACKINGS_NAME}
       component: kafka
   spec:
-    serviceName: ${NUXEO_BACKINGS_NAME}-kafka-broker-headless
+    serviceName: ${NUXEO_BACKINGS_NAME}-kafka
     replicas: ${KAFKA_SERVER_COUNT}
     podManagementPolicy: Parallel
     updateStrategy:
@@ -438,7 +437,7 @@ objects:
                 topologyKey: "kubernetes.io/hostname"
         terminationGracePeriodSeconds: ${KAFKA_TERMINATION_GRACE_PERIOD}
         containers:
-        - name: kafka-broker
+        - name: kafka
           image: ${KAFKA_IMAGE_NAME}:${KAFKA_IMAGE_TAG}
           resources:
             requests:
@@ -461,7 +460,7 @@ objects:
                 export KAFKA_ZOOKEEPER_CONNECT=$(DOMAIN=`hostname -d`; \
                     for ((i=0; i<$ZOOKEEPER_SERVER_COUNT; i++)); do \
                         echo -n "${NUXEO_BACKINGS_NAME}-zookeeper-$i.$DOMAIN:$ZOOKEEPER_CLIENT_PORT,"; \
-                    done| sed 's/,$//'| sed 's/kafka-broker/zookeeper/g') && \
+                    done| sed 's/,$//'| sed 's/kafka/zookeeper/g') && \
                 (kafka-topics --zookeeper ${KAFKA_ZOOKEEPER_CONNECT} --list)
             initialDelaySeconds: ${KAFKA_HEALTHCHECK_DELAY}
             timeoutSeconds: ${KAFKA_HEALTHCHECK_TIMEOUT}
@@ -496,7 +495,7 @@ objects:
             export KAFKA_ZOOKEEPER_CONNECT=$(DOMAIN=`hostname -d`; \
                 for ((i=0; i<$ZOOKEEPER_SERVER_COUNT; i++)); do \
                     echo -n "${NUXEO_BACKINGS_NAME}-zookeeper-$i.$DOMAIN:$ZOOKEEPER_CLIENT_PORT,"; \
-                done| sed 's/,$//'| sed 's/kafka-broker/zookeeper/g') && \
+                done| sed 's/,$//'| sed 's/kafka/zookeeper/g') && \
             export KAFKA_HEAP_OPTS="-Xmx${KAFKA_HEAP_SIZE} -Xms${KAFKA_HEAP_SIZE}" && \
             export KAFKA_BROKER_ID=${HOSTNAME##*-} && \
             export KAFKA_ADVERTISED_LISTENERS=PLAINTEXT://${POD_IP}:9092 && \
