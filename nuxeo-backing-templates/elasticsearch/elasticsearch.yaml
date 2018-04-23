@@ -35,7 +35,7 @@ parameters:
     required: true
   - description: The image tag
     name: IMAGE_TAG
-    value: 5.6.5
+    value: 5.6.9
     required: true
   - description: The image pull policy
     name: IMAGE_PULL_POLICY
