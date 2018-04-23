@@ -1,0 +1,652 @@
+apiVersion: v1
+kind: Template
+message: |-
+  An Elasticsearch Cluster has been created in your project.
+
+  For more information about using this template, see https://github.com/nuxeo/nuxeo-openshift. This
+  template was originally based off the Elasticsearch Helm Chart available at:
+  https://github.com/kubernetes/charts/tree/master/incubator/elasticsearch.
+metadata:  
+  name: elasticsearch
+  annotations:
+    description: |
+      This template sets up an Elasticsearch cluster in your project.
+    openshift.io/display-name: Elasticsearch cluster
+    template.openshift.io/documentation-url: https://github.com/nuxeo/nuxeo-openshift
+    template.openshift.io/long-description: |-
+      This template sets up an Elasticsearch cluster in your project.
+    template.openshift.io/provider-display-name: Nuxeo
+    template.openshift.io/support-url: https://answers.nuxeo.com/
+    iconClass: icon-java
+    tags: java, nuxeo
+parameters:
+  - description: The name of the backings stack.
+    displayName: The name of the backings stack.
+    name: NUXEO_BACKINGS_NAME
+    required: true
+    value: "nuxeo-backings"
+  - description: Elasticsearch cluster name
+    name: CLUSTER_NAME
+    value: nuxeo
+    required: true
+  - description: The image repository
+    name: IMAGE_REPOSITORY
+    value: docker.elastic.co/elasticsearch/elasticsearch
+    required: true
+  - description: The image tag
+    name: IMAGE_TAG
+    value: 5.6.5
+    required: true
+  - description: The image pull policy
+    name: IMAGE_PULL_POLICY
+    value: IfNotPresent
+    required: true
+  - description: The client name
+    name: CLIENT_NAME
+    value: client
+    required: true
+  - description: The client replica count
+    name: CLIENT_REPLICA_COUNT
+    value: "2"
+    required: true
+  - description: The client service type
+    name: CLIENT_SERVICE_TYPE
+    value: ClusterIP
+    required: true
+  - description: The client heap size
+    name: CLIENT_HEAP_SIZE
+    value: 256m
+    required: true
+  - description: The amount of CPU to request for the client
+    displayName: The amount of CPU to request for the client
+    name: CLIENT_REQUESTS_CPU
+    required: true
+    value: 25m
+  - description: The amount of memory to request for the client
+    displayName: The amount of memory to request for the client
+    name: CLIENT_REQUESTS_MEMORY
+    required: true
+    value: 256Mi
+  - description: The CPU limit for the client
+    displayName: The CPU limit for the client
+    name: CLIENT_LIMITS_CPU
+    required: true
+    value: "1"
+  - description: The master name
+    name: MASTER_NAME
+    value: master
+    required: true
+  - description: The master replica count
+    name: MASTER_REPLICA_COUNT
+    value: "3"
+    required: true
+  - description: The master heap size
+    name: MASTER_HEAP_SIZE
+    value: 256m
+    required: true
+  - description: The amount of CPU to request for the master
+    displayName: The amount of CPU to request for the master
+    name: MASTER_REQUESTS_CPU
+    required: true
+    value: 25m
+  - description: The amount of memory to request for the master
+    displayName: The amount of memory to request for the master
+    name: MASTER_REQUESTS_MEMORY
+    required: true
+    value: 256Mi
+  - description: The CPU limit for the master
+    displayName: The CPU limit for the master
+    name: MASTER_LIMITS_CPU
+    required: true
+    value: "1"
+  - description: Size of persistent storage for the master node
+    name: MASTER_PERSISTENCE_SIZE
+    value: 4Gi
+    required: true
+  - description: Persistent storage class name for the master node
+    name: MASTER_PERSISTENCE_STORAGE_CLASS_NAME
+    value: "aws-fast"
+    required: false
+  - description: The data node name
+    name: DATA_NAME
+    value: data
+    required: true
+  - description: The data node replica count
+    name: DATA_REPLICA_COUNT
+    value: "3"
+    required: true
+  - description: The data node heap size
+    name: DATA_HEAP_SIZE
+    value: 1024m
+    required: true
+  - description: The amount of CPU to request for the data node
+    displayName: The amount of CPU to request for the data node
+    name: DATA_REQUESTS_CPU
+    required: true
+    value: 25m
+  - description: The amount of memory to request for the data node
+    displayName: The amount of memory to request for the data node
+    name: DATA_REQUESTS_MEMORY
+    required: true
+    value: 1024Mi
+  - description: The CPU limit for the data node
+    displayName: The CPU limit for the data node
+    name: DATA_LIMITS_CPU
+    required: true
+    value: "1"
+  - description: Size of persistent storage for the data node
+    name: DATA_PERSISTENCE_SIZE
+    value: 10Gi
+    required: true
+  - description: Persistent storage class name for the data node
+    name: DATA_PERSISTENCE_STORAGE_CLASS_NAME
+    value: "aws-fast"
+    required: false
+  - description: Termination Grace Period in seconds for the data node
+    name: DATA_TERMINATION_GRACE_PERIOD
+    value: "3600"
+    required: true
+
+objects:
+
+# Source: elasticsearch/templates/configmap.yaml
+- apiVersion: v1
+  kind: ConfigMap
+  metadata:
+    name: ${NUXEO_BACKINGS_NAME}-elasticsearch-config
+    labels:
+      app: ${NUXEO_BACKINGS_NAME}
+      component: elasticsearch
+  data:
+    elasticsearch.yml: |-
+      cluster.name: ${CLUSTER_NAME}      
+      
+      node.data: ${NODE_DATA:true}
+      node.master: ${NODE_MASTER:true}
+      node.ingest: ${NODE_INGEST:true}
+      node.name: ${HOSTNAME}
+
+      network.host: 0.0.0.0
+
+      # see https://github.com/kubernetes/kubernetes/issues/3595
+      bootstrap.memory_lock: ${BOOTSTRAP_MEMORY_LOCK:false}
+
+      discovery:
+        zen:
+          ping.unicast.hosts: ${DISCOVERY_SERVICE}
+          minimum_master_nodes: ${MINIMUM_MASTER_NODES:2}
+
+      # see https://www.elastic.co/guide/en/x-pack/current/xpack-settings.html
+      xpack.ml.enabled: ${XPACK_ML_ENABLED:false}
+      xpack.monitoring.enabled: ${XPACK_MONITORING_ENABLED:false}
+      xpack.security.enabled: ${XPACK_SECURITY_ENABLED:false}
+      xpack.watcher.enabled: ${XPACK_WATCHER_ENABLED:false}
+
+      # see https://github.com/elastic/elasticsearch-definitive-guide/pull/679
+      processors: ${PROCESSORS:}
+
+      # avoid split-brain w/ a minimum consensus of two masters plus a data node
+      gateway.expected_master_nodes: ${EXPECTED_MASTER_NODES:2}
+      gateway.expected_data_nodes: ${EXPECTED_DATA_NODES:1}
+      gateway.recover_after_time: ${RECOVER_AFTER_TIME:5m}
+      gateway.recover_after_master_nodes: ${RECOVER_AFTER_MASTER_NODES:2}
+      gateway.recover_after_data_nodes: ${RECOVER_AFTER_DATA_NODES:1}
+    log4j2.properties: |-
+      status = error
+      appender.console.type = Console
+      appender.console.name = console
+      appender.console.layout.type = PatternLayout
+      appender.console.layout.pattern = [%d{ISO8601}][%-5p][%-25c{1.}] %marker%m%n
+      rootLogger.level = info
+      rootLogger.appenderRef.console.ref = console
+      logger.searchguard.name = com.floragunn
+      logger.searchguard.level = info
+    pre-stop-hook.sh: |-
+      #!/bin/bash
+      set -e
+
+      SERVICE_ACCOUNT_PATH=/var/run/secrets/kubernetes.io/serviceaccount
+      KUBE_TOKEN=$(<${SERVICE_ACCOUNT_PATH}/token)
+      KUBE_NAMESPACE=$(<${SERVICE_ACCOUNT_PATH}/namespace)
+
+      STATEFULSET_NAME=$(echo "${HOSTNAME}" | sed 's/-[0-9]*$//g')
+      INSTANCE_ID=$(echo "${HOSTNAME}" | grep -o '[0-9]*$')
+
+      echo "Prepare stopping of Pet ${KUBE_NAMESPACE}/${HOSTNAME} of StatefulSet ${KUBE_NAMESPACE}/${STATEFULSET_NAME} instance_id ${INSTANCE_ID}"
+
+      INSTANCES_DESIRED=$(curl -s \
+        --cacert ${SERVICE_ACCOUNT_PATH}/ca.crt \
+        -H "Authorization: Bearer $KUBE_TOKEN" \
+        "https://${KUBERNETES_SERVICE_HOST}:${KUBERNETES_PORT_443_TCP_PORT}/apis/apps/v1beta1/namespaces/${KUBE_NAMESPACE}/statefulsets/${STATEFULSET_NAME}/status" | jq -r '.spec.replicas')
+
+      echo "Desired instance count is ${INSTANCES_DESIRED}"
+
+      if [ "${INSTANCE_ID}" -lt "${INSTANCES_DESIRED}" ]; then
+        echo "No data migration needed"
+        exit 0
+      fi
+
+      echo "Prepare to migrate data of the node"
+
+      NODE_STATS=$(curl -s -XGET 'http://localhost:9200/_nodes/stats')
+      NODE_IP=$(echo "${NODE_STATS}" | jq -r ".nodes[] | select(.name==\"${HOSTNAME}\") | .host")
+
+      echo "Move all data from node ${NODE_IP}"
+
+      curl -s -XPUT localhost:9200/_cluster/settings -d "{
+        \"transient\" :{
+            \"cluster.routing.allocation.exclude._ip\" : \"${NODE_IP}\"
+        }
+      }"
+      echo
+
+      echo "Wait for node to become empty"
+      DOC_COUNT=$(echo "${NODE_STATS}" | jq ".nodes[] | select(.name==\"${HOSTNAME}\") | .indices.docs.count")
+      while [ "${DOC_COUNT}" -gt 0 ]; do
+        NODE_STATS=$(curl -s -XGET 'http://localhost:9200/_nodes/stats')
+        DOC_COUNT=$(echo "${NODE_STATS}" | jq -r ".nodes[] | select(.name==\"${HOSTNAME}\") | .indices.docs.count")
+        echo "Node contains ${DOC_COUNT} documents"
+        sleep 1
+      done
+
+      echo "Wait for node shards to become empty"
+      SHARD_STATS=$(curl -s -XGET 'http://localhost:9200/_cat/shards?format=json')
+      SHARD_COUNT=$(echo "${SHARD_STATS}" | jq "[.[] | select(.node==\"${HOSTNAME}\")] | length")
+      while [ "${SHARD_COUNT}" -gt 0 ]; do
+        SHARD_STATS=$(curl -s -XGET 'http://localhost:9200/_cat/shards?format=json')
+        SHARD_COUNT=$(echo "${SHARD_STATS}" | jq "[.[] | select(.node==\"${HOSTNAME}\")] | length")
+        echo "Node contains ${SHARD_COUNT} shards"
+        sleep 1
+      done
+
+      echo "Node clear to shutdown"
+
+# Source: elasticsearch/templates/service-account.yaml
+- apiVersion: v1
+  kind: ServiceAccount
+  metadata:
+    labels:
+      app: ${NUXEO_BACKINGS_NAME}
+      component: elasticsearch
+    name: elasticsearch
+
+# Source: elasticsearch/templates/client-svc.yaml
+- apiVersion: v1
+  kind: Service
+  metadata:
+    labels:
+      app: ${NUXEO_BACKINGS_NAME}
+      component: elasticsearch
+      role: client
+    name: ${NUXEO_BACKINGS_NAME}-elasticsearch-${CLIENT_NAME}
+  spec:
+    ports:
+      - name: http
+        port: 9200
+        targetPort: http
+      - name: transport
+        port: 9300
+        targetPort: transport
+    selector:
+      app: ${NUXEO_BACKINGS_NAME}
+      component: elasticsearch
+      role: ${CLIENT_NAME}
+    clusterIP: None
+
+# Source: elasticsearch/templates/master-svc.yaml
+- apiVersion: v1
+  kind: Service
+  metadata:
+    labels:
+      app: ${NUXEO_BACKINGS_NAME}
+      component: elasticsearch
+      role: master
+    annotations:
+      service.alpha.kubernetes.io/tolerate-unready-endpoints: "true"
+    name: ${NUXEO_BACKINGS_NAME}-elasticsearch-${MASTER_NAME}
+  spec:
+    clusterIP: None
+    ports:
+      - port: 9300
+        targetPort: transport
+    selector:
+      app: ${NUXEO_BACKINGS_NAME}
+      component: elasticsearch
+      role: ${MASTER_NAME}
+
+  # Source: elasticsearch/templates/client-deployment.yaml
+- apiVersion: apps/v1beta1
+  kind: Deployment
+  metadata:
+    labels:
+      app: ${NUXEO_BACKINGS_NAME}
+      component: elasticsearch
+      role: client
+    name: ${NUXEO_BACKINGS_NAME}-elasticsearch-${CLIENT_NAME}
+  spec:
+    replicas: ${CLIENT_REPLICA_COUNT}
+    template:
+      metadata:
+        labels:
+          app: ${NUXEO_BACKINGS_NAME}
+          component: elasticsearch
+          role: client
+      spec:
+        serviceAccountName: elasticsearch
+        affinity:
+          podAntiAffinity:
+            preferredDuringSchedulingIgnoredDuringExecution:
+            - weight: 1
+              podAffinityTerm:
+                topologyKey: kubernetes.io/hostname
+                labelSelector:
+                  matchLabels:                  
+                    app: ${NUXEO_BACKINGS_NAME}
+                    component: elasticsearch
+                    role: client
+        initContainers:
+        # see https://www.elastic.co/guide/en/elasticsearch/reference/current/vm-max-map-count.html
+        # and https://www.elastic.co/guide/en/elasticsearch/reference/current/setup-configuration-memory.html#mlockall
+        - name: "sysctl"
+          image: "busybox"
+          imagePullPolicy: "Always"
+          command: ["sysctl", "-w", "vm.max_map_count=262144"]
+          securityContext:
+            privileged: true
+        containers:
+        - name: elasticsearch
+          env:
+          - name: DISCOVERY_SERVICE
+            value: ${NUXEO_BACKINGS_NAME}-elasticsearch-${MASTER_NAME}
+          - name: KUBERNETES_MASTER
+            value: kubernetes.default.svc.cluster.local
+          - name: KUBERNETES_NAMESPACE
+            valueFrom:
+              fieldRef:
+                fieldPath: metadata.namespace
+          - name: NODE_DATA
+            value: "false"
+          - name: NODE_INGEST
+            value: "false"
+          - name: NODE_MASTER
+            value: "false"
+          - name: PROCESSORS
+            valueFrom:
+              resourceFieldRef:
+                resource: limits.cpu
+          - name: ES_JAVA_OPTS
+            value: "-Djava.net.preferIPv4Stack=true -Xms${CLIENT_HEAP_SIZE} -Xmx${CLIENT_HEAP_SIZE}"
+          - name: MINIMUM_MASTER_NODES
+            value: "2"
+          resources:
+              limits:
+                cpu: "${CLIENT_LIMITS_CPU}"
+              requests:
+                cpu: "${CLIENT_REQUESTS_CPU}"
+                memory: "${CLIENT_REQUESTS_MEMORY}"
+          readinessProbe:
+            httpGet:
+              path: /_cluster/health?wait_for_status=yellow
+              port: 9200
+            initialDelaySeconds: 5
+          livenessProbe:
+            httpGet:
+              path: /_cluster/health?wait_for_status=yellow
+              port: 9200
+            initialDelaySeconds: 90
+          image: "${IMAGE_REPOSITORY}:${IMAGE_TAG}"
+          imagePullPolicy: "${IMAGE_PULL_POLICY}"
+          ports:
+          - containerPort: 9200
+            name: http
+          - containerPort: 9300
+            name: transport
+          volumeMounts:
+          - mountPath: /usr/share/elasticsearch/config/elasticsearch.yml
+            name: config
+            subPath: elasticsearch.yml
+          - mountPath: /usr/share/elasticsearch/config/log4j2.properties
+            name: config
+            subPath: log4j2.properties
+        volumes:
+        - name: config
+          configMap:
+            name: ${NUXEO_BACKINGS_NAME}-elasticsearch-config
+
+# Source: elasticsearch/templates/data-statefulset.yaml
+- apiVersion: apps/v1beta1
+  kind: StatefulSet
+  metadata:
+    labels:
+      app: ${NUXEO_BACKINGS_NAME}
+      component: elasticsearch
+      role: ${DATA_NAME}
+    name: ${NUXEO_BACKINGS_NAME}-elasticsearch-${DATA_NAME}
+  spec:
+    serviceName: ${NUXEO_BACKINGS_NAME}-elasticsearch-${DATA_NAME}
+    replicas: ${DATA_REPLICA_COUNT}
+    template:
+      metadata:
+        labels:
+          app: ${NUXEO_BACKINGS_NAME}
+          component: elasticsearch
+          role: ${DATA_NAME}
+      spec:
+        serviceAccountName: elasticsearch
+        affinity:
+          podAntiAffinity:
+            preferredDuringSchedulingIgnoredDuringExecution:
+            - weight: 1
+              podAffinityTerm:
+                topologyKey: kubernetes.io/hostname
+                labelSelector:
+                  matchLabels:
+                    app: ${NUXEO_BACKINGS_NAME}
+                    component: elasticsearch
+                    role: ${DATA_NAME}
+        initContainers:
+        # see https://www.elastic.co/guide/en/elasticsearch/reference/current/vm-max-map-count.html
+        # and https://www.elastic.co/guide/en/elasticsearch/reference/current/setup-configuration-memory.html#mlockall
+        - name: "sysctl"
+          image: "busybox"
+          imagePullPolicy: "Always"
+          command: ["sysctl", "-w", "vm.max_map_count=262144"]
+          securityContext:
+            privileged: true
+        - name: "chown"
+          image: "${IMAGE_REPOSITORY}:${IMAGE_TAG}"
+          imagePullPolicy: "${IMAGE_PULL_POLICY}"
+          command:
+          - /bin/bash
+          - -c
+          - chown -R elasticsearch:elasticsearch /usr/share/elasticsearch/data &&
+            chown -R elasticsearch:elasticsearch /usr/share/elasticsearch/logs
+          securityContext:
+            runAsUser: 0
+          volumeMounts:
+          - mountPath: /usr/share/elasticsearch/data
+            name: data
+        containers:
+        - name: elasticsearch
+          env:
+          - name: DISCOVERY_SERVICE
+            value: ${NUXEO_BACKINGS_NAME}-elasticsearch-${MASTER_NAME}
+          - name: KUBERNETES_MASTER
+            value: kubernetes.default.svc.cluster.local
+          - name: KUBERNETES_NAMESPACE
+            valueFrom:
+              fieldRef:
+                fieldPath: metadata.namespace
+          - name: NODE_MASTER
+            value: "false"
+          - name: PROCESSORS
+            valueFrom:
+              resourceFieldRef:
+                resource: limits.cpu
+          - name: ES_JAVA_OPTS
+            value: "-Djava.net.preferIPv4Stack=true -Xms${DATA_HEAP_SIZE} -Xmx${DATA_HEAP_SIZE}"
+          - name: MINIMUM_MASTER_NODES
+            value: "2"
+          image: "${IMAGE_REPOSITORY}:${IMAGE_TAG}"
+          imagePullPolicy: "${IMAGE_PULL_POLICY}"
+          ports:
+          - containerPort: 9300
+            name: transport
+          resources:
+              limits:
+                cpu: "${DATA_LIMITS_CPU}"
+              requests:
+                cpu: "${DATA_REQUESTS_CPU}"
+                memory: "${DATA_REQUESTS_MEMORY}"
+          readinessProbe:
+            httpGet:
+              path: /_cluster/health?local=true
+              port: 9200
+            initialDelaySeconds: 5
+          volumeMounts:
+          - mountPath: /usr/share/elasticsearch/data
+            name: data
+          - mountPath: /usr/share/elasticsearch/config/elasticsearch.yml
+            name: config
+            subPath: elasticsearch.yml
+          - mountPath: /usr/share/elasticsearch/config/log4j2.properties
+            name: config
+            subPath: log4j2.properties
+          - name: config
+            mountPath: /pre-stop-hook.sh
+            subPath: pre-stop-hook.sh
+          lifecycle:
+            preStop:
+              exec:
+                command: ["/bin/bash","/pre-stop-hook.sh"]
+        terminationGracePeriodSeconds: ${DATA_TERMINATION_GRACE_PERIOD}
+        volumes:
+        - name: config
+          configMap:
+            name: ${NUXEO_BACKINGS_NAME}-elasticsearch-config
+    volumeClaimTemplates:
+    - metadata:
+        name: data
+      spec:
+        accessModes:
+          - "ReadWriteOnce"
+        storageClassName: "${DATA_PERSISTENCE_STORAGE_CLASS_NAME}"
+        resources:
+          requests:
+            storage: "${DATA_PERSISTENCE_SIZE}"
+
+# Source: elasticsearch/templates/master-statefulset.yaml
+- apiVersion: apps/v1beta1
+  kind: StatefulSet
+  metadata:
+    labels:
+      app: ${NUXEO_BACKINGS_NAME}
+      component: elasticsearch
+      role: ${MASTER_NAME}
+    name: ${NUXEO_BACKINGS_NAME}-elasticsearch-${MASTER_NAME}
+  spec:
+    serviceName: ${NUXEO_BACKINGS_NAME}-elasticsearch-${MASTER_NAME}
+    replicas: ${MASTER_REPLICA_COUNT}
+    template:
+      metadata:
+        labels:
+          app: ${NUXEO_BACKINGS_NAME}
+          component: elasticsearch
+          role: ${MASTER_NAME}
+      spec:
+        serviceAccountName: elasticsearch
+        affinity:
+          podAntiAffinity:
+            preferredDuringSchedulingIgnoredDuringExecution:
+            - weight: 1
+              podAffinityTerm:
+                topologyKey: kubernetes.io/hostname
+                labelSelector:
+                  matchLabels:
+                    app: ${NUXEO_BACKINGS_NAME}
+                    component: elasticsearch
+                    role: ${MASTER_NAME}
+        initContainers:
+        # see https://www.elastic.co/guide/en/elasticsearch/reference/current/vm-max-map-count.html
+        # and https://www.elastic.co/guide/en/elasticsearch/reference/current/setup-configuration-memory.html#mlockall
+        - name: "sysctl"
+          image: "busybox"
+          imagePullPolicy: "Always"
+          command: ["sysctl", "-w", "vm.max_map_count=262144"]
+          securityContext:
+            privileged: true
+        - name: "chown"
+          image: "${IMAGE_REPOSITORY}:${IMAGE_TAG}"
+          imagePullPolicy: "${IMAGE_PULL_POLICY}"
+          command:
+          - /bin/bash
+          - -c
+          - chown -R elasticsearch:elasticsearch /usr/share/elasticsearch/data &&
+            chown -R elasticsearch:elasticsearch /usr/share/elasticsearch/logs
+          securityContext:
+            runAsUser: 0
+          volumeMounts:
+          - mountPath: /usr/share/elasticsearch/data
+            name: data
+        containers:
+        - name: elasticsearch
+          env:
+          - name: DISCOVERY_SERVICE
+            value: ${NUXEO_BACKINGS_NAME}-elasticsearch-${MASTER_NAME}
+          - name: KUBERNETES_MASTER
+            value: kubernetes.default.svc.cluster.local
+          - name: KUBERNETES_NAMESPACE
+            valueFrom:
+              fieldRef:
+                fieldPath: metadata.namespace
+          - name: NODE_DATA
+            value: "false"
+          - name: NODE_INGEST
+            value: "false"
+          - name: PROCESSORS
+            valueFrom:
+              resourceFieldRef:
+                resource: limits.cpu
+          - name: ES_JAVA_OPTS
+            value: "-Djava.net.preferIPv4Stack=true -Xms${MASTER_HEAP_SIZE} -Xmx${MASTER_HEAP_SIZE}"
+          - name: MINIMUM_MASTER_NODES
+            value: "2"
+          resources:
+              limits:
+                cpu: "${MASTER_LIMITS_CPU}"
+              requests:
+                cpu: "${MASTER_REQUESTS_CPU}"
+                memory: "${MASTER_REQUESTS_MEMORY}"
+          readinessProbe:
+            httpGet:
+              path: /_cluster/health?local=true
+              port: 9200
+            initialDelaySeconds: 5
+          image: "${IMAGE_REPOSITORY}:${IMAGE_TAG}"
+          imagePullPolicy: "${IMAGE_PULL_POLICY}"
+          ports:
+          - containerPort: 9300
+            name: transport
+          volumeMounts:
+          - mountPath: /usr/share/elasticsearch/data
+            name: data
+          - mountPath: /usr/share/elasticsearch/config/elasticsearch.yml
+            name: config
+            subPath: elasticsearch.yml
+          - mountPath: /usr/share/elasticsearch/config/log4j2.properties
+            name: config
+            subPath: log4j2.properties
+        volumes:
+        - name: config
+          configMap:
+            name: ${NUXEO_BACKINGS_NAME}-elasticsearch-config
+    volumeClaimTemplates:
+    - metadata:
+        name: data
+      spec:
+        accessModes:
+          - "ReadWriteOnce"
+        storageClassName: "${MASTER_PERSISTENCE_STORAGE_CLASS_NAME}"
+        resources:
+          requests:
+            storage: "${MASTER_PERSISTENCE_SIZE}"
