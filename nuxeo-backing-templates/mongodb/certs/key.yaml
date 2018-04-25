@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: Secret
+metadata:
+  name: nuxeo-backings-mongodb-key
+stringData:  
+  key.txt: |
+    xQsmnz6VaunL2ktx1NwSOAQtATWeG8CKBnOtjyXrLIwOkBpNlb9XocGj9XNgV8Xz
+    tV+/eZYt7/5J0RTCcn0XGUIPzyb6RmDV7ytJ4ONjJrAFblKCq7LgZWYh7ea9gD4h
+    lzaaV6uSdclN9wdCsavw1y6lFammLitnBAlfJpV6ASD9JCcNbHK8BnjqIg/Gm2hG
+    pTcTY32EU1WM4QXRyOghfhyUycAIW9JuG2bDtz4x+wkQu5Pk9LVhMCf3YAIeXHle
+    ia5XXSA2md1VPcxJu7Cw9YHc0xPQG4BCGBXU1SDmXHRC7a59s4S3tMu4e+c6Jg80
+    Lq0DSuoIsrraa+0EUjPdherD
