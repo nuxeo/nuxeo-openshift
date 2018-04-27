@@ -20,7 +20,7 @@ oc create -f mongodb.yaml
 
 ### Generation of certificates
 
-TLS configuration requires the generation of certificates. In the `certs` folder, launch the `create-certs.sh` script. After answering the questions, it will generate a `certs.yaml` file and a `key.yaml` files that have to be deployed in the Openshift project. It basically creates a k8s secret that contains all certificates needed by TLS and a `key.txt` file that is needed for MongoDB authentication configuration.
+TLS configuration requires the generation of certificates. In the `certs` folder, launch the `create-certs.sh` script. After answering the questions, it will generate a `certs.yaml` file and a `key.yaml` files that have to be deployed in the Openshift project. It basically creates a k8s secret that contains all certificates needed by TLS.
 
 ### Template deployment
 

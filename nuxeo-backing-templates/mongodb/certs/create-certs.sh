@@ -67,16 +67,5 @@ echo "  tls.crt: |">> $out
 cat mongodb-cert.crt |sed -e "s/^/      /" >> $out
 
 
-out=key.yaml
-cat <<EOT > $out
-apiVersion: v1
-kind: Secret
-metadata:
-  name: nuxeo-backings-mongodb-key
-stringData:  
-  key.txt: |
-EOT
-openssl rand -base64 258 |sed -e "s/^/    /" >> $out
-
 rm -f *.crt
 rm -f *.key
