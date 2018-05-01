@@ -17,4 +17,4 @@ Review also the `kafka-template-sasl.yaml` for the line:
 export KAFKA_ADVERTISED_LISTENERS=PLAINTEXT://${POD_IP}:9092,SASL_SSL://oso-dev-app-node0${KAFKA_BROKER_ID+1}.dev.nuxeo.io:${NODEPORT} && \
 ```
 
-the adresse of the advertised SASL_SSL listener has to be updated.
+the adress of the advertised SASL_SSL listener has to be updated.
