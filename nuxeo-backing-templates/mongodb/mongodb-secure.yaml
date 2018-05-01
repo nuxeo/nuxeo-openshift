@@ -216,8 +216,15 @@ objects:
 
       log "Peers: ${peers[*]}"
 
+      if [ -z ${peers[*]} ]; then
+        # First node to bootstrap, only local connection is allowed as it's not authenticated
+        unset auth_args
+      else
+        auth_args="--auth --clusterAuthMode x509"        
+      fi
+
       log "Starting a MongoDB instance..."
-      mongod --config /data/configdb/mongod.conf --dbpath=/data/db --replSet="$replica_set" --port=27017 "${auth_args[@]}" "${ssl_server_args[@]}" --bind_ip 0.0.0.0 >> /work-dir/log.txt 2>&1 &
+      mongod --config /data/configdb/mongod.conf --dbpath=/data/db --replSet="$replica_set" --port=27017 ${auth_args} "${ssl_server_args[@]}" --bind_ip 0.0.0.0 >> /work-dir/log.txt 2>&1 &
 
       log "Waiting for MongoDB to be ready..."
       until mongo "${ssl_args[@]}" --eval "db.adminCommand('ping')"; do
@@ -324,10 +331,6 @@ objects:
                 cp /ca-readonly/tls.key /data/configdb/tls.key
                 cp /ca-readonly/tls.crt /data/configdb/tls.crt
 
-                # Authentication
-                cp /keydir-readonly/key.txt /data/configdb/key.txt
-                chmod 600 /data/configdb/key.txt
-
             volumeMounts:
               - name: workdir
                 mountPath: /work-dir
@@ -337,8 +340,6 @@ objects:
                 mountPath: /data/configdb
               - name: ca
                 mountPath: /ca-readonly
-              - name: keydir
-                mountPath: /keydir-readonly
           - name: install
             image: k8s.gcr.io/mongodb-install:0.6  
             args:
@@ -462,10 +463,6 @@ objects:
             secret:
               defaultMode: 0400
               secretName: ${NUXEO_BACKINGS_NAME}-mongodb-certs
-          - name: keydir
-            secret:
-              defaultMode: 0400
-              secretName: ${NUXEO_BACKINGS_NAME}-mongodb-key
           - name: workdir
             emptyDir: {}
           - name: configdir
