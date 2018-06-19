@@ -213,6 +213,10 @@ parameters:
     displayName: Transaction state replication factor
     name: KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR
     value: "3"
+  - description: Kafka offsets retention minutes
+    displayName: Kafka offsets retention minutes
+    name: KAFKA_OFFSETS_RETENTION_MINUTES
+    value: "20160" 
 
 objects:
 
@@ -478,6 +482,8 @@ objects:
             value: ${ZOOKEEPER_CLIENT_PORT}
           - name: KAFKA_HEAP_SIZE
             value: ${KAFKA_HEAP_SIZE}
+          - name: KAFKA_OFFSETS_RETENTION_MINUTES
+            value: ${KAFKA_OFFSETS_RETENTION_MINUTES}  
           - name: KAFKA_DEFAULT_REPLICATION_FACTOR
             value: "${KAFKA_DEFAULT_REPLICATION_FACTOR}"
           - name: KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR
