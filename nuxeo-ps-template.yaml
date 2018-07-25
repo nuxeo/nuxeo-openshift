@@ -4,13 +4,13 @@ message: |-
   The following backing services for Nuxeo have been created in your project:
 
     * a MongoDB instance
-    * an Elasticsearch simple node    
+    * an Elasticsearch simple node
     * a dev deployment
     * a uat deployment
     * a pipeline build
 
   Please add a Github webhook to https://openshift.dev.nuxeo.io/oapi/v1/namespaces/<<NAMESPACE>>/buildconfigs/${APPLICATION_NAME}-pipeline/webhooks/${GITHUB_WEBHOOK_SECRET}/github
-metadata:  
+metadata:
   name: nuxeo-ps-pipeline
   namespace: openshift
   annotations:
@@ -45,7 +45,7 @@ parameters:
     name: GITHUB_WEBHOOK_SECRET
     required: true
     from: "[a-zA-Z0-9]{12}"
-    generate: "expression"            
+    generate: "expression"
   - description: A Nuxeo Connect userId passed to the build of the image.
     name: NUXEO_CONNECT_USERNAME
     required: false
@@ -81,13 +81,13 @@ parameters:
     required: true
   - description: Domain suffix for routes
     name: DOMAIN_SUFFIX
-    value: apps.dev.nuxeo.io
+    value: apps.prod.nuxeo.io
     required: true
   - description: Storage class for persistence volumes
     name: STORAGE_CLASS
     value: gp2
     required: true
-  
+
 objects:
 
 
@@ -106,8 +106,8 @@ objects:
       role: config
   data:
     elasticsearch.yml: |-
-      cluster.name: ${ELASTICSEARCH_CLUSTER_NAME}      
-      
+      cluster.name: ${ELASTICSEARCH_CLUSTER_NAME}
+
       node.data: ${NODE_DATA:true}
       node.master: ${NODE_MASTER:true}
       node.ingest: ${NODE_INGEST:true}
@@ -273,7 +273,7 @@ objects:
                 topologyKey: kubernetes.io/hostname
                 labelSelector:
                   matchLabels:
-                    app: ${APPLICATION_NAME}-storage                  
+                    app: ${APPLICATION_NAME}-storage
                     component: elasticsearch
                     role: data
         initContainers:
@@ -332,7 +332,7 @@ objects:
               requests:
                 cpu: 25m
                 memory: ${ELASTICSEARCH_CLUSTER_MEMORY}
-              
+
           readinessProbe:
             httpGet:
               path: /_cluster/health?wait_for_status=yellow
@@ -368,7 +368,7 @@ objects:
     - metadata:
         name: data
         labels:
-          app: ${APPLICATION_NAME}   
+          app: ${APPLICATION_NAME}
         annotations:
           volume.beta.kubernetes.io/storage-class: ${STORAGE_CLASS}
       spec:
@@ -379,7 +379,7 @@ objects:
             storage: ${VOLUME_ELASTICSEARCH_CAPACITY}
 
 
-    
+
 
 - apiVersion: v1
   kind: Service
@@ -408,7 +408,7 @@ objects:
       metadata:
         labels:
           app: ${APPLICATION_NAME}-storage
-          component: mongo          
+          component: mongo
       spec:
         terminationGracePeriodSeconds: 10
         containers:
@@ -459,7 +459,7 @@ objects:
 
 - apiVersion: v1
   kind: ImageStream
-  metadata:      
+  metadata:
     creationTimestamp: null
     name: ${APPLICATION_NAME}-nuxeo
     labels:
@@ -476,14 +476,14 @@ objects:
 - apiVersion: v1
   kind: ConfigMap
   metadata:
-    name: ${APPLICATION_NAME}-dev-conf   
+    name: ${APPLICATION_NAME}-dev-conf
     labels:
       app: ${APPLICATION_NAME}-dev
       role: config
       stage: dev
   data:
     nuxeo.conf: |
-      # Additional nuxeo.conf parameters      
+      # Additional nuxeo.conf parameters
     init.sh: |
       #!/bin/sh
 
@@ -503,7 +503,7 @@ objects:
 
       if [ ! -f $NUXEO_DATA/instance.clid -a -f /opt/nuxeo/connect/connect.properties ]; then
         . /opt/nuxeo/connect/connect.properties
-        if [ -n "$NUXEO_CONNECT_USERNAME" -a -n "$NUXEO_CONNECT_PASSWORD" -a -n "$NUXEO_STUDIO_PROJECT" ]; then  
+        if [ -n "$NUXEO_CONNECT_USERNAME" -a -n "$NUXEO_CONNECT_PASSWORD" -a -n "$NUXEO_STUDIO_PROJECT" ]; then
           echo "---> Registering instance on connect"
           nuxeoctl register $NUXEO_CONNECT_USERNAME $NUXEO_STUDIO_PROJECT dev openshift $NUXEO_CONNECT_PASSWORD
         fi
@@ -512,8 +512,6 @@ objects:
 - apiVersion: v1
   kind: PersistentVolumeClaim
   metadata:
-    annotations:
-      volume.beta.kubernetes.io/storage-class: ${STORAGE_CLASS}
     creationTimestamp: null
     name: ${APPLICATION_NAME}-dev-binaries
     labels:
@@ -522,10 +520,11 @@ objects:
       stage: dev
   spec:
     accessModes:
-    - ReadWriteOnce
+    - ReadWriteMany
     resources:
       requests:
         storage: ${VOLUME_BINARIES_CAPACITY}
+    storageClass: shared
 
 
 - apiVersion: v1
@@ -553,7 +552,7 @@ objects:
       component: nuxeo
       stage: dev
       deploymentconfig: ${APPLICATION_NAME}-dev-nuxeo
-    
+
     template:
       metadata:
         creationTimestamp: null
@@ -598,8 +597,8 @@ objects:
               elasticsearch.httpReadOnly.baseUrl=http://${APPLICATION_NAME}-elasticsearch:9200
               elasticsearch.indexName=${APPLICATION_NAME}-dev
               mail.transport.host=aws-smtp-relay.common.svc
-              mail.from=noreply@nuxeo.io               
-              
+              mail.from=noreply@nuxeo.io
+
           - name: NUXEO_PACKAGES
             value: nuxeo-web-ui
           - name: NUXEO_URL
@@ -612,7 +611,7 @@ objects:
             value: "0"
           - name: NUXEO_BINARY_STORE
             value: /binaries
-          
+
           ports:
           - containerPort: 8080
             protocol: TCP
@@ -636,7 +635,7 @@ objects:
             claimName: ${APPLICATION_NAME}-dev-binaries
         - name: nuxeoconf
           configMap:
-            name: ${APPLICATION_NAME}-dev-conf  
+            name: ${APPLICATION_NAME}-dev-conf
         - name: connect-secret
           secret:
             secretName: ${APPLICATION_NAME}-connect
@@ -648,7 +647,7 @@ objects:
           emptyDir: {}
         dnsPolicy: ClusterFirst
         restartPolicy: Always
-        terminationGracePeriodSeconds: 30        
+        terminationGracePeriodSeconds: 30
     test: false
     triggers:
     - type: ConfigChange
@@ -660,7 +659,7 @@ objects:
         from:
           kind: ImageStreamTag
           name: ${APPLICATION_NAME}-nuxeo:latest
-    
+
 - apiVersion: v1
   kind: Service
   metadata:
@@ -670,7 +669,7 @@ objects:
       component: nuxeo
       role: lb
   spec:
-    clusterIP: None    
+    clusterIP: None
     selector:
       app: ${APPLICATION_NAME}-dev
       component: nuxeo
@@ -685,7 +684,7 @@ objects:
   metadata:
     labels:
       app: ${APPLICATION_NAME}-dev
-    name: ${APPLICATION_NAME}-dev-nuxeo-route  
+    name: ${APPLICATION_NAME}-dev-nuxeo-route
   spec:
     host: ${APPLICATION_NAME}-dev.${DOMAIN_SUFFIX}
     tls:
@@ -706,34 +705,20 @@ objects:
 - apiVersion: v1
   kind: ConfigMap
   metadata:
-    name: ${APPLICATION_NAME}-uat-conf   
+    name: ${APPLICATION_NAME}-uat-conf
     labels:
       app: ${APPLICATION_NAME}-uat
       role: config
       stage: dev
   data:
     nuxeo.conf: |
-      # Additional nuxeo.conf parameters      
+      # Additional nuxeo.conf parameters
     init.sh: |
       #!/bin/sh
 
-      ## Need to use nss_wrapper in order to make LibreOffice conversion works
-      ## cf https://docs.openshift.com/enterprise/3.2/creating_images/guidelines.html
-      export USER_ID=$(id -u)
-      export GROUP_ID=$(id -g)
-
-      cat > /tmp/passwd <<EOT
-      root:x:0:0:root:/root:/bin/bash
-      nuxeo:x:${USER_ID}:${GROUP_ID}:Nuxeo server:/tmp:/bin/bash
-      EOT
-
-      export LD_PRELOAD=/usr/lib/libnss_wrapper.so
-      export NSS_WRAPPER_PASSWD=/tmp/passwd
-      export NSS_WRAPPER_GROUP=/etc/group
-
       if [ ! -f $NUXEO_DATA/instance.clid -a -f /opt/nuxeo/connect/connect.properties ]; then
         . /opt/nuxeo/connect/connect.properties
-        if [ -n "$NUXEO_CONNECT_USERNAME" -a -n "$NUXEO_CONNECT_PASSWORD" -a -n "$NUXEO_STUDIO_PROJECT" ]; then  
+        if [ -n "$NUXEO_CONNECT_USERNAME" -a -n "$NUXEO_CONNECT_PASSWORD" -a -n "$NUXEO_STUDIO_PROJECT" ]; then
           echo "---> Registering instance on connect"
           nuxeoctl register $NUXEO_CONNECT_USERNAME $NUXEO_STUDIO_PROJECT dev openshift $NUXEO_CONNECT_PASSWORD
         fi
@@ -783,7 +768,7 @@ objects:
       component: nuxeo
       stage: uat
       deploymentconfig: ${APPLICATION_NAME}-uat-nuxeo
-    
+
     template:
       metadata:
         creationTimestamp: null
@@ -828,8 +813,8 @@ objects:
               elasticsearch.httpReadOnly.baseUrl=http://${APPLICATION_NAME}-elasticsearch:9200
               elasticsearch.indexName=${APPLICATION_NAME}-uat
               mail.transport.host=aws-smtp-relay.common.svc
-              mail.from=noreply@nuxeo.io               
-              
+              mail.from=noreply@nuxeo.io
+
           - name: NUXEO_PACKAGES
             value: nuxeo-web-ui
           - name: NUXEO_URL
@@ -842,7 +827,7 @@ objects:
             value: "0"
           - name: NUXEO_BINARY_STORE
             value: /binaries
-          
+
           ports:
           - containerPort: 8080
             protocol: TCP
@@ -866,7 +851,7 @@ objects:
             claimName: ${APPLICATION_NAME}-uat-binaries
         - name: nuxeoconf
           configMap:
-            name: ${APPLICATION_NAME}-uat-conf  
+            name: ${APPLICATION_NAME}-uat-conf
         - name: connect-secret
           secret:
             secretName: ${APPLICATION_NAME}-connect
@@ -878,7 +863,7 @@ objects:
           emptyDir: {}
         dnsPolicy: ClusterFirst
         restartPolicy: Always
-        terminationGracePeriodSeconds: 30        
+        terminationGracePeriodSeconds: 30
     test: false
     triggers:
     - type: ConfigChange
@@ -890,7 +875,7 @@ objects:
         from:
           kind: ImageStreamTag
           name: ${APPLICATION_NAME}-nuxeo:latest
-    
+
 - apiVersion: v1
   kind: Service
   metadata:
@@ -915,13 +900,13 @@ objects:
   metadata:
     labels:
       app: ${APPLICATION_NAME}-uat
-    name: ${APPLICATION_NAME}-uat-nuxeo-route  
+    name: ${APPLICATION_NAME}-uat-nuxeo-route
   spec:
     # TODO: Add parameter
     host: ${APPLICATION_NAME}-uat.${DOMAIN_SUFFIX}
     tls:
       termination: edge
-      insecureEdgeTerminationPolicy: Redirect    
+      insecureEdgeTerminationPolicy: Redirect
     to:
       kind: Service
       name: ${APPLICATION_NAME}-uat-nuxeo
@@ -938,13 +923,13 @@ objects:
 
 - apiVersion: v1
   kind: ImageStream
-  metadata:          
+  metadata:
     name: ${APPLICATION_NAME}-base-image
     labels:
       app: ${APPLICATION_NAME}
   spec: {}
   status:
-    dockerImageRepository: ""    
+    dockerImageRepository: ""
 
 
 - apiVersion: v1
@@ -973,27 +958,26 @@ objects:
               apt-get remove -y imagemagick && \
               apt-get install -y --no-install-recommends librsvg2-bin && \
               apt-get install -y imagemagick && \
-              apt-get install -y --no-install-recommends vim libnss-wrapper && \
-              wget http://apt.nuxeo.org/pool/releases/ffmpeg-nuxeo_2.8.5-1_amd64.deb && \
-              dpkg -i ffmpeg-nuxeo_2.8.5-1_amd64.deb && \
-              rm -f ffmpeg-nuxeo_2.8.5-1_amd64.deb    
+              apt-get install -y --no-install-recommends vim
           USER 1000
       type: Dockerfile
     strategy:
       dockerStrategy: {}
       type: Docker
+    triggers:
+    - type: ConfigChange
 
 
 
 - apiVersion: v1
   kind: ImageStream
-  metadata:          
+  metadata:
     name: ${APPLICATION_NAME}-app-build
     labels:
       app: ${APPLICATION_NAME}
   spec: {}
   status:
-    dockerImageRepository: ""    
+    dockerImageRepository: ""
 
 
 - apiVersion: v1
@@ -1020,13 +1004,13 @@ objects:
         from:
           kind: DockerImage
           name: 'nuxeo/s2i:${NUXEO_VERSION}'
-        incremental: true      
+        incremental: false
     output:
       to:
         kind: ImageStreamTag
         name: ${APPLICATION_NAME}-app-build:latest
-  successfulBuildsHistoryLimit: 2 
-  failedBuildsHistoryLimit: 2 
+  successfulBuildsHistoryLimit: 2
+  failedBuildsHistoryLimit: 2
 
 - apiVersion: v1
   kind: BuildConfig
@@ -1042,8 +1026,9 @@ objects:
         USER root
         COPY build /build
         RUN chmod -R 777 /build
-        USER 1000
         COPY ./connect.properties /opt/nuxeo/connect/connect.properties
+        RUN chmod 777 /opt/nuxeo/connect/connect.properties
+        USER 1000
         RUN /build/install.sh
         # Clean credential after using it
         USER root
@@ -1075,8 +1060,8 @@ objects:
       to:
         kind: ImageStreamTag
         name: '${APPLICATION_NAME}-nuxeo:latest'
-    successfulBuildsHistoryLimit: 2 
-    failedBuildsHistoryLimit: 2 
+    successfulBuildsHistoryLimit: 2
+    failedBuildsHistoryLimit: 2
 
 
 
@@ -1115,7 +1100,7 @@ objects:
                     }
                 }
              }
-             
+
             node {
 
                 stage("validate") {
@@ -1129,27 +1114,27 @@ objects:
                   }
                 }
             }
-             
+
           } catch (err) {
              echo "in catch block"
              echo "Caught: ${err}"
              currentBuild.result = 'FAILURE'
              throw err
-          }          
+          }
       type: JenkinsPipeline
     triggers:
     - github:
         secret: ${GITHUB_WEBHOOK_SECRET}
       type: GitHub
-    successfulBuildsHistoryLimit: 10 
+    successfulBuildsHistoryLimit: 10
     failedBuildsHistoryLimit: 5
 
 - apiVersion: v1
   kind: BuildConfig
   metadata:
     labels:
-      name: ${APPLICATION-NAME}-reset-dev
-    name: ${APPLICATION-NAME}-reset-dev
+      name: ${APPLICATION_NAME}-reset-dev
+    name: ${APPLICATION_NAME}-reset-dev
   spec:
     strategy:
       jenkinsPipelineStrategy:
@@ -1167,27 +1152,27 @@ objects:
               node {
                 project = env.PROJECT_NAME
                 stage("stop nuxeo pod") {
-                  sh "oc scale dc/${APPLICATION-NAME}-dev-nuxeo --replicas=0"
+                  sh "oc scale dc/${APPLICATION_NAME}-dev-nuxeo --replicas=0"
                 }
                 stage('drop db') {
                   sh "oc get pod -l component=mongo --template='{{range .items}}{{.metadata.name}}{{end}}' > podname"
                   podMongo = readFile('podname').trim()
-                  sh '''oc exec ''' + podMongo + ''' -- bash -c 'mongo ${APPLICATION-NAME}-dev --eval "printjson(db.dropDatabase())"'   '''
+                  sh '''oc exec ''' + podMongo + ''' -- bash -c 'mongo ${APPLICATION_NAME}-dev --eval "printjson(db.dropDatabase())"'   '''
                 }
                 stage('drop es indexes') {
                   sh "oc get pod -l component=elasticsearch --template='{{range .items}}{{.metadata.name}}{{end}}' > podname"
                   podElastic = readFile('podname').trim()
-                  sh '''oc exec ''' + podElastic + ''' -- bash -c "curl -XDELETE http://localhost:9200/${APPLICATION-NAME}-dev-uidgen"'''
-                  sh '''oc exec ''' + podElastic + ''' -- bash -c "curl -XDELETE http://localhost:9200/${APPLICATION-NAME}-dev-audit"'''
-                  sh '''oc exec ''' + podElastic + ''' -- bash -c "curl -XDELETE http://localhost:9200/${APPLICATION-NAME}-dev"'''
+                  sh '''oc exec ''' + podElastic + ''' -- bash -c "curl -XDELETE http://localhost:9200/${APPLICATION_NAME}-dev-uidgen"'''
+                  sh '''oc exec ''' + podElastic + ''' -- bash -c "curl -XDELETE http://localhost:9200/${APPLICATION_NAME}-dev-audit"'''
+                  sh '''oc exec ''' + podElastic + ''' -- bash -c "curl -XDELETE http://localhost:9200/${APPLICATION_NAME}-dev"'''
                 }
                 stage("restart nuxeo pod") {
-                  sh "oc scale dc/${APPLICATION-NAME}-dev-nuxeo --replicas=1"
+                  sh "oc scale dc/${APPLICATION_NAME}-dev-nuxeo --replicas=1"
                 }
                 stage("wait for pod") {
                     isAwait = true
                     while (isAwait) {
-                      sh "oc get dc/${APPLICATION-NAME}-dev-nuxeo --template='{{.status.availableReplicas}}'  > status"
+                      sh "oc get dc/${APPLICATION_NAME}-dev-nuxeo --template='{{.status.availableReplicas}}'  > status"
                       status = readFile('status').trim()
                       if (status.toString().equals("1")) {
                           isAwait = false
@@ -1209,8 +1194,8 @@ objects:
   kind: BuildConfig
   metadata:
     labels:
-      name: ${APPLICATION-NAME}-reset-uat
-    name: ${APPLICATION-NAME}-reset-uat
+      name: ${APPLICATION_NAME}-reset-uat
+    name: ${APPLICATION_NAME}-reset-uat
   spec:
     strategy:
       jenkinsPipelineStrategy:
@@ -1228,27 +1213,27 @@ objects:
               node {
                 project = env.PROJECT_NAME
                 stage("stop nuxeo pod") {
-                  sh "oc scale dc/${APPLICATION-NAME}-uat-nuxeo --replicas=0"
+                  sh "oc scale dc/${APPLICATION_NAME}-uat-nuxeo --replicas=0"
                 }
                 stage('drop db') {
                   sh "oc get pod -l component=mongo --template='{{range .items}}{{.metadata.name}}{{end}}' > podname"
                   podMongo = readFile('podname').trim()
-                  sh '''oc exec ''' + podMongo + ''' -- bash -c 'mongo ${APPLICATION-NAME}-uat --eval "printjson(db.dropDatabase())"'   '''
+                  sh '''oc exec ''' + podMongo + ''' -- bash -c 'mongo ${APPLICATION_NAME}-uat --eval "printjson(db.dropDatabase())"'   '''
                 }
                 stage('drop es indexes') {
                   sh "oc get pod -l component=elasticsearch --template='{{range .items}}{{.metadata.name}}{{end}}' > podname"
                   podElastic = readFile('podname').trim()
-                  sh '''oc exec ''' + podElastic + ''' -- bash -c "curl -XDELETE http://localhost:9200/${APPLICATION-NAME}-uat-uidgen"'''
-                  sh '''oc exec ''' + podElastic + ''' -- bash -c "curl -XDELETE http://localhost:9200/${APPLICATION-NAME}-uat-audit"'''
-                  sh '''oc exec ''' + podElastic + ''' -- bash -c "curl -XDELETE http://localhost:9200/${APPLICATION-NAME}-uat"'''
+                  sh '''oc exec ''' + podElastic + ''' -- bash -c "curl -XDELETE http://localhost:9200/${APPLICATION_NAME}-uat-uidgen"'''
+                  sh '''oc exec ''' + podElastic + ''' -- bash -c "curl -XDELETE http://localhost:9200/${APPLICATION_NAME}-uat-audit"'''
+                  sh '''oc exec ''' + podElastic + ''' -- bash -c "curl -XDELETE http://localhost:9200/${APPLICATION_NAME}-uat"'''
                 }
                 stage("restart nuxeo pod") {
-                  sh "oc scale dc/${APPLICATION-NAME}-uat-nuxeo --replicas=1"
+                  sh "oc scale dc/${APPLICATION_NAME}-uat-nuxeo --replicas=1"
                 }
                 stage("wait for pod") {
                     isAwait = true
                     while (isAwait) {
-                      sh "oc get dc/${APPLICATION-NAME}-uat-nuxeo --template='{{.status.availableReplicas}}'  > status"
+                      sh "oc get dc/${APPLICATION_NAME}-uat-nuxeo --template='{{.status.availableReplicas}}'  > status"
                       status = readFile('status').trim()
                       if (status.toString().equals("1")) {
                           isAwait = false
