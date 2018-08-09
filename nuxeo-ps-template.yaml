@@ -602,7 +602,7 @@ objects:
           - name: NUXEO_PACKAGES
             value: nuxeo-web-ui
           - name: NUXEO_URL
-            value: htts://${APPLICATION_NAME}-dev.${DOMAIN_SUFFIX}
+            value: https://${APPLICATION_NAME}-dev.${DOMAIN_SUFFIX}
           - name: NUXEO_ES_HOSTS
             value: ${APPLICATION_NAME}-elasticsearch:9200
           - name: NUXEO_ES_CLUSTERNAME
@@ -818,7 +818,7 @@ objects:
           - name: NUXEO_PACKAGES
             value: nuxeo-web-ui
           - name: NUXEO_URL
-            value: htts://${APPLICATION_NAME}-dev.${DOMAIN_SUFFIX}
+            value: https://${APPLICATION_NAME}-uat.${DOMAIN_SUFFIX}
           - name: NUXEO_ES_HOSTS
             value: ${APPLICATION_NAME}-elasticsearch:9200
           - name: NUXEO_ES_CLUSTERNAME
