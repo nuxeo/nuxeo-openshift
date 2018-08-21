@@ -73,14 +73,10 @@ parameters:
     name: NUXEO_RELEASE_GIT_EMAIL
     value: openshift_jenkins@test.com
     required: false
-  - description: A Nexus admin username used to deploy released artifacts to a Nexus repository.
-    name: NEXUS_USERNAME
-    value: admin
-    required: false
   - description: The password of the Nexus admin user used to deploy released artifacts to a Nexus repository.
     name: NEXUS_PASSWORD
     value: admin123
-    required: false
+    required: true
   - description: Size of persistent storage for Nexus.
     name: VOLUME_NEXUS_CAPACITY
     value: 2Gi
@@ -539,8 +535,15 @@ objects:
     annotations:
       template.openshift.io/base64-expose-credentials: '{.data}'
   stringData:
-    username: ${NEXUS_USERNAME}
+    username: admin
     password: ${NEXUS_PASSWORD}
+
+- apiVersion: v1
+  kind: ConfigMap
+  metadata:
+    name: ${APPLICATION_NAME}-nexus-service
+  data:
+    url: http://nexus-${APPLICATION_NAME}.${DOMAIN_SUFFIX}/nexus/service/local
 
 - apiVersion: v1
   kind: PersistentVolumeClaim
@@ -609,7 +612,7 @@ objects:
             readinessProbe:
               failureThreshold: 3
               httpGet:
-                path: /nexus/content/groups/public
+                path: /nexus
                 port: 8081
                 scheme: HTTP
               initialDelaySeconds: 30
@@ -640,8 +643,65 @@ objects:
             - nexus
           from:
             kind: ImageStreamTag
-            name: 'nexus:latest'
+            name: nexus:latest
         type: ImageChange
+
+- apiVersion: build.openshift.io/v1
+  kind: BuildConfig
+  metadata:
+    labels:
+      component: build
+    name: custom-nexus-build
+  spec:
+    failedBuildsHistoryLimit: 5
+    nodeSelector: null
+    output: {}
+    postCommit: {}
+    resources: {}
+    runPolicy: Serial
+    source:
+      dockerfile: |
+        FROM appropriate/curl
+
+        # Wait for Nexus to be ready
+        RUN /bin/sh -c 'while [[ \
+            "$(curl -u admin:'${DEFAULT_PASSWORD}' -o /dev/null -s -w "%{http_code}\n" '${NEXUS_SERVICE_URL}'/users)" != "200" \
+            && "$(curl -u admin:'${NEXUS_PASSWORD}' -o /dev/null -s -w "%{http_code}\n" '${NEXUS_SERVICE_URL}'/users)" != "200" ]]; \
+            do sleep 3; done; echo "Nexus is now ready."'
+
+        # Delete deployment user
+        RUN curl -u admin:${DEFAULT_PASSWORD} -X DELETE \
+            ${NEXUS_SERVICE_URL}/users/deployment
+
+        # Disable anonymous user
+        RUN curl -u admin:${DEFAULT_PASSWORD} -X PUT -H "Content-Type: application/json" \
+            -d '{"data":{"userId":"anonymous","firstName":"Nexus","lastName":"Anonymous User","email":"changeme2@yourcompany.com","status":"disabled","roles":["repository-any-read","anonymous"]}}' \
+            ${NEXUS_SERVICE_URL}/users/anonymous
+
+        # Change admin password
+        RUN curl -u admin:${DEFAULT_PASSWORD} -X POST -H "Content-Type: application/json" \
+            -d '{"data": {"userId": "admin", "oldPassword": "'${DEFAULT_PASSWORD}'", "newPassword": "'${{NEXUS_PASSWORD}}'"}}' \
+            ${NEXUS_SERVICE_URL}/users_changepw
+      type: Dockerfile
+    strategy:
+      dockerStrategy:
+        env:
+          - name: NEXUS_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                key: password
+                name: ${APPLICATION_NAME}-nexus-credentials
+          - name: NEXUS_SERVICE_URL
+            valueFrom:
+              configMapKeyRef:
+                key: url
+                name: ${APPLICATION_NAME}-nexus-service
+          - name: DEFAULT_PASSWORD
+            value: admin123
+      type: Docker
+    successfulBuildsHistoryLimit: 5
+    triggers:
+      - type: ConfigChange
 
 
 ############################################################################################################
