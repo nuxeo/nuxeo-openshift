@@ -10,7 +10,8 @@ message: |-
     * a CI/CD pipeline build
     * a Release pipeline build
 
-  Please add a Github webhook to https://openshift.dev.nuxeo.io/oapi/v1/namespaces/<<NAMESPACE>>/buildconfigs/${APPLICATION_NAME}-pipeline/webhooks/${GITHUB_WEBHOOK_SECRET}/github
+  Please add a Github webhook to https://openshift.<<dev|prod>>.nuxeo.io/oapi/v1/namespaces/<<NAMESPACE>>/buildconfigs/${APPLICATION_NAME}-pipeline/webhooks/${GITHUB_WEBHOOK_SECRET}/github
+  For more details, please read the following documentation: https://nuxeowiki.atlassian.net/wiki/spaces/USCC/pages/233406490 and https://nuxeowiki.atlassian.net/wiki/spaces/USCC/pages/233603134
 metadata:
   name: nuxeo-full-ps-pipeline
   annotations:
