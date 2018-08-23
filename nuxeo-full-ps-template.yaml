@@ -468,8 +468,6 @@ objects:
 - apiVersion: v1
   kind: Service
   metadata:
-    annotations:
-      openshift.io/generated-by: OpenShiftNewApp
     labels:
       app: nexus
     name: nexus
@@ -507,8 +505,6 @@ objects:
 - apiVersion: image.openshift.io/v1
   kind: ImageStream
   metadata:
-    annotations:
-      openshift.io/generated-by: OpenShiftNewApp
     labels:
       app: nexus
     name: nexus
@@ -564,8 +560,6 @@ objects:
 - apiVersion: apps.openshift.io/v1
   kind: DeploymentConfig
   metadata:
-    annotations:
-      openshift.io/generated-by: OpenShiftNewApp
     labels:
       app: nexus
     name: nexus
@@ -583,8 +577,6 @@ objects:
       type: Recreate
     template:
       metadata:
-        annotations:
-          openshift.io/generated-by: OpenShiftNewApp
         labels:
           app: nexus
           deploymentconfig: nexus
@@ -592,16 +584,6 @@ objects:
         containers:
           - image: nexus:latest
             imagePullPolicy: Always
-            livenessProbe:
-              exec:
-                command:
-                  - echo
-                  - ok
-              failureThreshold: 3
-              initialDelaySeconds: 30
-              periodSeconds: 10
-              successThreshold: 1
-              timeoutSeconds: 1
             name: nexus
             ports:
               - containerPort: 8081
@@ -622,11 +604,6 @@ objects:
             volumeMounts:
               - mountPath: /sonatype-work
                 name: nexus-volume-1
-        dnsPolicy: ClusterFirst
-        restartPolicy: Always
-        schedulerName: default-scheduler
-        securityContext: {}
-        terminationGracePeriodSeconds: 30
         volumes:
           - name: nexus-volume-1
             persistentVolumeClaim:
@@ -758,11 +735,9 @@ objects:
     resources: {}
     runPolicy: Serial
     source:
-      dockerfile: >-
+      dockerfile: |-
         FROM docker.io/openshift/jenkins-agent-maven-35-centos7:v3.11
-
         USER root
-
         RUN yum -y install
         http://opensource.wandisco.com/centos/7/git/x86_64/wandisco-git-release-7-2.noarch.rpm
         && \
@@ -818,7 +793,7 @@ objects:
               - name: JNLP_SERVICE_NAME
                 value: jenkins-jnlp
               - name: INSTALL_PLUGINS
-                value: >-
+                value: |-
                   maven-plugin, pipeline-maven, file-operations,
                   apache-httpcomponents-client-4-api, junit-attachments, tasks
               - name: NUXEO_RELEASE_GIT_USERNAME
@@ -890,7 +865,7 @@ objects:
           - configMap:
               defaultMode: 420
               items:
-                - key: MAVEN_SETTINGS
+                - key: settings
                   path: settings.xml
               name: ${APPLICATION_NAME}-maven-settings
             name: jenkins-configuration
@@ -980,12 +955,17 @@ objects:
 
 - apiVersion: v1
   data:
-    MAVEN_SETTINGS: |-
+    settings: |-
       <?xml version='1.0' encoding='UTF-8'?>
       <settings>
         <servers>
           <server>
             <id>nuxeo-studio</id>
+            <username>${env.NUXEO_CONNECT_USERNAME}</username>
+            <password>${env.NUXEO_CONNECT_PASSWORD}</password>
+          </server>
+          <server>
+            <id>hotfix-releases</id>
             <username>${env.NUXEO_CONNECT_USERNAME}</username>
             <password>${env.NUXEO_CONNECT_PASSWORD}</password>
           </server>
@@ -1028,20 +1008,6 @@ objects:
     init.sh: |
       #!/bin/sh
 
-      ## Need to use nss_wrapper in order to make LibreOffice conversion works
-      ## cf https://docs.openshift.com/enterprise/3.2/creating_images/guidelines.html
-      export USER_ID=$(id -u)
-      export GROUP_ID=$(id -g)
-
-      cat > /tmp/passwd <<EOT
-      root:x:0:0:root:/root:/bin/bash
-      nuxeo:x:${USER_ID}:${GROUP_ID}:Nuxeo server:/tmp:/bin/bash
-      EOT
-
-      export LD_PRELOAD=/usr/lib/libnss_wrapper.so
-      export NSS_WRAPPER_PASSWD=/tmp/passwd
-      export NSS_WRAPPER_GROUP=/etc/group
-
       if [ ! -f $NUXEO_DATA/instance.clid -a -f /opt/nuxeo/connect/connect.properties ]; then
         . /opt/nuxeo/connect/connect.properties
         if [ -n "$NUXEO_CONNECT_USERNAME" -a -n "$NUXEO_CONNECT_PASSWORD" -a -n "$NUXEO_STUDIO_PROJECT" ]; then
@@ -1053,8 +1019,6 @@ objects:
 - apiVersion: v1
   kind: PersistentVolumeClaim
   metadata:
-    annotations:
-      volume.beta.kubernetes.io/storage-class: shared
     name: ${APPLICATION_NAME}-dev-binaries
     labels:
       app: ${APPLICATION_NAME}-dev
@@ -1066,6 +1030,7 @@ objects:
     resources:
       requests:
         storage: ${VOLUME_BINARIES_CAPACITY}
+    storageClass: shared
 
 
 - apiVersion: v1
@@ -1136,7 +1101,7 @@ objects:
               elasticsearch.client=RestClient
               elasticsearch.httpReadOnly.baseUrl=http://${APPLICATION_NAME}-elasticsearch:9200
               elasticsearch.indexName=${APPLICATION_NAME}-dev
-              mail.transport.host=aws-smtp-relay.common.svc
+              mail.transport.host=aws-smtp-relay.common-infra.svc
               mail.from=noreply@nuxeo.io
 
           - name: NUXEO_PACKAGES
@@ -1267,8 +1232,6 @@ objects:
 - apiVersion: v1
   kind: PersistentVolumeClaim
   metadata:
-    annotations:
-      volume.beta.kubernetes.io/storage-class: shared
     name: ${APPLICATION_NAME}-uat-binaries
     labels:
       app: ${APPLICATION_NAME}-uat
@@ -1280,6 +1243,7 @@ objects:
     resources:
       requests:
         storage: ${VOLUME_BINARIES_CAPACITY}
+    storageClass: shared
 
 
 - apiVersion: v1
@@ -1350,7 +1314,7 @@ objects:
               elasticsearch.client=RestClient
               elasticsearch.httpReadOnly.baseUrl=http://${APPLICATION_NAME}-elasticsearch:9200
               elasticsearch.indexName=${APPLICATION_NAME}-uat
-              mail.transport.host=aws-smtp-relay.common.svc
+              mail.transport.host=aws-smtp-relay.common-infra.svc
               mail.from=noreply@nuxeo.io
 
           - name: NUXEO_PACKAGES
@@ -1466,8 +1430,6 @@ objects:
     labels:
       app: ${APPLICATION_NAME}
   spec: {}
-  status:
-    dockerImageRepository: ""
 
 
 - apiVersion: v1
@@ -1497,9 +1459,6 @@ objects:
               apt-get install -y --no-install-recommends librsvg2-bin && \
               apt-get install -y imagemagick && \
               apt-get install -y --no-install-recommends vim && \
-              wget http://apt.nuxeo.org/pool/releases/ffmpeg-nuxeo_2.8.5-1_amd64.deb && \
-              dpkg -i ffmpeg-nuxeo_2.8.5-1_amd64.deb && \
-              rm -f ffmpeg-nuxeo_2.8.5-1_amd64.deb && \
               echo Finished
           USER 1000
       type: Dockerfile
@@ -1525,42 +1484,28 @@ objects:
     source:
       binary:
         asFile: source
-      dockerfile: >-
+      dockerfile: |-
         # Start from a Nuxeo base image
-
         FROM ${APPLICATION_NAME}-base-image:latest
 
-        # Set up the /build folder with the install script, the marketplace
-        package and the studio credentials
-
+        # Set up the /build folder with the install script, the marketplace package and the studio credentials
         USER root
-
         RUN mkdir -p /build/marketplace
-
         COPY install.sh /build
-
         COPY marketplace.zip /build/marketplace
-
         RUN chmod -R 777 /build
-
         COPY ./connect.properties /opt/nuxeo/connect/connect.properties
-
         RUN chmod 777 /opt/nuxeo/connect/connect.properties
 
         # Run the image build script
-
         USER 1000
-
         RUN /build/install.sh
 
         # Clean the server
-
         USER root
-
         RUN rm -f /opt/nuxeo/connect/connect.properties && \
             chgrp -fR 0 /opt/nuxeo/server/ && \
             chmod -fR g+rwX /opt/nuxeo/server/
-
         USER 1000
       secrets:
         - secret:
@@ -1954,7 +1899,7 @@ objects:
                           def files = ["release.py", "requirements.txt", "IndentedHelpFormatterWithNL.py", "nxutils.py", "terminalsize.py"]
                           files.each { file -> operations.add(
                               fileDownloadOperation(
-                                  url: "https://raw.githubusercontent.com/nuxeo/nuxeo/${NUXEO_VERSION}/scripts/${file}",
+                                  url: "https://raw.githubusercontent.com/nuxeo/nuxeo/release-${NUXEO_VERSION}/scripts/${file}",
                                   userName: "",
                                   password: "",
                                   targetLocation: "",
