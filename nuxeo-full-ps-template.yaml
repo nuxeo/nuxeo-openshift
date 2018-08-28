@@ -538,9 +538,32 @@ objects:
 - apiVersion: v1
   kind: ConfigMap
   metadata:
-    name: ${APPLICATION_NAME}-nexus-service
+    name: ${APPLICATION_NAME}-nexus-settings
   data:
-    url: http://nexus-${APPLICATION_NAME}.${DOMAIN_SUFFIX}/nexus/service/local
+    security: |-
+      <?xml version="1.0" encoding="UTF-8"?>
+      <security>
+        <version>2.0.5</version>
+        <users>
+          <user>
+            <id>admin</id>
+            <firstName>Administrator</firstName>
+            <lastName>User</lastName>
+            <password>%NEXUS_PASSWORD%</password>
+            <status>active</status>
+            <email>changeme@test.com</email>
+          </user>
+        </users>
+        <userRoleMappings>
+          <userRoleMapping>
+            <userId>admin</userId>
+            <source>default</source>
+            <roles>
+              <role>nx-admin</role>
+            </roles>
+          </userRoleMapping>
+        </userRoleMappings>
+      </security>
 
 - apiVersion: v1
   kind: PersistentVolumeClaim
@@ -603,11 +626,42 @@ objects:
             terminationMessagePolicy: File
             volumeMounts:
               - mountPath: /sonatype-work
-                name: nexus-volume-1
+                name: nexus-data
+        initContainers:
+          - image: busybox
+            imagePullPolicy: IfNotPresent
+            name: nexus-work
+            command:
+              - sh
+              - '-c'
+              - |-
+                mkdir -p /sonatype-work/conf/ && sha1pwd=$(echo -n $NEXUS_PASSWORD
+                | sha1sum | cut -c1-40) && sed -e "s/%NEXUS_PASSWORD%/$sha1pwd/g"
+                /work/security.xml > /sonatype-work/conf/security.xml
+            env:
+              - name: NEXUS_PASSWORD
+                valueFrom:
+                  secretKeyRef:
+                    key: password
+                    name: ${APPLICATION_NAME}-nexus-credentials
+            resources: {}
+            terminationMessagePath: /dev/termination-log
+            terminationMessagePolicy: File
+            volumeMounts:
+              - mountPath: /sonatype-work
+                name: nexus-data
+              - mountPath: /work
+                name: nexus-configuration
         volumes:
-          - name: nexus-volume-1
+          - name: nexus-data
             persistentVolumeClaim:
               claimName: nexus-pv
+          - name: nexus-configuration
+            configMap:
+              items:
+                - key: security
+                  path: security.xml
+              name: ${APPLICATION_NAME}-nexus-settings
     test: false
     triggers:
       - type: ConfigChange
@@ -619,63 +673,6 @@ objects:
             kind: ImageStreamTag
             name: nexus:latest
         type: ImageChange
-
-- apiVersion: build.openshift.io/v1
-  kind: BuildConfig
-  metadata:
-    labels:
-      component: build
-    name: custom-nexus-build
-  spec:
-    failedBuildsHistoryLimit: 5
-    nodeSelector: null
-    output: {}
-    postCommit: {}
-    resources: {}
-    runPolicy: Serial
-    source:
-      dockerfile: |
-        FROM appropriate/curl
-
-        # Wait for Nexus to be ready
-        RUN /bin/sh -c 'while [[ \
-            "$(curl -u admin:'${DEFAULT_PASSWORD}' -o /dev/null -s -w "%{http_code}\n" '${NEXUS_SERVICE_URL}'/users)" != "200" \
-            && "$(curl -u admin:'${NEXUS_PASSWORD}' -o /dev/null -s -w "%{http_code}\n" '${NEXUS_SERVICE_URL}'/users)" != "200" ]]; \
-            do sleep 3; done; echo "Nexus is now ready."'
-
-        # Delete deployment user
-        RUN curl -u admin:${DEFAULT_PASSWORD} -X DELETE \
-            ${NEXUS_SERVICE_URL}/users/deployment
-
-        # Disable anonymous user
-        RUN curl -u admin:${DEFAULT_PASSWORD} -X PUT -H "Content-Type: application/json" \
-            -d '{"data":{"userId":"anonymous","firstName":"Nexus","lastName":"Anonymous User","email":"changeme2@yourcompany.com","status":"disabled","roles":["repository-any-read","anonymous"]}}' \
-            ${NEXUS_SERVICE_URL}/users/anonymous
-
-        # Change admin password
-        RUN curl -u admin:${DEFAULT_PASSWORD} -X POST -H "Content-Type: application/json" \
-            -d '{"data": {"userId": "admin", "oldPassword": "'${DEFAULT_PASSWORD}'", "newPassword": "'${{NEXUS_PASSWORD}}'"}}' \
-            ${NEXUS_SERVICE_URL}/users_changepw
-      type: Dockerfile
-    strategy:
-      dockerStrategy:
-        env:
-          - name: NEXUS_PASSWORD
-            valueFrom:
-              secretKeyRef:
-                key: password
-                name: ${APPLICATION_NAME}-nexus-credentials
-          - name: NEXUS_SERVICE_URL
-            valueFrom:
-              configMapKeyRef:
-                key: url
-                name: ${APPLICATION_NAME}-nexus-service
-          - name: DEFAULT_PASSWORD
-            value: admin123
-      type: Docker
-    successfulBuildsHistoryLimit: 5
-    triggers:
-      - type: ConfigChange
 
 
 ############################################################################################################
