@@ -469,8 +469,8 @@ objects:
   kind: Service
   metadata:
     labels:
-      app: nexus
-    name: nexus
+      app: ${APPLICATION_NAME}-nexus
+    name: ${APPLICATION_NAME}-nexus
   spec:
     ports:
       - name: 8081-tcp
@@ -478,8 +478,8 @@ objects:
         protocol: TCP
         targetPort: 8081
     selector:
-      app: nexus
-      deploymentconfig: nexus
+      app: ${APPLICATION_NAME}-nexus
+      deploymentconfig: ${APPLICATION_NAME}-nexus
     sessionAffinity: None
     type: ClusterIP
 
@@ -489,8 +489,8 @@ objects:
     annotations:
       openshift.io/host.generated: 'true'
     labels:
-      app: nexus
-    name: nexus
+      app: ${APPLICATION_NAME}-nexus
+    name: ${APPLICATION_NAME}-nexus
   spec:
     host: nexus-${APPLICATION_NAME}.${DOMAIN_SUFFIX}
     path: /nexus
@@ -498,7 +498,7 @@ objects:
       targetPort: 8081-tcp
     to:
       kind: Service
-      name: nexus
+      name: ${APPLICATION_NAME}-nexus
       weight: 100
     wildcardPolicy: None
 
@@ -506,8 +506,8 @@ objects:
   kind: ImageStream
   metadata:
     labels:
-      app: nexus
-    name: nexus
+      app: ${APPLICATION_NAME}-nexus
+    name: ${APPLICATION_NAME}-nexus
   spec:
     lookupPolicy:
       local: false
@@ -570,9 +570,9 @@ objects:
   metadata:
     annotations:
       volume.beta.kubernetes.io/storage-class: ${STORAGE_CLASS}
-    name: nexus-pv
+    name: ${APPLICATION_NAME}-nexus-pv
     labels:
-      app: ${APPLICATION_NAME}
+      app: ${APPLICATION_NAME}-nexus
   spec:
     accessModes:
     - ReadWriteOnce
@@ -584,14 +584,14 @@ objects:
   kind: DeploymentConfig
   metadata:
     labels:
-      app: nexus
-    name: nexus
+      app: ${APPLICATION_NAME}-nexus
+    name: ${APPLICATION_NAME}-nexus
   spec:
     replicas: 1
     revisionHistoryLimit: 10
     selector:
-      app: nexus
-      deploymentconfig: nexus
+      app: ${APPLICATION_NAME}-nexus
+      deploymentconfig: ${APPLICATION_NAME}-nexus
     strategy:
       activeDeadlineSeconds: 21600
       recreateParams:
@@ -601,13 +601,13 @@ objects:
     template:
       metadata:
         labels:
-          app: nexus
-          deploymentconfig: nexus
+          app: ${APPLICATION_NAME}-nexus
+          deploymentconfig: ${APPLICATION_NAME}-nexus
       spec:
         containers:
-          - image: nexus:latest
+          - image: ${APPLICATION_NAME}-nexus:latest
             imagePullPolicy: Always
-            name: nexus
+            name: ${APPLICATION_NAME}-nexus
             ports:
               - containerPort: 8081
                 protocol: TCP
@@ -630,7 +630,7 @@ objects:
         initContainers:
           - image: busybox
             imagePullPolicy: IfNotPresent
-            name: nexus-work
+            name: ${APPLICATION_NAME}-nexus-work
             command:
               - sh
               - '-c'
@@ -655,7 +655,7 @@ objects:
         volumes:
           - name: nexus-data
             persistentVolumeClaim:
-              claimName: nexus-pv
+              claimName: ${APPLICATION_NAME}-nexus-pv
           - name: nexus-configuration
             configMap:
               items:
@@ -668,10 +668,10 @@ objects:
       - imageChangeParams:
           automatic: true
           containerNames:
-            - nexus
+            - ${APPLICATION_NAME}-nexus
           from:
             kind: ImageStreamTag
-            name: nexus:latest
+            name: ${APPLICATION_NAME}-nexus:latest
         type: ImageChange
 
 
@@ -691,7 +691,7 @@ objects:
       jenkins: slave
       jenkins/maven: 'true'
       role: jenkins-slave
-    name: custom-jenkins-image
+    name: ${APPLICATION_NAME}-jenkins
   spec:
     lookupPolicy:
       local: false
@@ -720,14 +720,14 @@ objects:
   metadata:
     labels:
       component: build
-    name: custom-jenkins-build
+    name: ${APPLICATION_NAME}-jenkins-build
   spec:
     failedBuildsHistoryLimit: 5
     nodeSelector: null
     output:
       to:
         kind: ImageStreamTag
-        name: 'custom-jenkins-image:latest'
+        name: '${APPLICATION_NAME}-jenkins:latest'
     postCommit: {}
     resources: {}
     runPolicy: Serial
@@ -813,7 +813,7 @@ objects:
                   secretKeyRef:
                     key: instance.clid
                     name: ${APPLICATION_NAME}-instance-clid
-            image: custom-jenkins-image:latest
+            image: ${APPLICATION_NAME}-jenkins:latest
             imagePullPolicy: IfNotPresent
             livenessProbe:
               failureThreshold: 30
@@ -1886,7 +1886,7 @@ objects:
                           }
 
                           // Get external releases repository URL
-                          sh "oc get route/nexus -o json > nexus-route.json"
+                          sh "oc get route/${APPLICATION_NAME}-nexus -o json > nexus-route.json"
                           def nexusRoute = readJSON(file: "nexus-route.json")
                           externalReleasesUrl = "http://" + nexusRoute.spec.host + nexusRoute.spec.path + "/content/repositories/releases"
                       }
