@@ -62,7 +62,7 @@ parameters:
   - description: The version of the studio project passed the build of the image.
     name: NUXEO_STUDIO_VERSION
     required: false
-    value: 0.0.0-SNAPSHOT
+    value: master-SNAPSHOT
   - description: The instance.clid of a valid registered instance (needed only if the project runs ftests).
     name: INSTANCE_CLID
     required: false
@@ -74,10 +74,14 @@ parameters:
     name: NUXEO_RELEASE_GIT_EMAIL
     value: openshift_jenkins@test.com
     required: false
-  - description: The password of the Nexus admin user used to deploy released artifacts to a Nexus repository.
-    name: NEXUS_PASSWORD
+  - description: The password of the Nexus admin user who can access and deploy to a Nexus repository.
+    name: NEXUS_ADMIN_PASSWORD
     value: admin123
     required: true
+  - description: The email of the Nexus admin user.
+    name: NEXUS_ADMIN_EMAIL
+    value: openshift_nexus@test.com
+    required: false
   - description: Size of persistent storage for Nexus.
     name: VOLUME_NEXUS_CAPACITY
     value: 2Gi
@@ -533,7 +537,7 @@ objects:
       template.openshift.io/base64-expose-credentials: '{.data}'
   stringData:
     username: admin
-    password: ${NEXUS_PASSWORD}
+    password: ${NEXUS_ADMIN_PASSWORD}
 
 - apiVersion: v1
   kind: ConfigMap
@@ -549,9 +553,9 @@ objects:
             <id>admin</id>
             <firstName>Administrator</firstName>
             <lastName>User</lastName>
-            <password>%NEXUS_PASSWORD%</password>
+            <password>%NEXUS_ADMIN_PASSWORD%</password>
             <status>active</status>
-            <email>changeme@test.com</email>
+            <email>${NEXUS_ADMIN_EMAIL}</email>
           </user>
         </users>
         <userRoleMappings>
@@ -635,11 +639,12 @@ objects:
               - sh
               - '-c'
               - |-
-                mkdir -p /sonatype-work/conf/ && sha1pwd=$(echo -n $NEXUS_PASSWORD
-                | sha1sum | cut -c1-40) && sed -e "s/%NEXUS_PASSWORD%/$sha1pwd/g"
+                mkdir -p /sonatype-work/conf/ && \
+                sha1pwd=$(echo -n $NEXUS_ADMIN_PASSWORD | sha1sum | cut -c1-40) && \
+                sed -e "s/%NEXUS_ADMIN_PASSWORD%/$sha1pwd/g" \
                 /work/security.xml > /sonatype-work/conf/security.xml
             env:
-              - name: NEXUS_PASSWORD
+              - name: NEXUS_ADMIN_PASSWORD
                 valueFrom:
                   secretKeyRef:
                     key: password
@@ -696,25 +701,6 @@ objects:
     lookupPolicy:
       local: false
 
-- apiVersion: route.openshift.io/v1
-  kind: Route
-  metadata:
-    annotations:
-      openshift.io/host.generated: 'true'
-    labels:
-      app: jenkins-ephemeral
-      template: jenkins-ephemeral-template
-    name: jenkins
-  spec:
-    host: jenkins-${APPLICATION_NAME}.${DOMAIN_SUFFIX}
-    port:
-      targetPort: web
-    to:
-      kind: Service
-      name: jenkins
-      weight: 100
-    wildcardPolicy: None
-
 - apiVersion: build.openshift.io/v1
   kind: BuildConfig
   metadata:
@@ -735,9 +721,7 @@ objects:
       dockerfile: |-
         FROM docker.io/openshift/jenkins-agent-maven-35-centos7:v3.11
         USER root
-        RUN yum -y install
-        http://opensource.wandisco.com/centos/7/git/x86_64/wandisco-git-release-7-2.noarch.rpm
-        && \
+        RUN yum -y install http://opensource.wandisco.com/centos/7/git/x86_64/wandisco-git-release-7-2.noarch.rpm && \
             yum -y install git
         USER 1000
       secrets:
@@ -857,15 +841,15 @@ objects:
         serviceAccountName: jenkins
         terminationGracePeriodSeconds: 30
         volumes:
-          - emptyDir: {}
-            name: jenkins-data
-          - configMap:
+          - name: jenkins-data
+            emptyDir: {}
+          - name: jenkins-configuration
+            configMap:
               defaultMode: 420
               items:
                 - key: settings
                   path: settings.xml
               name: ${APPLICATION_NAME}-maven-settings
-            name: jenkins-configuration
     test: false
     triggers:
       - imageChangeParams:
@@ -906,7 +890,7 @@ objects:
     labels:
       app: ${APPLICATION_NAME}
       credential.sync.jenkins.openshift.io: 'true'
-    name: ${APPLICATION_NAME}-connect-username-password
+    name: ${APPLICATION_NAME}-connect-credentials
     annotations:
       template.openshift.io/base64-expose-credentials: '{.data}'
   stringData:
@@ -968,8 +952,8 @@ objects:
           </server>
           <server>
             <id>external-releases</id>
-            <username>${env.NEXUS_USERNAME}</username>
-            <password>${env.NEXUS_PASSWORD}</password>
+            <username>${env.NEXUS_ADMIN_USERNAME}</username>
+            <password>${env.NEXUS_ADMIN_PASSWORD}</password>
           </server>
         </servers>
         <profiles>
@@ -1027,7 +1011,7 @@ objects:
     resources:
       requests:
         storage: ${VOLUME_BINARIES_CAPACITY}
-    storageClass: shared
+    storageClassName: shared
 
 
 - apiVersion: v1
@@ -1240,7 +1224,7 @@ objects:
     resources:
       requests:
         storage: ${VOLUME_BINARIES_CAPACITY}
-    storageClass: shared
+    storageClassName: shared
 
 
 - apiVersion: v1
@@ -1567,7 +1551,7 @@ objects:
                           withMaven() {
                               withCredentials([
                                   usernamePassword(
-                                      credentialsId: "${project}-${APPLICATION_NAME}-connect-username-password",
+                                      credentialsId: "${project}-${APPLICATION_NAME}-connect-credentials",
                                       usernameVariable: "NUXEO_CONNECT_USERNAME",
                                       passwordVariable: "NUXEO_CONNECT_PASSWORD"
                                   )
@@ -1908,9 +1892,14 @@ objects:
                           // Launch release and deploy artifacts to Nexus
                           withCredentials([
                               usernamePassword(
+                                  credentialsId: "${project}-${APPLICATION_NAME}-connect-credentials",
+                                  usernameVariable: "NUXEO_CONNECT_USERNAME",
+                                  passwordVariable: "NUXEO_CONNECT_PASSWORD"
+                              ),
+                              usernamePassword(
                                   credentialsId: "${project}-${APPLICATION_NAME}-nexus-credentials",
-                                  usernameVariable: "NEXUS_USERNAME",
-                                  passwordVariable: "NEXUS_PASSWORD"
+                                  usernameVariable: "NEXUS_ADMIN_USERNAME",
+                                  passwordVariable: "NEXUS_ADMIN_PASSWORD"
                               )
                           ]) {
                               env.EXTERNAL_RELEASES_URL = externalReleasesUrl
