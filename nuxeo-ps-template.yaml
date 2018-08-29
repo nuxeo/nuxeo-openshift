@@ -596,7 +596,7 @@ objects:
               elasticsearch.client=RestClient
               elasticsearch.httpReadOnly.baseUrl=http://${APPLICATION_NAME}-elasticsearch:9200
               elasticsearch.indexName=${APPLICATION_NAME}-dev
-              mail.transport.host=aws-smtp-relay.common.svc
+              mail.transport.host=aws-smtp-relay.common-infra.svc
               mail.from=noreply@nuxeo.io
 
           - name: NUXEO_PACKAGES
@@ -812,7 +812,7 @@ objects:
               elasticsearch.client=RestClient
               elasticsearch.httpReadOnly.baseUrl=http://${APPLICATION_NAME}-elasticsearch:9200
               elasticsearch.indexName=${APPLICATION_NAME}-uat
-              mail.transport.host=aws-smtp-relay.common.svc
+              mail.transport.host=aws-smtp-relay.common-infra.svc
               mail.from=noreply@nuxeo.io
 
           - name: NUXEO_PACKAGES
