@@ -1,0 +1,109 @@
+version: 1.0
+name: nuxeo-dev-apb
+description: Nuxeo Dev environment with CI/CD
+bindable: False
+async: optional
+tags:
+  - nuxeo
+metadata:
+  displayName: Nuxeo Dev environment
+  longDescription:
+    A full and modular Nuxeo development environment that allows
+     a complete CI/CD workflow.
+  dependencies: []
+  documentationUrl: "https://github.com/nuxeo-sandbox/nuxeo-openshift/README.md"
+  imageUrl: "https://www.nuxeo.com/assets/imgs/logo340x60.png"
+plans:
+  - name: default
+    description: Development with Git Repository
+    free: True
+    metadata: {}
+    parameters:
+      - name: project_name
+        type: string
+        title: Project Name
+
+      - name: project_git_repo
+        type: string
+        title: Address of the Git Repository
+
+      - name: project_git_ref
+        type: string
+        default: "master"
+        title: Branch of the Git Repository
+
+      - name: project_git_ssh
+        type: string
+        title: SSH key for git repo access if needed
+        display_type: textearea
+
+      - name: nuxeo_connect_username
+        type: string
+        title: A Nuxeo Connect userId used to register the instance, pull studio project etc...
+
+      - name: nuxeo_connect_token
+        type: string
+        title: A token for the Connect account ( https://connect.nuxeo.com/nuxeo/site/connect/tokens )
+        display_type: password
+
+      - name: nuxeo_studio_project
+        type: string
+        title: The name of the studio project to register to
+
+      - name: domain_suffix
+        type: string
+        title: Domain suffix for routes
+        default: apps.prod.nuxeo.io
+
+      - name: backend_pv_storage_class
+        type: string
+        title: Storage class for backend persistence volumes
+        default: gp2
+
+      - name: binaries_pv_storage_class
+        type: string
+        title: Storage class for backend persistence volumes
+        default: shared
+
+  - name: studio-only
+    description: Development with Studio project only
+    free: True
+    metadata: {}
+    parameters:
+      - name: project_name
+        type: string
+        title: Project Name
+
+      - name: nuxeo_connect_username
+        type: string
+        title: A Nuxeo Connect userId used to register the instance, pull studio project etc...
+
+      - name: nuxeo_connect_token
+        type: string
+        title: A token for the Connect account ( https://connect.nuxeo.com/nuxeo/site/connect/tokens )
+        display_type: password
+
+      - name: nuxeo_studio_project
+        type: string
+        title: The name of the studio project to register to
+
+      - name: nuxeo_studio_version
+        type: string
+        title: The name of the studio project to register to
+
+      - name: domain_suffix
+        type: string
+        title: Domain suffix for routes
+        default: apps.prod.nuxeo.io
+
+      - name: backend_pv_storage_class
+        type: string
+        title: Storage class for backend persistence volumes
+        default: gp2
+
+      - name: binaries_pv_storage_class
+        type: string
+        title: Storage class for backend persistence volumes
+        default: shared
+
+
