@@ -1,7 +1,8 @@
+---
 version: 1.0
 name: nuxeo-dev-apb
 description: Nuxeo Dev environment with CI/CD
-bindable: False
+bindable: false
 async: optional
 tags:
   - nuxeo
@@ -16,7 +17,7 @@ metadata:
 plans:
   - name: default
     description: Development with Git Repository
-    free: True
+    free: true
     metadata: {}
     parameters:
       - name: project_name
@@ -39,11 +40,15 @@ plans:
 
       - name: nuxeo_connect_username
         type: string
-        title: A Nuxeo Connect userId used to register the instance, pull studio project etc...
+        title: |
+          A Nuxeo Connect userId used to register the instance, pull
+          studio project etc...
 
       - name: nuxeo_connect_token
         type: string
-        title: A token for the Connect account ( https://connect.nuxeo.com/nuxeo/site/connect/tokens )
+        title: |
+          A token for the Connect account
+          ( https://connect.nuxeo.com/nuxeo/site/connect/tokens )
         display_type: password
 
       - name: nuxeo_studio_project
@@ -67,7 +72,7 @@ plans:
 
   - name: studio-only
     description: Development with Studio project only
-    free: True
+    free: true
     metadata: {}
     parameters:
       - name: project_name
@@ -76,11 +81,15 @@ plans:
 
       - name: nuxeo_connect_username
         type: string
-        title: A Nuxeo Connect userId used to register the instance, pull studio project etc...
+        title: |
+          A Nuxeo Connect userId used to register the instance, pull
+          studio project etc...
 
       - name: nuxeo_connect_token
         type: string
-        title: A token for the Connect account ( https://connect.nuxeo.com/nuxeo/site/connect/tokens )
+        title: |
+          A token for the Connect account
+          ( https://connect.nuxeo.com/nuxeo/site/connect/tokens )
         display_type: password
 
       - name: nuxeo_studio_project
@@ -105,5 +114,3 @@ plans:
         type: string
         title: Storage class for backend persistence volumes
         default: shared
-
-
