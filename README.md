@@ -1,9 +1,10 @@
 # Nuxeo development with Openshift
 
+<img src="https://api.travis-ci.org/nuxeo-sandbox/nuxeo-openshift.svg?branch=dev-environment"/>
+
 This repos aims at providing a template for deploying a full featured development environment for Nuxeo. The idea is to start from a Git repository and provide everything needed for a full CI/CD environment.
 
-
-Here is a high level picture of the targetted PS template:
+Here is a high level picture of the Nuxeo development template:
 
 <img src="https://www.lucidchart.com/publicSegments/view/1d5f1b53-4e53-442c-a600-ef1378801b85/image.png"/>
 
