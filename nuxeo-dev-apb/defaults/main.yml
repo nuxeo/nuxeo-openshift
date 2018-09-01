@@ -15,8 +15,14 @@ project_name: nuxeo
 project_git_repo: https://github.com/dmetzler/nuxeo-dsl
 project_git_ref: master
 domain_suffix: apps.prod.nuxeo.io
+
+backend_repository_type: DBS
+backend_stream_type: Chronicle
+backend_pubsub_type: inmemory
+backend_binaries_type: fs
 backend_pv_storage_class: gp2
 binaries_pv_storage_class: shared
+
 
 nuxeo_studio_project: ""
 nuxeo_connect_username: ""

@@ -19,7 +19,12 @@ configmap_lookup: "{{
   )
 }}"
 
+
+deploy_mongo: "{{ True if backend_repository_type == 'DBS' else False }}"
+deploy_elasticsearch: True
+
 # Whether we are in a cluster or not.
 pod_name: "{{ lookup('env', 'POD_NAME') }}"
 pod_namespace: "{{ lookup('env', 'POD_NAMESPACE') }}"
 in_cluster: "{{ True if (pod_name and pod_namespace) else False }}"
+

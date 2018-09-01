@@ -12,6 +12,7 @@
       vars:
         apb_action: provision
         in_cluster: False
+        testing: True
 
     - name: Deprovision test
       include_role:
@@ -19,3 +20,4 @@
       vars:
         apb_action: deprovision
         in_cluster: False
+        testing: True

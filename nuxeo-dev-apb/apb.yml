@@ -23,26 +23,37 @@ plans:
       - name: project_name
         type: string
         title: Project Name
+        display_group: Project properties
 
       - name: project_git_repo
         type: string
         title: Address of the Git Repository
+        display_group: Project properties
 
       - name: project_git_ref
         type: string
         default: "master"
         title: Branch of the Git Repository
+        display_group: Project properties
 
       - name: project_git_ssh
         type: string
         title: SSH key for git repo access if needed
         display_type: textearea
+        display_group: Project properties
+
+      - name: domain_suffix
+        type: string
+        title: Domain suffix for routes
+        default: apps.prod.nuxeo.io
+        display_group: Project properties
 
       - name: nuxeo_connect_username
         type: string
         title: |
           A Nuxeo Connect userId used to register the instance, pull
           studio project etc...
+        display_group: Connect properties
 
       - name: nuxeo_connect_token
         type: string
@@ -50,25 +61,54 @@ plans:
           A token for the Connect account
           ( https://connect.nuxeo.com/nuxeo/site/connect/tokens )
         display_type: password
+        display_group: Connect properties
 
       - name: nuxeo_studio_project
         type: string
         title: The name of the studio project to register to
+        display_group: Connect properties
 
-      - name: domain_suffix
-        type: string
-        title: Domain suffix for routes
-        default: apps.prod.nuxeo.io
+      - name: backend_repository_type
+        default: 'DBS'
+        type: enum
+        enum: ['DBS', 'VCS_Postgres']
+        title: Repository type
+        display_group: Backend storages
+
+      - name: backend_stream_type
+        default: 'Chronicle'
+        type: enum
+        enum: ['Chronicle', 'Kafka']
+        title: Stream type
+        display_group: Backend storages
+
+      - name: backend_pubsub_type
+        default: inmemory
+        type: enum
+        enum: ['inmemory', 'stream', 'redis']
+        title: Stream type
+        display_group: Backend storages
+
+      - name: backend_binaries_type
+        default: fs
+        type: enum
+        enum: ['fs', 'minio', 's3']
+        title: Binaries storage type
+        display_group: Backend storages
+
+      # TODO: K/V store type
 
       - name: backend_pv_storage_class
         type: string
         title: Storage class for backend persistence volumes
         default: gp2
+        display_group: Backend storages
 
       - name: binaries_pv_storage_class
         type: string
-        title: Storage class for backend persistence volumes
+        title: Storage class for backend persistence volumes (if fs used)
         default: shared
+        display_group: Backend storages
 
   - name: studio-only
     description: Development with Studio project only
