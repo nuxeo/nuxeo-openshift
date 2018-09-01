@@ -1,0 +1,23 @@
+---
+
+# Defaults for values we could expect from a broker
+
+_apb_plan_id: default
+_apb_service_class_id: 0
+_apb_service_instance_id: 0
+
+apb_name: nuxeo-dev-apb
+app_image: docker.io/nuxeoapbcatalog/nuxeo-dev-apb
+namespace: "{{ lookup('env','NAMESPACE') | default('hello-world', true) }}"
+component: global
+
+project_name: nuxeo
+project_git_repo: https://github.com/dmetzler/nuxeo-dsl
+project_git_ref: master
+domain_suffix: apps.prod.nuxeo.io
+backend_pv_storage_class: gp2
+binaries_pv_storage_class: shared
+
+nuxeo_studio_project: ""
+nuxeo_connect_username: ""
+nuxeo_connect_token: ""

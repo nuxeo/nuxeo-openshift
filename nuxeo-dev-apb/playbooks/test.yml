@@ -1,0 +1,21 @@
+---
+- name: nuxeo-dev-apb provision
+  hosts: localhost
+  gather_facts: false
+  connection: local
+  roles:
+  - role: ansibleplaybookbundle.asb-modules
+  tasks:
+    - name: Provision test
+      include_role:
+        name: nuxeo-dev-apb
+      vars:
+        apb_action: provision
+        in_cluster: False
+
+    - name: Deprovision test
+      include_role:
+        name: nuxeo-dev-apb
+      vars:
+        apb_action: deprovision
+        in_cluster: False
