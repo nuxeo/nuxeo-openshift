@@ -39,7 +39,7 @@ plans:
       - name: project_git_ssh
         type: string
         title: SSH key for git repo access if needed
-        display_type: textearea
+        display_type: textarea
         display_group: Project properties
 
       - name: domain_suffix
@@ -67,6 +67,25 @@ plans:
         type: string
         title: The name of the studio project to register to
         display_group: Connect properties
+
+      - name: nuxeo_version
+        default: '9.10'
+        type: enum
+        enum: ['9.10']
+        title: Nuxeo version to use
+        display_group: Nuxeo Configuration
+
+      - name: nuxeo_packages
+        default: 'nuxeo-web-ui'
+        type: string
+        title: List of Nuxeo packages to install at startup
+        display_group: Nuxeo Configuration
+
+      - name: nuxeo_templates
+        default: ''
+        type: string
+        title: Comma separated list of Nuxeo templates to be added to the configuration
+        display_group: Nuxeo Configuration
 
       - name: backend_repository_type
         default: 'DBS'

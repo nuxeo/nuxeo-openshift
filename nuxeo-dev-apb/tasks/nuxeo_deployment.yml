@@ -1,0 +1,9 @@
+---
+
+- name: "Set Nuxeo deployment objects state={{ state }}"
+  k8s:
+    state: "{{ state }}"
+    definition: "{{ lookup('template', 'nuxeo-service.yml.j2') | from_yaml }}"
+  when: item.apply | default(True)
+  loop:
+    - environment: dev

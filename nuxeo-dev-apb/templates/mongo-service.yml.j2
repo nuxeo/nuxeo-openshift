@@ -9,10 +9,12 @@ metadata:
     apb_service_class_id: '{{ _apb_service_class_id }}'
     apb_service_instance_id: '{{ _apb_service_instance_id }}'
     component: mongodb
-  name: "{{ app_name }}-mongodb-service"
+  name: "{{ mongodb_service_name }}"
   namespace: {{ namespace }}
 spec:
   clusterServiceClassExternalName: nuxeo-nuxeo-mongodb-apb
   clusterServicePlanExternalName: replicaset
   parameters:
     replicas: 1
+    persistentVolume_storageClass: "{{ backend_pv_storage_class }}"
+    persistentVolume_size: 5Gi

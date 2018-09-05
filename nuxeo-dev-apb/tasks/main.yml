@@ -21,6 +21,12 @@
   # we do not run that part in test
   when: not testing
 
+- name: "Instantiating Nuxeo deployments"
+  include_tasks: "nuxeo_deployment.yml"
+  # As it requires APB and Ansible Service catalog
+  # we do not run that part in test
+  # when: not testing
+
 - name: "Update last operation"
   asb_last_operation:
     description: "100%: Cluster objects state={{ state }}"

@@ -1,6 +1,5 @@
 ---
 
-
 - name: "Set Backend storage objects state={{ state }}"
   k8s:
     state: "{{ state }}"
@@ -9,11 +8,7 @@
   loop:
     - name: mongo-service.yml.j2
       apply: "{{ deploy_mongo }}"
-    - name: mongo-binding.yml.j2
-      apply: "{{ deploy_mongo }}"
     - name: elasticsearch-service.yml.j2
-      apply: "{{ deploy_elasticsearch }}"
-    - name: elasticsearch-binding.yml.j2
       apply: "{{ deploy_elasticsearch }}"
 
 

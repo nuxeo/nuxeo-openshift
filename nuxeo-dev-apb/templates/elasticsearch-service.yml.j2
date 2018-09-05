@@ -9,8 +9,13 @@ metadata:
     apb_service_class_id: '{{ _apb_service_class_id }}'
     apb_service_instance_id: '{{ _apb_service_instance_id }}'
     component: elasticsearch
-  name: "{{ app_name }}-elasticsearch-service"
+  name: "{{ elasticsearch_service_name }}"
   namespace: {{ namespace }}
 spec:
   clusterServiceClassExternalName: nuxeo-nuxeo-elasticsearch-apb
   clusterServicePlanExternalName: nonclustered
+  parameters:
+    data_persistence_storage_class_name: "{{ backend_pv_storage_class }}"
+    data_persistence_size: 5Gi
+    image_repository: docker.elastic.co/elasticsearch/elasticsearch-oss
+    image_tag: "{{ elasticsearch_version }}"
