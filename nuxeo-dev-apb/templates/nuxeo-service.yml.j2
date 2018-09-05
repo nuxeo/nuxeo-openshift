@@ -16,7 +16,7 @@ spec:
   clusterServiceClassExternalName: nuxeo-nuxeo-apb
   clusterServicePlanExternalName: nuxeo-cluster
   parameters:
-    app_name: nuxeo-{{ item.environment}}
+    app_name: {{ app_name }}-{{ item.environment}}
     interactive_replicas: 1
     worker_replicas: 0
     image_repository: "nuxeo/nuxeo"
@@ -32,6 +32,8 @@ spec:
     nuxeoStudioProject:
     connect_enabled: true
     connectExistingSecret: "{{ connect_secret_name}} "
+    nuxeoJavaOpts: "-Xms512m -Xmx1024m -Djava.net.preferIPv4Stack=true"
+    resources: "{'limits': {'cpu': '2','memory': '2Gi'},'requests': {'cpu': '1','memory': '1Gi'}}"
 {% if deploy_mongo %}
     useExternalMongoDB: true
     mongoServiceName: "{{ mongodb_service_name }}"

@@ -15,8 +15,10 @@ spec:
   clusterServiceClassExternalName: nuxeo-nuxeo-elasticsearch-apb
   clusterServicePlanExternalName: nonclustered
   parameters:
-    app_name: elasticsearch
+    app_name: "{{ elasticsearch_service_name }}"
     data_persistence_storage_class_name: "{{ backend_pv_storage_class }}"
     data_persistence_size: 5Gi
-    image_repository: "{{ elasticsearch_image_map }}"
+    image_repository: "{{ elasticsearch_image }}"
     image_tag: "{{ elasticsearch_version }}"
+    client_java_opts: -Xms256m -Xmx512m -Djava.net.preferIPv4Stack=true
+    client_resources: "{limits: {cpu: 1, memory: 1Gi}, requests: {cpu: 500m, memory: 512m}}"
