@@ -15,6 +15,7 @@ spec:
   clusterServiceClassExternalName: nuxeo-nuxeo-mongodb-apb
   clusterServicePlanExternalName: replicaset
   parameters:
+    app_name: mongodb
     replicas: 1
     persistentVolume_storageClass: "{{ backend_pv_storage_class }}"
     persistentVolume_size: 5Gi

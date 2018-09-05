@@ -15,7 +15,8 @@ spec:
   clusterServiceClassExternalName: nuxeo-nuxeo-elasticsearch-apb
   clusterServicePlanExternalName: nonclustered
   parameters:
+    app_name: elasticsearch
     data_persistence_storage_class_name: "{{ backend_pv_storage_class }}"
     data_persistence_size: 5Gi
-    image_repository: docker.elastic.co/elasticsearch/elasticsearch-oss
+    image_repository: "{{ elasticsearch_image_map }}"
     image_tag: "{{ elasticsearch_version }}"

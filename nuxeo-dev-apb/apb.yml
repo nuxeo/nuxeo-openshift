@@ -42,12 +42,6 @@ plans:
         display_type: textarea
         display_group: Project properties
 
-      - name: domain_suffix
-        type: string
-        title: Domain suffix for routes
-        default: apps.prod.nuxeo.io
-        display_group: Project properties
-
       - name: nuxeo_connect_username
         type: string
         title: |
@@ -158,11 +152,6 @@ plans:
       - name: nuxeo_studio_version
         type: string
         title: The name of the studio project to register to
-
-      - name: domain_suffix
-        type: string
-        title: Domain suffix for routes
-        default: apps.prod.nuxeo.io
 
       - name: backend_pv_storage_class
         type: string
