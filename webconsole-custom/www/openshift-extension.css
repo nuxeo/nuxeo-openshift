@@ -1,0 +1,46 @@
+/*
+  Customize the logo in the homepage header
+*/
+#header-logo {
+  background-image: url(./img/logo.png);
+  background-size: contain;
+  width: 220px;
+  height: 30px;
+}
+
+
+@media (min-width:768px){
+    .layout-pf.layout-pf-fixed body.has-project-bar,.layout-pf.layout-pf-fixed body.has-project-bar.has-project-search{padding-top: 91px;}
+    .layout-pf.layout-pf-fixed body{padding-top:51px}
+    .project-bar{height:40px;top: 51px;}
+    .nav-pf-vertical{display:none}
+    .has-project-bar .nav-pf-vertical{display:block;top: 91px;}
+}
+
+
+.navbar-pf-vertical{background-color:white;border-bottom:1px solid #091e32}
+.navbar-pf-vertical .nav .nav-item-iconic .caret,.navbar-pf-vertical .nav .nav-item-iconic .fa,.navbar-pf-vertical .nav .nav-item-iconic .pficon{color:#0066FF;font-size:16px}
+.navbar-pf-vertical .nav .nav-item-iconic{color: #0066FF}
+.navbar-pf-vertical .nav .nav-item-iconic:focus,.navbar-pf-vertical .nav .nav-item-iconic:hover{color:#1F28BF;background-color:transparent}
+.navbar-pf-vertical .nav .nav-item-iconic:focus .caret,.navbar-pf-vertical .nav .nav-item-iconic:focus .fa,.navbar-pf-vertical .nav .nav-item-iconic:focus .glyphicon,.navbar-pf-vertical .nav .nav-item-iconic:focus .pficon,.navbar-pf-vertical .nav .nav-item-iconic:hover .caret,.navbar-pf-vertical .nav .nav-item-iconic:hover .fa,.navbar-pf-vertical .nav .nav-item-iconic:hover .glyphicon,.navbar-pf-vertical .nav .nav-item-iconic:hover .pficon{color:#1F28BF}
+.navbar-pf-vertical .nav .open>.nav-item-iconic .caret,.navbar-pf-vertical .nav .open>.nav-item-iconic .fa,.navbar-pf-vertical .nav .open>.nav-item-iconic .pficon,.navbar-pf-vertical .nav .open>.nav-item-iconic:focus .caret,.navbar-pf-vertical .nav .open>.nav-item-iconic:focus .fa,.navbar-pf-vertical .nav .open>.nav-item-iconic:focus .pficon,.navbar-pf-vertical .nav .open>.nav-item-iconic:hover .caret,.navbar-pf-vertical .nav .open>.nav-item-iconic:hover .fa,.navbar-pf-vertical .nav .open>.nav-item-iconic:hover .pficon{color:#1F28BF}
+.navbar-pf-vertical .nav .nav-item-iconic{padding: 15px 12px;}
+
+
+
+.project-bar{background-color:#091e32}
+.project-bar .catalog-search .landing-search-form .search-pf-input-group .form-control{background-color:#73D2CF;border-color:whitewhite;color:#0066ff}
+.project-bar .add-to-project>.btn-link{background-color:#73D2CF;border:1px solid #030303}
+.project-bar .add-to-project>.btn-link{color:#0066ff}
+
+.nav-pf-vertical{background-color: #222c39;}
+.nav-pf-vertical .list-group-item>a .fa,.nav-pf-vertical .list-group-item>a .pficon{color:#bcbfbf}
+.nav-pf-vertical .list-group-item.active>a,.nav-pf-vertical .list-group-item.is-hover>a,.nav-pf-vertical .list-group-item>a:focus{background-color:#404040;color:#fff!important}
+
+.nav-pf-vertical .list-group-item.active>a:before{background:#73D2CF}
+.nav-pf-vertical .list-group-item.active>a .fa,.nav-pf-vertical .list-group-item.active>a .pficon,.nav-pf-vertical .list-group-item.is-hover>a .fa,.nav-pf-vertical .list-group-item.is-hover>a .pficon,.nav-pf-vertical .list-group-item>a:focus .fa,.nav-pf-vertical .list-group-item>a:focus .pficon{color:#73D2CF}
+
+
+.nav-pf-vertical .nav-pf-secondary-nav{background:#404040;}
+.nav-pf-vertical .nav-pf-secondary-nav .list-group-item.active>a,.nav-pf-vertical .nav-pf-secondary-nav .list-group-item.active>a:hover{background:#222c39}
+.nav-pf-vertical .nav-pf-secondary-nav .list-group-item>a:focus,.nav-pf-vertical .nav-pf-secondary-nav .list-group-item>a:hover{background:#222c39}
