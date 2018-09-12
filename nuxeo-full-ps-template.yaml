@@ -721,8 +721,17 @@ objects:
       dockerfile: |-
         FROM docker.io/openshift/jenkins-agent-maven-35-centos7:v3.11
         USER root
+        # Install Git
         RUN yum -y install http://opensource.wandisco.com/centos/7/git/x86_64/wandisco-git-release-7-2.noarch.rpm && \
             yum -y install git
+        # Install NodeJS
+        RUN yum -y install gcc-c++ make && \
+            curl -sL https://rpm.nodesource.com/setup_6.x | bash - && \
+            yum -y install nodejs
+        # Install Chrome
+        RUN wget https://dl.google.com/linux/direct/google-chrome-stable_current_x86_64.rpm && \
+            yum -y install redhat-lsb libXScrnSaver && \
+            yum -y install google-chrome-stable_current_x86_64.rpm
         USER 1000
       secrets:
         - secret:
@@ -1558,7 +1567,7 @@ objects:
                               ]) {
                                   unstash name: "mavenSettings"
                                   def mavenSettings = findFiles(glob: "**/settings.xml")[0]
-                                  sh "mvn --settings ${mavenSettings.path} clean package"
+                                  sh "mvn --settings ${mavenSettings.path} clean package -DskipITs"
                                   if (fileExists(".nuxeo-s2i")) {
                                       def props = readProperties file: ".nuxeo-s2i"
                                       packagePathRegExp = props["NUXEO_PACKAGE_DIR"]
@@ -1608,6 +1617,23 @@ objects:
                       }
                       stage("Deploy to DEV Env") {
                           openshiftDeploy(deploymentConfig: "${APPLICATION_NAME}-dev-nuxeo")
+                      }
+                      stage("Run ftests") {
+                        def packageFile = findFiles(glob: "**/${APPLICATION_NAME}-ftest/**/package.json")
+                        if (packageFile.length == 0) {
+                            echo "No NodeJs functional tests to run."
+                        } else {
+                            def packagePath = packageFile[0].path
+                            def ftestFolderPath = packagePath.substring(0, packagePath.lastIndexOf('/'))
+                            dir (ftestFolderPath) {
+                                sh "oc get route/${APPLICATION_NAME}-dev-nuxeo-route -o json > dev-route.json"
+                                def devRoute = readJSON(file: "dev-route.json")
+                                def nuxeoUrl = "https://" + devRoute.spec.host + "/nuxeo/"
+                                sh "npm cache clean"
+                                sh "npm install"
+                                sh "npm run test -- --headless --nuxeoUrl=${nuxeoUrl}"
+                            }
+                        }
                       }
                       timeout(time: 60, unit: 'MINUTES') {
                         node {
