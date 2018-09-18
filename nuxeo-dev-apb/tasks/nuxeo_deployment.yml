@@ -7,3 +7,4 @@
   when: item.apply | default(True)
   loop:
     - environment: dev
+    - environment: uat
