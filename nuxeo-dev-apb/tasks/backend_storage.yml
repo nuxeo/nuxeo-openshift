@@ -11,4 +11,20 @@
     - name: elasticsearch-service.yml.j2
       apply: "{{ deploy_elasticsearch }}"
 
+- name: "Wait for backend storage to be ready"
+  pause:
+    minutes: 3
+  when: state == "present"
 
+## This query doesn't work so we wait for 3 minutes for the
+## backends to be ready
+# - name: "Wait for backend storage to be ready"
+#   set_fact:
+#     mongo_service: "{{ mongodb_service_query }}"
+#     elasticsearch_service: "{{ elasticsearch_service_query }}"
+#   retries: 60
+#   delay: 10
+#   until:
+#     - not mongodb_service_query or not deploy_mongo
+#     - not elasticsearch_service_query or not deploy_elasticsearch
+#   when: state == "present"

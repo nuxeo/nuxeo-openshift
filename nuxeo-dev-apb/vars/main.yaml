@@ -20,15 +20,27 @@ elasticsearch_version_map:
 elasticsearch_version: "{{ elasticsearch_version_map[nuxeo_version] }}"
 
 
-configmap_lookup: "{{
+mongodb_service_lookup: "{{
   lookup(
     'k8s',
-    api_version='v1',
-    kind='ConfigMap',
+    api_version='servicecatalog.k8s.io/v1beta1',
+    kind='ServiceInstance',
     namespace=namespace,
-    resource_name=app_name
+    resource_name=mongodb_service_name
   )
 }}"
+mongodb_service_query: "{{mongodb_service_lookup | json_query('status.asyncOpInProgress') }}"
+
+elasticsearch_service_lookup: "{{
+  lookup(
+    'k8s',
+    api_version='servicecatalog.k8s.io/v1beta1',
+    kind='ServiceInstance',
+    namespace=namespace,
+    resource_name=elasticsearch_service_name
+  )
+}}"
+elasticsearch_service_query: "{{elasticsearch_service_lookup | json_query('status.asyncOpInProgress') }}"
 
 
 deploy_mongo: "{{ True if backend_repository_type == 'DBS' else False }}"

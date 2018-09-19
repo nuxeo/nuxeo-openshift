@@ -6,6 +6,9 @@ _apb_plan_id: default
 _apb_service_class_id: 0
 _apb_service_instance_id: 0
 
+default_debug: True
+bootstrap_debug_enabled: False
+
 apb_name: nuxeo-dev-apb
 app_image: docker.io/nuxeoapbcatalog/nuxeo-dev-apb
 namespace: "{{ lookup('env','NAMESPACE') | default('hello-world', true) }}"
