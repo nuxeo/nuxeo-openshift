@@ -18,6 +18,7 @@ spec:
     app_name: "{{ elasticsearch_service_name }}"
     data_persistence_storage_class_name: "{{ backend_pv_storage_class }}"
     data_persistence_size: 5Gi
+    configure_xpack:  {{ elasticsearch_configure_xpack }}
     image_repository: "{{ elasticsearch_image }}"
     image_tag: "{{ elasticsearch_version }}"
     client_java_opts: -Xms256m -Xmx512m -Djava.net.preferIPv4Stack=true

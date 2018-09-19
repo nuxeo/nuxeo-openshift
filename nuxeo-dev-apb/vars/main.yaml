@@ -18,6 +18,10 @@ elasticsearch_version_map:
   "10.2": "6.3.2"
   "master": "6.3.2"
 elasticsearch_version: "{{ elasticsearch_version_map[nuxeo_version] }}"
+elasticsearch_xpack_map:
+  "5.6.9": true
+  "6.3.2": false
+elasticsearch_configure_xpack: "{{ elasticsearch_xpack_map[elasticsearch_version] }}"
 
 
 mongodb_service_lookup: "{{
