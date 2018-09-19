@@ -1,0 +1,72 @@
+---
+apiVersion: apps.openshift.io/v1
+kind: DeploymentConfig
+metadata:
+  labels:
+    app: {{ app_name }}
+    apb_name: '{{ apb_name }}'
+    apb_plan_id: '{{ _apb_plan_id }}'
+    apb_service_class_id: '{{ _apb_service_class_id }}'
+    apb_service_instance_id: '{{ _apb_service_instance_id }}'
+    component: nexus
+  name: {{ nexus_dc_name }}
+  namespace: {{ namespace }}
+spec:
+  replicas: 1
+  revisionHistoryLimit: 10
+  selector:
+    app: {{ app_name }}
+    component: nexus
+  template:
+    metadata:
+      labels:
+        app: {{ app_name }}
+        component: nexus
+    spec:
+      containers:
+        - image: sonatype/nexus:latest
+          imagePullPolicy: IfNotPresent
+          name: nexus
+          ports:
+            - containerPort: 8081
+              protocol: TCP
+          readinessProbe:
+            failureThreshold: 3
+            httpGet:
+              path: /nexus
+              port: 8081
+              scheme: HTTP
+            initialDelaySeconds: 30
+            periodSeconds: 10
+            successThreshold: 1
+            timeoutSeconds: 1
+          volumeMounts:
+            - mountPath: /sonatype-work
+              name: nexus-data
+      initContainers:
+        - image: busybox
+          imagePullPolicy: IfNotPresent
+          name: nexus-conf
+          command:
+            - sh
+            - '-c'
+            - |-
+              mkdir -p /sonatype-work/conf/ && \
+              cp /work/security.xml /sonatype-work/conf/security.xml
+          volumeMounts:
+            - mountPath: /sonatype-work
+              name: nexus-data
+            - mountPath: /work
+              name: nexus-configuration
+      volumes:
+        - name: nexus-data
+          persistentVolumeClaim:
+            claimName: {{ nexus_pvc_name }}
+        - name: nexus-configuration
+          configMap:
+            items:
+              - key: security
+                path: security.xml
+            name: {{ nexus_config_name }}
+  triggers:
+    - type: ConfigChange

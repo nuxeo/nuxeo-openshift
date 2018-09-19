@@ -1,0 +1,23 @@
+---
+
+# Defaults for values we could expect from a broker
+
+_apb_plan_id: default
+_apb_service_class_id: 0
+_apb_service_instance_id: 0
+
+default_debug: True
+bootstrap_debug_enabled: False
+
+apb_name: nuxeo-dev-apb
+app_image: docker.io/nuxeoapbcatalog/nuxeo-cicd-apb
+namespace: "{{ lookup('env','NAMESPACE') | default('hello-world', true) }}"
+
+testing: false
+
+
+domain_suffix: apps.prod.nuxeo.io
+nexus_admin_user: admin
+nexus_admin_email: devnull@nuxeo.com
+nexus_storage_class: shared
+nexus_storage_capacity: 2Gi

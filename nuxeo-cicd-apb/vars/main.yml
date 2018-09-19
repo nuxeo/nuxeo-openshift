@@ -1,0 +1,30 @@
+---
+state_map:
+  provision: present
+  deprovision: absent
+state: "{{ state_map[apb_action] }}"
+# Whether we are in a cluster or not.
+pod_name: "{{ lookup('env', 'POD_NAME') }}"
+pod_namespace: "{{ lookup('env', 'POD_NAMESPACE') }}"
+in_cluster: "{{ True if (pod_name and pod_namespace) else False }}"
+
+name: "{{ project_name if project_name is defined else 'nuxeo-cicd-' + (_apb_service_instance_id | string |truncate(5, True, '') ) }}"
+
+dc_lookup: "{{ lookup('openshift', kind='DeploymentConfig', namespace=namespace, resource_name=nexus_dc_name) }}"
+password_lookup: "{{ lookup('password', '/dev/null chars=ascii_letters,digits,hexdigits') }}"
+
+
+# Variables to hold queries
+ready_replicas_query: "[spec.replicas, status.readyReplicas]"
+dc_query: "{{ dc_lookup | json_query(ready_replicas_query) | unique | count == 1 }}"
+
+
+
+app_name: "{{ name }}"
+nexus_service_name: "{{ name }}-nexus"
+nexus_route_name: "{{ name }}-nexus"
+nexus_host: "{{ name }}-nexus.{{ domain_suffix }}"
+nexus_config_name: "{{ name }}-nexus"
+nexus_dc_name: "{{ name }}-nexus"
+nexus_pvc_name: "{{ name }}-nexus"
+nexus_creds_name: "{{ name }}-nexus-credentials"

@@ -1,0 +1,38 @@
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  labels:
+    app: {{ app_name }}
+    apb_name: '{{ apb_name }}'
+    apb_plan_id: '{{ _apb_plan_id }}'
+    apb_service_class_id: '{{ _apb_service_class_id }}'
+    apb_service_instance_id: '{{ _apb_service_instance_id }}'
+    component: nexus
+  name: "{{ nexus_config_name }}"
+  namespace: {{ namespace }}
+data:
+  security: |-
+    <?xml version="1.0" encoding="UTF-8"?>
+    <security>
+      <version>2.0.5</version>
+      <users>
+        <user>
+          <id>{{ nexus_admin_user }}</id>
+          <firstName>Admin</firstName>
+          <lastName>User</lastName>
+          <password>{{ nexus_password | hash('sha1') }}</password>
+          <status>active</status>
+          <email>{{ nexus_admin_email }}</email>
+        </user>
+      </users>
+      <userRoleMappings>
+        <userRoleMapping>
+          <userId>{{ nexus_admin_user }}</userId>
+          <source>default</source>
+          <roles>
+            <role>nx-admin</role>
+          </roles>
+        </userRoleMapping>
+      </userRoleMappings>
+    </security>

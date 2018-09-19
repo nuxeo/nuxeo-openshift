@@ -1,0 +1,57 @@
+version: 1.0
+name: nuxeo-cicd-apb
+description: CI/CD deployment in Openshift for Nuxeo
+bindable: false
+async: optional
+tags:
+  - nuxeo
+  - jenkins
+metadata:
+  displayName: CI/CD environment for Nuxeo Development
+  console.openshift.io/iconClass: icon-jenkins
+  longDescription:
+    This basically deploys Jenkins and Nexus
+  dependencies: []
+  documentationUrl: "https://github.com/nuxeo-sandbox/nuxeo-openshift/README.md"
+  providerDisplayName: "Nuxeo"
+plans:
+  - name: default
+    description: Default CI/CD deployment
+    free: true
+    metadata: {}
+    parameters:
+    - name: project_name
+      type: string
+      title: Project Name
+      display_group: Project properties
+    - name: domain_suffix
+      type: string
+      title: Domain suffix for routes
+      default: apps.prod.nuxeo.io
+      display_group: Project properties
+    - name: nexus_admin_user
+      type: string
+      default: admin
+      title: Administrator user name
+      display_group: Nexus configuration
+    - name: nexus_admin_password
+      type: string
+      default: admin
+      title: Administrator user password (generated if none given)
+      display_type: password
+      display_group: Nexus configuration
+    - name: nexus_admin_email
+      type: string
+      default: devnull@nuxeo.com
+      title: Administrator Email adress
+      display_group: Nexus configuration
+    - name: nexus_storage_class
+      type: string
+      default: shared
+      title: Nexus storage class
+      display_group: Nexus configuration
+    - name: nexus_storage_capacity
+      type: string
+      default: 2Gi
+      title: Nexus storage capacity
+      display_group: Nexus configuration
