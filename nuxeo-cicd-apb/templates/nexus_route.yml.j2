@@ -16,6 +16,9 @@ spec:
   path: /nexus
   port:
     targetPort: 8081-tcp
+  tls:
+    insecureEdgeTerminationPolicy: Redirect
+    termination: edge
   to:
     kind: Service
     name: {{ nexus_service_name }}

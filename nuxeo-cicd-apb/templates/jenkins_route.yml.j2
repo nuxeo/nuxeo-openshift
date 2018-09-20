@@ -1,7 +1,6 @@
 ---
 apiVersion: v1
-kind: Secret
-type: kubernetes.io/basic-auth
+kind: Route
 metadata:
   labels:
     app: {{ app_name }}
@@ -9,12 +8,15 @@ metadata:
     apb_plan_id: '{{ _apb_plan_id }}'
     apb_service_class_id: '{{ _apb_service_class_id }}'
     apb_service_instance_id: '{{ _apb_service_instance_id }}'
-    component: nexus
-    credential.sync.jenkins.openshift.io: 'true'
-  name: {{ nexus_creds_name }}
+    component: jenkins
+  name: {{ jenkins_route_name }}
   namespace: {{ namespace }}
   annotations:
-    template.openshift.io/base64-expose-credentials: '{.data}'
-stringData:
-  username: {{ nexus_admin_user }}
-  password: {{ nexus_password }}
+    haproxy.router.openshift.io/timeout: 4m
+spec:
+  tls:
+    insecureEdgeTerminationPolicy: Redirect
+    termination: edge
+  to:
+    kind: Service
+    name: {{ jenkins_service_name }}

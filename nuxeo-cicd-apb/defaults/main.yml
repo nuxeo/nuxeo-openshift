@@ -21,3 +21,6 @@ nexus_admin_user: admin
 nexus_admin_email: devnull@nuxeo.com
 nexus_storage_class: shared
 nexus_storage_capacity: 2Gi
+
+jenkins_git_release_username: openshift
+jenkins_git_release_email: openshift@nuxeo.com

@@ -58,3 +58,5 @@ in_cluster: "{{ True if (pod_name and pod_namespace) else False }}"
 mongodb_service_name: "{{ app_name }}-mongodb"
 elasticsearch_service_name: "{{ app_name }}-elasticsearch"
 connect_secret_name: "{{ app_name }}-connect-secret"
+connect_secret_basic_name: "{{ connect_secret_name }}-basic"
+github_ssh_key_name: "{{ app_name }}-github-ssh

@@ -22,15 +22,33 @@
     - name: nexus_creds.yml.j2
     - name: nexus_pv.yml.j2
     - name: nexus_dc.yml.j2
+    - name: jenkins_git_config.yml.j2
+    - name: jenkins_maven_config.yml.j2
+    - name: jenkins_route.yml.j2
+    - name: jenkins_dc.yml.j2
+    - name: jenkins_sa.yml.j2
+    - name: jenkins_rbac.yml.j2
+    - name: jenkins_jnlp_service.yml.j2
+    - name: jenkins_service.yml.j2
 
-- name: "Wait for Deployment to become ready"
+- name: "Wait for Nexus Deployment to become ready"
   debug:
-    msg: "DeploymentConfig ready status: {{ dc_query }}"
+    msg: "DeploymentConfig ready status: {{ nexus_dc_query }}"
   retries: 20
   delay: 10
   until:
-    - dc_query
+    - nexus_dc_query
   when: state == 'present'
+
+- name: "Wait for Jenkins Deployment to become ready"
+  debug:
+    msg: "DeploymentConfig ready status: {{ jenkins_dc_query }}"
+  retries: 20
+  delay: 10
+  until:
+    - jenkins_dc_query
+  when: state == 'present'
+
 
 - name: "Update last operation"
   asb_last_operation:

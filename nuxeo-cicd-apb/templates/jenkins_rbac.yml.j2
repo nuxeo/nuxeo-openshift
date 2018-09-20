@@ -1,0 +1,12 @@
+---
+apiVersion: v1
+groupNames: null
+kind: RoleBinding
+metadata:
+  name: jenkins_edit
+  namespace: {{ namespace }}
+roleRef:
+  name: edit
+subjects:
+- kind: ServiceAccount
+  name: jenkins

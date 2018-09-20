@@ -29,6 +29,7 @@ plans:
       title: Domain suffix for routes
       default: apps.prod.nuxeo.io
       display_group: Project properties
+
     - name: nexus_admin_user
       type: string
       default: admin
@@ -55,3 +56,23 @@ plans:
       default: 2Gi
       title: Nexus storage capacity
       display_group: Nexus configuration
+
+    - name: jenkins_git_release_username
+      type: string
+      default: openshift
+      title: Git user name to perform release
+      display_group: Jenkins configuration
+    - name: jenkins_git_release_email
+      type: string
+      default: openshift@nuxeo.com
+      title: Git user email to perform release
+      display_group: Jenkins configuration
+    - name: git_ssh_secret_name_override
+      type: string
+      title: Name of the secret containing the SSH key to access git
+      display_group: Jenkins configuration
+    - name: nuxeo_clid
+      type: string
+      title: Nuxeo instance CLID
+      display_group: Jenkins configuration
+

@@ -14,6 +14,7 @@
   loop:
     - name: global-config.yml.j2
     - name: connect-secret.yml.j2
+    - name: connect-secret-basic.yml.j2
 
 - name: "Instantiating backend storage"
   include_tasks: "backend_storage.yml"

@@ -9,14 +9,17 @@ pod_namespace: "{{ lookup('env', 'POD_NAMESPACE') }}"
 in_cluster: "{{ True if (pod_name and pod_namespace) else False }}"
 
 name: "{{ project_name if project_name is defined else 'nuxeo-cicd-' + (_apb_service_instance_id | string |truncate(5, True, '') ) }}"
+git_ssh_secret_name: "{{ app_name + '-github-ssh' if git_ssh_secret_name_override is not defined else git_ssh_secret_name_override }}"
 
-dc_lookup: "{{ lookup('openshift', kind='DeploymentConfig', namespace=namespace, resource_name=nexus_dc_name) }}"
+nexus_dc_lookup: "{{ lookup('openshift', kind='DeploymentConfig', namespace=namespace, resource_name=nexus_dc_name) }}"
+jenkins_dc_lookup: "{{ lookup('openshift', kind='DeploymentConfig', namespace=namespace, resource_name=jenkins_dc_name) }}"
 password_lookup: "{{ lookup('password', '/dev/null chars=ascii_letters,digits,hexdigits') }}"
 
 
 # Variables to hold queries
 ready_replicas_query: "[spec.replicas, status.readyReplicas]"
-dc_query: "{{ dc_lookup | json_query(ready_replicas_query) | unique | count == 1 }}"
+nexus_dc_query: "{{ nexus_dc_lookup | json_query(ready_replicas_query) | unique | count == 1 }}"
+jenkins_dc_query: "{{ jenkins_dc_lookup | json_query(ready_replicas_query) | unique | count == 1 }}"
 
 
 
@@ -28,3 +31,10 @@ nexus_config_name: "{{ name }}-nexus"
 nexus_dc_name: "{{ name }}-nexus"
 nexus_pvc_name: "{{ name }}-nexus"
 nexus_creds_name: "{{ name }}-nexus-credentials"
+jenkins_dc_name: jenkins
+jenkins_service_name: jenkins
+jenkins_jnlp_service_name: jenkins-jnlp
+jenkins_route_name: jenkins
+jenkins_maven_config_name: "{{ name }}-maven-config"
+jenkins_git_config_name: "{{ name }}-git-config"
+clid_secret_name: "{{ name }}-clid"
