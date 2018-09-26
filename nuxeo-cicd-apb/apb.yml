@@ -37,7 +37,6 @@ plans:
       display_group: Nexus configuration
     - name: nexus_admin_password
       type: string
-      default: admin
       title: Administrator user password (generated if none given)
       display_type: password
       display_group: Nexus configuration
@@ -71,8 +70,5 @@ plans:
       type: string
       title: Name of the secret containing the SSH key to access git
       display_group: Jenkins configuration
-    - name: nuxeo_clid
-      type: string
-      title: Nuxeo instance CLID
-      display_group: Jenkins configuration
+
 

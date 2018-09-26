@@ -1,0 +1,23 @@
+---
+
+- name: "Set CI/CD objects state={{ state }}"
+  k8s:
+    state: "{{ state }}"
+    definition: "{{ lookup('template', item.name) | from_yaml }}"
+  when: item.apply | default(True)
+  loop:
+     - name: cicd-service.yml.j2
+
+- name: "Wait for CI/CD to be ready"
+  pause:
+    minutes: 3
+  when: state == "present"
+
+- name: "Create build configuration objects state={{ state }}"
+  k8s:
+    state: "{{ state }}"
+    definition: "{{ lookup('template', item.name) | from_yaml }}"
+  when: item.apply | default(True)
+  loop:
+    - name: base-image-stream.yml.j2
+    - name: base-image-build.yml.j2

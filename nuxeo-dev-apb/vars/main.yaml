@@ -27,7 +27,6 @@ elasticsearch_configure_xpack: "{{ elasticsearch_xpack_map[elasticsearch_version
 mongodb_service_lookup: "{{
   lookup(
     'k8s',
-    api_version='servicecatalog.k8s.io/v1beta1',
     kind='ServiceInstance',
     namespace=namespace,
     resource_name=mongodb_service_name
@@ -38,7 +37,6 @@ mongodb_service_query: "{{mongodb_service_lookup | json_query('status.asyncOpInP
 elasticsearch_service_lookup: "{{
   lookup(
     'k8s',
-    api_version='servicecatalog.k8s.io/v1beta1',
     kind='ServiceInstance',
     namespace=namespace,
     resource_name=elasticsearch_service_name
@@ -55,8 +53,15 @@ pod_name: "{{ lookup('env', 'POD_NAME') }}"
 pod_namespace: "{{ lookup('env', 'POD_NAMESPACE') }}"
 in_cluster: "{{ True if (pod_name and pod_namespace) else False }}"
 
+
+global_config_name: "{{ app_name }}-global-config"
 mongodb_service_name: "{{ app_name }}-mongodb"
 elasticsearch_service_name: "{{ app_name }}-elasticsearch"
+cicd_service_name: "{{ app_name }}-cicd"
 connect_secret_name: "{{ app_name }}-connect-secret"
 connect_secret_basic_name: "{{ connect_secret_name }}-basic"
-github_ssh_key_name: "{{ app_name }}-github-ssh
+github_need_ssh: "{{ True if project_git_ssh is defined else False }}"
+github_ssh_key_name: "{{ app_name }}-github-ssh"
+pipeline_service_name: "{{ app_name }}-default-pipeline"
+base_image_name: "{{ app_name }}-base"
+base_image_build: "{{ app_name }}-base-image-build"

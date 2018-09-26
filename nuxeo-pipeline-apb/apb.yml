@@ -1,0 +1,39 @@
+---
+version: 1.0
+name: nuxeo-pipeline-apb
+description: Jenkins pipeline for Nuxeo CI/CD
+bindable: false
+async: optional
+tags:
+  - nuxeo
+metadata:
+  displayName: Jenkins pipeline for Nuxeo
+  longDescription:
+    A Pipeline that deploy a Nuxeo DEV project into several environments
+  dependencies: []
+  documentationUrl: "https://github.com/nuxeo-sandbox/nuxeo-openshift/README.md"
+  imageUrl: "https://www.nuxeo.com/assets/imgs/logo340x60.png"
+plans:
+  - name: default
+    description: Development with Git Repository
+    free: true
+    metadata: {}
+    parameters:
+      - name: project_name
+        type: string
+        title: Project Name
+        display_group: Project properties
+      - name: pipeline_name
+        type: string
+        title: Pipeline Name
+        default: default
+        display_group: Project properties
+      - name: pipeline_git_ref
+        type: string
+        title: Git reference for that pipeline (optional)
+        display_group: Project properties
+      - name: pipeline_definition
+        default: 'uat-dev'
+        type: enum
+        enum: ['uat-dev','single']
+        title: Pipeline definition to use

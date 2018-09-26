@@ -1,0 +1,56 @@
+---
+
+state_map:
+  provision: present
+  deprovision: absent
+state: "{{ state_map[apb_action] }}"
+
+
+pipeline_map:
+  uat-dev:
+    jenkinsfile:
+      git:
+        uri: "https://github.com/nuxeo-sandbox/nuxeo-openshift"
+        ref: dev-environment
+      path: jenkinsfile/Jenkinsfile-build
+    environments:
+      - dev
+      - uat
+  single:
+    jenkinsfile:
+      git:
+        uri: "https://github.com/nuxeo-sandbox/nuxeo-openshift"
+        ref: dev-environment
+      path: jenkinsfile/Jenkinsfile-single
+    environments:
+      - "{{ pipeline_name }}"
+
+pipeline: "{{ pipeline_map[pipeline_definition] }}"
+
+global_config_map: "{{
+  lookup(
+    'k8s',
+    kind='ConfigMap',
+    namespace=namespace,
+    resource_name=global_config_name
+  )
+}}"
+global_config: "{{ global_config_map.data }}"
+
+
+docker_image_lookup: "{{
+  lookup(
+    'k8s',
+    kind='ImageStream',
+    namespace=namespace,
+    resource_name=nuxeo_image_name
+  ).status.dockerImageRepository
+}}"
+
+
+app_name: "{{ project_name if project_name is defined else global_config.appname }}"
+global_config_name: "{{ app_name }}-global-config"
+base_image_name: "{{ app_name }}-base"
+nuxeo_image_name: "{{ app_name }}-{{ pipeline_name }}-nuxeo"
+nuxeo_image_build: "{{ app_name }}-{{ pipeline_name }}-image-build"
+build_pipeline_name: "{{ app_name }}-{{ pipeline_name }}"

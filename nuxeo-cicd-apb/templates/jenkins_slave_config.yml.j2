@@ -1,0 +1,79 @@
+---
+kind: ConfigMap
+apiVersion: v1
+metadata:
+  name: jenkins-slave
+  namespace: {{ namespace }}
+  labels:
+    app: {{ app_name }}
+    apb_name: '{{ apb_name }}'
+    apb_plan_id: '{{ _apb_plan_id }}'
+    apb_service_class_id: '{{ _apb_service_class_id }}'
+    apb_service_instance_id: '{{ _apb_service_instance_id }}'
+    component: jenkins
+    role: jenkins-slave
+data:
+  maven: |-
+    <org.csanchez.jenkins.plugins.kubernetes.PodTemplate>
+      <inheritFrom></inheritFrom>
+      <name>maven</name>
+      <instanceCap>2147483647</instanceCap>
+      <idleMinutes>0</idleMinutes>
+      <label>maven</label>
+      <serviceAccount>jenkins</serviceAccount>
+      <nodeSelector></nodeSelector>
+      <volumes/>
+      <containers>
+        <org.csanchez.jenkins.plugins.kubernetes.ContainerTemplate>
+          <name>jnlp</name>
+          <image>nuxeo/nuxeo-dev-apb-jenkins-slave-maven:latest</image>
+          <privileged>false</privileged>
+          <alwaysPullImage>true</alwaysPullImage>
+          <workingDir>/tmp</workingDir>
+          <command></command>
+          <args>${computer.jnlpmac} ${computer.name}</args>
+          <ttyEnabled>false</ttyEnabled>
+          <resourceRequestCpu></resourceRequestCpu>
+          <resourceRequestMemory></resourceRequestMemory>
+          <resourceLimitCpu></resourceLimitCpu>
+          <resourceLimitMemory></resourceLimitMemory>
+          <envVars/>
+        </org.csanchez.jenkins.plugins.kubernetes.ContainerTemplate>
+      </containers>
+      <envVars/>
+      <annotations/>
+      <imagePullSecrets/>
+      <nodeProperties/>
+    </org.csanchez.jenkins.plugins.kubernetes.PodTemplate>
+  node-chrome: |-
+    <org.csanchez.jenkins.plugins.kubernetes.PodTemplate>
+      <inheritFrom></inheritFrom>
+      <name>node-chrome</name>
+      <instanceCap>2147483647</instanceCap>
+      <idleMinutes>0</idleMinutes>
+      <label>node-chrome</label>
+      <serviceAccount>jenkins</serviceAccount>
+      <nodeSelector></nodeSelector>
+      <volumes/>
+      <containers>
+        <org.csanchez.jenkins.plugins.kubernetes.ContainerTemplate>
+          <name>jnlp</name>
+          <image>nuxeo/nuxeo-dev-apb-jenkins-slave-node-chrome:latest</image>
+          <privileged>false</privileged>
+          <alwaysPullImage>true</alwaysPullImage>
+          <workingDir>/tmp</workingDir>
+          <command></command>
+          <args>${computer.jnlpmac} ${computer.name}</args>
+          <ttyEnabled>false</ttyEnabled>
+          <resourceRequestCpu></resourceRequestCpu>
+          <resourceRequestMemory></resourceRequestMemory>
+          <resourceLimitCpu></resourceLimitCpu>
+          <resourceLimitMemory></resourceLimitMemory>
+          <envVars/>
+        </org.csanchez.jenkins.plugins.kubernetes.ContainerTemplate>
+      </containers>
+      <envVars/>
+      <annotations/>
+      <imagePullSecrets/>
+      <nodeProperties/>
+    </org.csanchez.jenkins.plugins.kubernetes.PodTemplate>

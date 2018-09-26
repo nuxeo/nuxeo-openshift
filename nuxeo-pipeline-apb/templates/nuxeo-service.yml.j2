@@ -9,42 +9,42 @@ metadata:
     apb_service_class_id: "{{ _apb_service_class_id }}"
     apb_service_instance_id: "{{ _apb_service_instance_id }}"
     component: nuxeo
-    environment: "{{ item.environment}}"
-  name: "{{ app_name }}-{{ item.environment}}-nuxeo-service"
+    environment: "{{ item }}"
+  name: "{{ app_name }}-{{ item }}-nuxeo-service"
   namespace: "{{ namespace }}"
 spec:
   clusterServiceClassExternalName: nuxeo-nuxeo-apb
   clusterServicePlanExternalName: nuxeo-cluster
   parameters:
-    app_name: {{ app_name }}-{{ item.environment}}
+    app_name: {{ app_name }}-{{ item }}
     interactive_replicas: 1
     worker_replicas: 0
-    image_repository: "nuxeo/nuxeo"
-    image_tag: "{{ nuxeo_version }}"
+    image_repository: "{{ docker_image }}"
+    image_tag: "{{ item }}"
     binaries_persistentVolume_enabled: true
-    binaries_persistentVolume_storageClass: "{{ binaries_pv_storage_class }}"
+    binaries_persistentVolume_storageClass: "{{ global_config.binaries_pv_storage_class }}"
     binaries_persistentVolume_size: "10Gi"
     transientstore_persistentVolume_enabled: false
     data_persistentVolume_enabled: false
-    applicationUrl: "{{ app_name }}-{{ item.environment}}.apps.prod.nuxeo.io"
-    nuxeoPackages: "{{ nuxeo_packages }}"
-    nuxeoTemplates: "{{ nuxeo_templates }}"
+    applicationUrl: "{{ app_name }}-{{ item }}.apps.prod.nuxeo.io"
+    nuxeoPackages: "{{ global_config.nuxeo_packages }}"
+    nuxeoTemplates: "{{ global_config.nuxeo_templates }}"
     nuxeoStudioProject:
     connect_enabled: true
-    connectExistingSecret: "{{ connect_secret_name}} "
+    connectExistingSecret: "{{ global_config.connect_secret_name}} "
     nuxeoJavaOpts: "-Xms512m -Xmx1024m -Djava.net.preferIPv4Stack=true"
     resources: "{'limits': {'cpu': '2','memory': '2Gi'},'requests': {'cpu': '1','memory': '1Gi'}}"
-{% if deploy_mongo %}
+{% if global_config.deploy_mongo %}
     useExternalMongoDB: true
-    mongoServiceName: "{{ mongodb_service_name }}"
+    mongoServiceName: "{{ global_config.mongodb_service_name }}"
 {% else %}
-    useExternalMongoDB: true
+    useExternalMongoDB: false
 {% endif %}
-{% if deploy_elasticsearch %}
+{% if global_config.deploy_elasticsearch %}
     useExternalElasticsearch: true
-    elasticsearchServiceName: "{{ elasticsearch_service_name }}"
+    elasticsearchServiceName: "{{ global_config.elasticsearch_service_name }}"
 {% else %}
-    useExternalElasticsearch: true
+    useExternalElasticsearch: false
 {% endif %}
     useKafkaForStream: false
 #    kafkaServiceName: "nuxeo-kafka

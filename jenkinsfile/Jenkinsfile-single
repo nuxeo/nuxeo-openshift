@@ -1,0 +1,156 @@
+def project = ""
+def pipeline_name = ""
+def packagePathRegExp = ""
+def project_git_repo = ""
+def project_git_ref = ""
+def github_ssh_key_name = ""
+def connect_secret_basic_name = ""
+def nuxeo_image_build = ""
+def app_name = ""
+def nuxeo_image_name = ""
+
+
+pipeline {
+  agent {
+    node {
+      label 'maven'
+    }
+  }
+
+  options {
+    timeout(time: 60, unit: 'MINUTES')
+  }
+
+  stages {
+    stage('Initialize') {
+      steps {
+        script {
+          openshift.withCluster() {
+            openshift.withProject() {
+                app_name = env.APP_NAME
+
+                echo "Using project: ${openshift.project()} with app: ${app_name}"
+                project = openshift.project()
+                pipeline_name = env.PIPELINE_NAME
+                project_git_repo = env.PROJECT_GIT_REPO
+                project_git_ref = env.PROJECT_GIT_REF
+                github_ssh_key_name = env.GITHUB_SSH_KEY_NAME
+                connect_secret_basic_name = env.CONNECT_SECRET_BASIC_NAME
+                nuxeo_image_build = env.NUXEO_IMAGE_BUILD
+                nuxeo_image_name = env.NUXEO_IMAGE_NAME
+
+            }
+          }
+        }
+      }
+    }
+    stage('Checkout repository') {
+      steps {
+        script {
+            openshift.withCluster() {
+                openshift.withProject() {
+                  git url: "${project_git_repo}",
+                  branch: "${project_git_ref}",
+                  credentialsId: "${project}-${github_ssh_key_name}"
+                }
+            }
+        }
+      }
+    }
+
+    stage('Build Nuxeo package') {
+      steps {
+        script {
+          withMaven() {
+            withCredentials([
+              usernamePassword(
+                  credentialsId: "${project}-${connect_secret_basic_name}",
+                  usernameVariable: "NUXEO_CONNECT_USERNAME",
+                  passwordVariable: "NUXEO_CONNECT_PASSWORD"
+              )
+            ]) {
+
+              sh "mvn clean package"
+
+              // Should be done in a library function like nuxeo.openshift.stashPackage("marketplace")
+              if (fileExists(".nuxeo-s2i")) {
+                  def props = readProperties file: ".nuxeo-s2i"
+                  packagePathRegExp = props["NUXEO_PACKAGE_DIR"]
+              } else {
+                  packagePathRegExp = "*(marketplace|package)-*.zip"
+              }
+              def files = findFiles(glob: "**/${packagePathRegExp}")
+              if (files.length == 0) {
+                  echo "Marketplace zip file not found."
+              }
+
+              stash name:"marketplace", includes:"${files[0]}"
+            }
+          }
+        }
+      }
+    }
+
+
+    stage('Build Docker image') {
+      steps {
+        script {
+          openshift.withCluster() {
+            openshift.withProject() {
+
+              unstash name: "marketplace"
+              def files = findFiles(glob: "**/${packagePathRegExp}")
+              if (files.length == 0) {
+                  echo "Marketplace zip file not found."
+              }
+              if (fileExists("source")) {
+                  sh "rm -rf source"
+              }
+              sh "mkdir -p source"
+              fileOperations([
+                  fileCopyOperation(
+                      includes: "${files[0].path}",
+                      targetLocation: "source",
+                      flattenFiles: true,
+                  ),
+                  fileRenameOperation(
+                      source: "source/${files[0].name}",
+                      destination: "source/marketplace.zip"
+                  )
+              ])
+
+              openshift.selector("bc", nuxeo_image_build).startBuild("--from-dir='source'", "--wait")
+              def builds = openshift.selector("bc", nuxeo_image_build).related('builds')
+              timeout(10) {
+                builds.untilEach(1) {
+                  return (it.object().status.phase == "Complete")
+                }
+              }
+
+              // Promote to dev
+              openshift.tag("${nuxeo_image_name}:latest", "${nuxeo_image_name}:${pipeline_name}")
+            }
+          }
+        }
+      }
+    }
+
+    stage('Deploy env') {
+      steps {
+        script {
+            openshift.withCluster() {
+                openshift.withProject() {
+                  openshiftDeploy(deploymentConfig: "${app_name}-${pipeline_name}-interactive")
+                  timeout(5) {
+                    openshift.selector("dc", "${app_name}-${pipeline_name}-interactive").related('pods').untilEach(1) {
+                      return (it.object().status.phase == "Running")
+                    }
+                  }
+                }
+            }
+        }
+      }
+    }
+
+  }
+}

@@ -1,0 +1,16 @@
+FROM {{ base_image_name }}:latest
+# Set up the /build folder with the install script, the marketplace package and the studio credentials
+USER root
+COPY marketplace.zip /build/marketplace
+RUN chmod -R 777 /build
+COPY ./connect.properties /opt/nuxeo/connect/connect.properties
+RUN chmod 777 /opt/nuxeo/connect/connect.properties
+# Run the image build script
+USER 1000
+RUN /build/install.sh
+# Clean the server
+USER root
+RUN rm -f /opt/nuxeo/connect/connect.properties && \
+    chgrp -fR 0 /opt/nuxeo/server/ && \
+    chmod -fR g+rwX /opt/nuxeo/server/
+USER 1000

@@ -9,12 +9,28 @@ metadata:
     apb_service_class_id: '{{ _apb_service_class_id }}'
     apb_service_instance_id: '{{ _apb_service_instance_id }}'
     component: {{ component }}
-  name: "{{ app_name }}-global-config"
+  name: "{{ global_config_name }}"
   namespace: {{ namespace }}
 data:
   appname: {{ app_name }}
-  git_repo: {{ project_git_repo }}
-  git_ref: {{ project_git_ref }}
-  domain_suffix: {{ domain_suffix }}
-  backend_pv_storage_class: {{ backend_pv_storage_class }}
-  binaries_pv_storage_class: {{ binaries_pv_storage_class }}
+  project_git_repo: "{{ project_git_repo }}"
+  project_git_ref: "{{ project_git_ref }}"
+  github_ssh_key_name: "{{ github_ssh_key_name }}"
+  github_need_ssh: "{{ github_need_ssh}}"
+  nuxeo_studio_project: "{{ nuxeo_studio_project }}"
+  nuxeo_version: "{{ nuxeo_version }}"
+  nuxeo_packages: "{{ nuxeo_packages }}"
+  nuxeo_templates: "{{ nuxeo_templates }}"
+  backend_repository_type: "{{ backend_repository_type }}"
+  backend_stream_type: "{{ backend_stream_type }}"
+  backend_pubsub_type: "{{ backend_pubsub_type }}"
+  backend_binaries_type: "{{ backend_binaries_type }}"
+  backend_pv_storage_class: "{{ backend_pv_storage_class }}"
+  binaries_pv_storage_class: "{{ binaries_pv_storage_class }}"
+  connect_secret_name: "{{ connect_secret_name }}"
+  connect_secret_basic_name: "{{ connect_secret_basic_name}}"
+  deploy_mongo: "{{ deploy_mongo }}"
+  mongodb_service_name: "{{ mongodb_service_name }}"
+  deploy_elasticsearch: "{{ deploy_elasticsearch }}"
+  elasticsearch_service_name: "{{ elasticsearch_service_name }}"
+

@@ -16,8 +16,6 @@
     minutes: 3
   when: state == "present"
 
-## This query doesn't work so we wait for 3 minutes for the
-## backends to be ready
 # - name: "Wait for backend storage to be ready"
 #   set_fact:
 #     mongo_service: "{{ mongodb_service_query }}"

@@ -46,26 +46,6 @@ spec:
               value: |-
                 maven-plugin, pipeline-maven, file-operations,
                 apache-httpcomponents-client-4-api, junit-attachments, tasks
-            - name: NUXEO_RELEASE_GIT_USERNAME
-              valueFrom:
-                configMapKeyRef:
-                  key: user.name
-                  name: {{ jenkins_git_config_name }}
-            - name: NUXEO_RELEASE_GIT_EMAIL
-              valueFrom:
-                configMapKeyRef:
-                  key: user.email
-                  name: {{ jenkins_git_config_name }}
-            - name: SSH_PRIVATEKEY
-              valueFrom:
-                secretKeyRef:
-                  key: ssh-privatekey
-                  name: {{ git_ssh_secret_name }}
-            - name: INSTANCE_CLID
-              valueFrom:
-                secretKeyRef:
-                  key: instance.clid
-                  name: {{ clid_secret_name }}
           image: nuxeo/nuxeo-dev-apb-jenkin-master:latest
           imagePullPolicy: Always
           livenessProbe:

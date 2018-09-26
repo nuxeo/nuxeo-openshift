@@ -65,7 +65,7 @@ plans:
       - name: nuxeo_version
         default: '9.10'
         type: enum
-        enum: ['9.10','10.2','master']
+        enum: ['9.10', '10.2', 'master']
         title: Nuxeo version to use
         display_group: Nuxeo Configuration
 
@@ -78,7 +78,9 @@ plans:
       - name: nuxeo_templates
         default: ''
         type: string
-        title: Comma separated list of Nuxeo templates to be added to the configuration
+        title: |
+          Comma separated list of Nuxeo templates to be added to the
+          configuration
         display_group: Nuxeo Configuration
 
       - name: backend_repository_type

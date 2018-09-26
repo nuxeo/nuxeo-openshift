@@ -1,0 +1,28 @@
+---
+
+- name: "Get the docker image name"
+  set_fact:
+    docker_image: "{{ docker_image_lookup }}"
+  when: state == "absent"
+
+
+- name: "Create build configuration objects state={{ state }}"
+  k8s:
+    state: "{{ state }}"
+    definition: "{{ lookup('template', item.name) | from_yaml }}"
+  when: item.apply | default(True)
+  loop:
+    - name: nuxeo-image-stream.yml.j2
+    - name: nuxeo-image-build.yml.j2
+    - name: build-pipeline.yml.j2
+
+- name: "Get the docker image name"
+  set_fact:
+    docker_image: "{{ docker_image_lookup }}"
+  when: state == "present"
+
+- name: "Set Nuxeo deployment objects state={{ state }}"
+  k8s:
+    state: "{{ state }}"
+    definition: "{{ lookup('template', 'nuxeo-service.yml.j2') | from_yaml }}"
+  loop: "{{ pipeline.environments }}"

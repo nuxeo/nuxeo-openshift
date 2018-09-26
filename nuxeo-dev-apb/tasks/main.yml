@@ -5,7 +5,6 @@
     description: "0%: Starting"
   when: in_cluster
 
-
 - name: "Set Nuxeo Dev global objects state={{ state }}"
   k8s:
     state: "{{ state }}"
@@ -15,6 +14,8 @@
     - name: global-config.yml.j2
     - name: connect-secret.yml.j2
     - name: connect-secret-basic.yml.j2
+    - name: ssh-secret.yml.j2
+      apply: "{{ github_need_ssh }}"
 
 - name: "Instantiating backend storage"
   include_tasks: "backend_storage.yml"
@@ -22,11 +23,16 @@
   # we do not run that part in test
   when: not testing
 
-- name: "Instantiating Nuxeo deployments"
-  include_tasks: "nuxeo_deployment.yml"
+- name: "Instantiating CI/CD"
+  include_tasks: "cicd.yml"
   # As it requires APB and Ansible Service catalog
   # we do not run that part in test
-  # when: not testing
+  when: not testing
+
+- name: "Instantiating pipeline"
+  k8s:
+    state: "{{ state }}"
+    definition: "{{ lookup('template', 'pipeline-service.yml.j2') | from_yaml }}"
 
 - name: "Update last operation"
   asb_last_operation:

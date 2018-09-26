@@ -1,0 +1,28 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<settings>
+  <servers>
+    <server>
+      <id>nuxeo-studio</id>
+      <username>${env.NUXEO_CONNECT_USERNAME}</username>
+      <password>${env.NUXEO_CONNECT_PASSWORD}</password>
+    </server>
+    <server>
+      <id>hotfix-releases</id>
+      <username>${env.NUXEO_CONNECT_USERNAME}</username>
+      <password>${env.NUXEO_CONNECT_PASSWORD}</password>
+    </server>
+    <server>
+      <id>external-releases</id>
+      <username>${env.NEXUS_ADMIN_USERNAME}</username>
+      <password>${env.NEXUS_ADMIN_PASSWORD}</password>
+    </server>
+  </servers>
+  <profiles>
+    <profile>
+      <id>release</id>
+      <properties>
+        <external.releases.url>${env.EXTERNAL_RELEASES_URL}</external.releases.url>
+      </properties>
+    </profile>
+  </profiles>
+</settings>

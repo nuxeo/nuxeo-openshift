@@ -1,0 +1,39 @@
+---
+apiVersion: build.openshift.io/v1
+kind: BuildConfig
+metadata:
+  labels:
+    app: {{ app_name }}
+    apb_name: '{{ apb_name }}'
+    apb_plan_id: '{{ _apb_plan_id }}'
+    apb_service_class_id: '{{ _apb_service_class_id }}'
+    apb_service_instance_id: '{{ _apb_service_instance_id }}'
+  name: {{ build_pipeline_name }}
+  namespace: {{ namespace }}
+spec:
+  source:
+    git:
+      uri: {{ pipeline.jenkinsfile.git.uri }}
+      ref: {{ pipeline.jenkinsfile.git.ref }}
+  strategy:
+    jenkinsPipelineStrategy:
+      jenkinsfilePath: {{ pipeline.jenkinsfile.path }}
+      env:
+      - name: PIPELINE_NAME
+        value: {{ pipeline_name }}
+      - name: PROJECT_GIT_REPO
+        value: {{ global_config.project_git_repo }}
+      - name: PROJECT_GIT_REF
+        value: {{ pipeline_git_ref }}
+{% if global_config.github_need_ssh %}
+      - name: GITHUB_SSH_KEY_NAME
+        value: {{ global_config.github_ssh_key_name }}
+{% endif %}
+      - name: CONNECT_SECRET_BASIC_NAME
+        value: {{ global_config.connect_secret_basic_name }}
+      - name: NUXEO_IMAGE_BUILD
+        value: {{ nuxeo_image_build }}
+      - name: NUXEO_IMAGE_NAME
+        value: {{ nuxeo_image_name }}
+      - name: APP_NAME
+        value: {{ app_name }}
