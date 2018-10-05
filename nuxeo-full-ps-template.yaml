@@ -1619,21 +1619,24 @@ objects:
                           openshiftDeploy(deploymentConfig: "${APPLICATION_NAME}-dev-nuxeo")
                       }
                       stage("Run ftests") {
-                        def packageFile = findFiles(glob: "**/${APPLICATION_NAME}-ftest/**/package.json")
-                        if (packageFile.length == 0) {
-                            echo "No NodeJs functional tests to run."
-                        } else {
-                            def packagePath = packageFile[0].path
-                            def ftestFolderPath = packagePath.substring(0, packagePath.lastIndexOf('/'))
-                            dir (ftestFolderPath) {
-                                sh "oc get route/${APPLICATION_NAME}-dev-nuxeo-route -o json > dev-route.json"
-                                def devRoute = readJSON(file: "dev-route.json")
-                                def nuxeoUrl = "https://" + devRoute.spec.host + "/nuxeo/"
-                                sh "npm cache clean"
-                                sh "npm install"
-                                sh "npm run test -- --headless --nuxeoUrl=${nuxeoUrl}"
-                            }
-                        }
+                          def packageFile = findFiles(glob: "**/${APPLICATION_NAME}-ftest/**/package.json")
+                          if (packageFile.length == 0) {
+                              echo "No NodeJs functional tests to run."
+                          } else {
+                              openshift.withCluster() {
+                                  openshift.withProject() {
+                                      def nuxeoUrl = "https://" + openshift.selector("route/${APPLICATION_NAME}-dev-nuxeo-route").object().spec.host + "/nuxeo/"
+                                      timeout(time: 15, unit: "MINUTES") {
+                                          openshift.selector("dc", "${APPLICATION_NAME}-dev-nuxeo").related("pods").untilEach(1) {
+                                              withEnv(["NUXEO_URL=${nuxeoUrl}"]) {
+                                                  sh "mvn verify -pl=${APPLICATION_NAME}-ftest -DskipNodeITs=false"
+                                                  return (it.object().status.phase == "Running")
+                                              }
+                                          }
+                                      }
+                                  }
+                              }
+                          }
                       }
                       timeout(time: 60, unit: 'MINUTES') {
                         node {
