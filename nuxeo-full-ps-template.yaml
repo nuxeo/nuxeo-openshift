@@ -1627,11 +1627,14 @@ objects:
                                   openshift.withProject() {
                                       def nuxeoUrl = "https://" + openshift.selector("route/${APPLICATION_NAME}-dev-nuxeo-route").object().spec.host + "/nuxeo/"
                                       timeout(time: 15, unit: "MINUTES") {
-                                          openshift.selector("dc", "${APPLICATION_NAME}-dev-nuxeo").related("pods").untilEach(1) {
-                                              withEnv(["NUXEO_URL=${nuxeoUrl}"]) {
-                                                  sh "mvn verify -pl=${APPLICATION_NAME}-ftest -DskipNodeITs=false"
-                                                  return (it.object().status.phase == "Running")
-                                              }
+                                          def dcLatestVersion = openshift.selector("dc", "${APPLICATION_NAME}-dev-nuxeo").object().status.latestVersion
+                                          def rc = openshift.selector('rc', "${APPLICATION_NAME}-dev-nuxeo-${dcLatestVersion}")
+                                          rc.untilEach(1){
+                                              def rcMap = it.object()
+                                              return (rcMap.status.replicas.equals(rcMap.status.readyReplicas))
+                                          }
+                                          withEnv(["NUXEO_URL=${nuxeoUrl}"]) {
+                                              sh "mvn verify -pl=${APPLICATION_NAME}-ftest -DskipNodeITs=false"
                                           }
                                       }
                                   }
