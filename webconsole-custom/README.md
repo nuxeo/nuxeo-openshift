@@ -8,7 +8,7 @@ Docker container image that hold customization for Openshift Web Console
 Create a new application in the `openshift-web-console` project and expose the created service:
 
 ```
-oc new-app https://github.com/nuxeo-sandbox/nuxeo-openshift\#dev-environment --context-dir=webconsole-custom --name webconsole-custom -n openshift-web-console
+oc new-app https://github.com/nuxeo/nuxeo-openshift --context-dir=webconsole-custom --name webconsole-custom -n openshift-web-console
 oc expose svc/webconsole-custom -n openshift-web-console
 ```
 

@@ -12,7 +12,7 @@ metadata:
   longDescription:
     This basically deploys Jenkins and Nexus
   dependencies: []
-  documentationUrl: "https://github.com/nuxeo-sandbox/nuxeo-openshift/README.md"
+  documentationUrl: "https://github.com/nuxeo/nuxeo-openshift/README.md"
   providerDisplayName: "Nuxeo"
 plans:
   - name: default

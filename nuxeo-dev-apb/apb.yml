@@ -12,7 +12,7 @@ metadata:
     A full and modular Nuxeo development environment that allows
      a complete CI/CD workflow.
   dependencies: []
-  documentationUrl: "https://github.com/nuxeo-sandbox/nuxeo-openshift/README.md"
+  documentationUrl: "https://github.com/nuxeo/nuxeo-openshift/README.md"
   imageUrl: "https://www.nuxeo.com/assets/imgs/logo340x60.png"
 plans:
   - name: default

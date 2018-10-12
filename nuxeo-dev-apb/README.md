@@ -22,7 +22,7 @@ oc edit configmap asdfa -n openshift-ansible-service-broker
 Create a new build:
 
 ```
-oc new-build https://github.com/nuxeo-sandbox/nuxeo-openshift\#dev-environment --context-dir=nuxeo-dev-apb --name=nuxeo-dev-apb
+oc new-build https://github.com/nuxeo/nuxeo-openshift --context-dir=nuxeo-dev-apb --name=nuxeo-dev-apb
 ```
 
 

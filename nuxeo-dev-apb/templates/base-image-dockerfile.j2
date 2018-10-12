@@ -7,7 +7,7 @@ RUN apt-get update && \
     apt-get install -y imagemagick && \
     apt-get install -y --no-install-recommends vim && \
     mkdir -p /build/marketplace && \
-    curl -fsSL "https://raw.githubusercontent.com/nuxeo-sandbox/nuxeo-openshift/dev-environment/scripts/install.sh" -o /build/install.sh && \
+    curl -fsSL "https://raw.githubusercontent.com/nuxeo/nuxeo-openshift/master/scripts/install.sh" -o /build/install.sh && \
     echo "60c3ca4222befc08b125d7b368de9a34 /build/install.sh" | md5sum -c - && \
     echo Finished
 USER 1000

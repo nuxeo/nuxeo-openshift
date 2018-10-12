@@ -10,8 +10,8 @@ pipeline_map:
   uat-dev:
     jenkinsfile:
       git:
-        uri: "https://github.com/nuxeo-sandbox/nuxeo-openshift"
-        ref: dev-environment
+        uri: "https://github.com/nuxeo/nuxeo-openshift"
+        ref: master
       path: jenkinsfile/Jenkinsfile-build
     environments:
       - dev
@@ -19,8 +19,8 @@ pipeline_map:
   single:
     jenkinsfile:
       git:
-        uri: "https://github.com/nuxeo-sandbox/nuxeo-openshift"
-        ref: dev-environment
+        uri: "https://github.com/nuxeo/nuxeo-openshift"
+        ref: master
       path: jenkinsfile/Jenkinsfile-single
     environments:
       - "{{ pipeline_name }}"
