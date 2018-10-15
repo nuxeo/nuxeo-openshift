@@ -5,7 +5,7 @@ state_map:
   deprovision: absent
 state: "{{ state_map[apb_action] }}"
 
-app_name: "{{ project_name }}"
+app_name: "{{ project_name | lower }}"
 
 # Choose appropriate ES docker image from https://www.docker.elastic.co/#
 elasticsearch_image_map:
