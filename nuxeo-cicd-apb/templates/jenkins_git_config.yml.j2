@@ -12,5 +12,5 @@ metadata:
     apb_service_instance_id: '{{ _apb_service_instance_id }}'
     component: jenkins
 data:
-  user.name: {{ jenkins_git_release_username }}
-  user.email: {{ jenkins_git_release_email }}
+  user.name: {{ global_config.jenkins_git_release_username }}
+  user.email: {{ global_config.jenkins_git_release_email }}
