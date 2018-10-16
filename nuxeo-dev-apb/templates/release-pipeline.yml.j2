@@ -1,0 +1,41 @@
+---
+apiVersion: build.openshift.io/v1
+kind: BuildConfig
+metadata:
+  labels:
+    app: {{ app_name }}
+    apb_name: '{{ apb_name }}'
+    apb_plan_id: '{{ _apb_plan_id }}'
+    apb_service_class_id: '{{ _apb_service_class_id }}'
+    apb_service_instance_id: '{{ _apb_service_instance_id }}'
+  name: {{ release_pipeline_name }}
+  namespace: {{ namespace }}
+spec:
+  source:
+    git:
+      uri: https://github.com/nuxeo/nuxeo-openshift
+      ref: master
+  strategy:
+    jenkinsPipelineStrategy:
+      jenkinsfilePath: jenkinsfile/Jenkinsfile-release
+      env:
+      - name: PROJECT_GIT_REPO
+        value: {{ project_git_repo }}
+      - name: PROJECT_GIT_REF
+        value: {{ project_git_ref }}
+      - name: NUXEO_VERSION
+        value: "{{ nuxeo_version }}"
+      - name: GIT_USERNAME
+        value: "{{ jenkins_git_release_username }}"
+      - name: GIT_EMAIL
+        value: "{{ jenkins_git_release_email }}"
+{% if github_need_ssh %}
+      - name: GITHUB_SSH_KEY_NAME
+        value: {{ github_ssh_key_name }}
+{% endif %}
+      - name: CONNECT_SECRET_BASIC_NAME
+        value: {{ connect_secret_basic_name }}
+      - name: NEXUS_CREDS_NAME
+        value: {{ nexus_creds_name }}
+      - name: APP_NAME
+        value: {{ app_name }}

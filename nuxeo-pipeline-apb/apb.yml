@@ -9,7 +9,7 @@ tags:
 metadata:
   displayName: Jenkins pipeline for Nuxeo
   longDescription:
-    A Pipeline that deploy a Nuxeo DEV project into several environments
+    A Pipeline that deploys a Nuxeo DEV project into several environments
   dependencies: []
   documentationUrl: "https://github.com/nuxeo/nuxeo-openshift/README.md"
   imageUrl: "https://www.nuxeo.com/assets/imgs/logo340x60.png"

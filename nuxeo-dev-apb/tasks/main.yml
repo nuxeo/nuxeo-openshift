@@ -29,10 +29,15 @@
   # we do not run that part in test
   when: not testing
 
-- name: "Instantiating pipeline"
+- name: "Instantiating build pipeline"
   k8s:
     state: "{{ state }}"
     definition: "{{ lookup('template', 'pipeline-service.yml.j2') | from_yaml }}"
+
+- name: "Instantiating release pipeline"
+  k8s:
+    state: "{{ state }}"
+    definition: "{{ lookup('template', 'release-pipeline.yml.j2') | from_yaml }}"
 
 - name: "Update last operation"
   asb_last_operation:

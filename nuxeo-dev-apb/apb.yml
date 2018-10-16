@@ -62,6 +62,18 @@ plans:
         title: The name of the studio project to register to
         display_group: Connect properties
 
+      - name: jenkins_git_release_username
+        type: string
+        default: openshift
+        title: Git user name to perform release
+        display_group: Git configuration
+
+      - name: jenkins_git_release_email
+        type: string
+        default: openshift@nuxeo.com
+        title: Git user email to perform release
+        display_group: Git configuration
+
       - name: nuxeo_version
         default: '9.10'
         type: enum
