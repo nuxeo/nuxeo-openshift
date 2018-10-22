@@ -21,6 +21,7 @@ spec:
     worker_replicas: 0
     image_repository: "{{ docker_image }}"
     image_tag: "{{ item }}"
+    image_pullPolicy: Always
     binaries_persistentVolume_enabled: true
     binaries_persistentVolume_storageClass: "{{ global_config.binaries_pv_storage_class }}"
     binaries_persistentVolume_size: "10Gi"
