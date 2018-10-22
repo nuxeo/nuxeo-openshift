@@ -78,7 +78,7 @@ pipeline {
               }
               def files = findFiles(glob: "**/${packagePathRegExp}")
               if (files.length == 0) {
-                  echo "Marketplace zip file not found."
+                  echo "WARNING: Marketplace zip file not found."
               }
 
               stash name:"marketplace", includes:"${files[0]}"
@@ -98,7 +98,7 @@ pipeline {
               unstash name: "marketplace"
               def files = findFiles(glob: "**/${packagePathRegExp}")
               if (files.length == 0) {
-                  echo "Marketplace zip file not found."
+                  echo "WARNING: Marketplace zip file not found."
               }
               if (fileExists("source")) {
                   sh "rm -rf source"

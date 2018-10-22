@@ -1,4 +1,8 @@
 def project = ""
+def packagePathRegExp = ""
+def nuxeo_image_build = ""
+def nuxeo_image_name = ""
+def release_tag = ""
 
 pipeline {
   agent {
@@ -44,6 +48,8 @@ pipeline {
               connect_secret_basic_name = env.CONNECT_SECRET_BASIC_NAME
               nexus_creds_name = env.NEXUS_CREDS_NAME
               auto_increment_policy = "auto_" + env.RELEASE_SCOPE
+              nuxeo_image_build = env.NUXEO_IMAGE_BUILD
+              nuxeo_image_name = env.NUXEO_IMAGE_NAME
             }
           }
         }
@@ -71,8 +77,8 @@ pipeline {
             openshift.withProject() {
               // Download release script
               def operations = []
-              def files = ["release.py", "requirements.txt", "IndentedHelpFormatterWithNL.py", "nxutils.py", "terminalsize.py"]
-              files.each { file -> operations.add(
+              def release_files = ["release.py", "requirements.txt", "IndentedHelpFormatterWithNL.py", "nxutils.py", "terminalsize.py"]
+              release_files.each { file -> operations.add(
                 fileDownloadOperation(
                   url: "https://raw.githubusercontent.com/nuxeo/nuxeo/release-${nuxeo_version}/scripts/${file}",
                   userName: "",
@@ -111,8 +117,25 @@ pipeline {
                 def nexusRoute = readJSON(file: "nexus-route.json")
                 env.EXTERNAL_RELEASES_URL = "http://" + nexusRoute.spec.host + nexusRoute.spec.path + "/content/repositories/releases"
 
-                // Launch release and deploy artifacts to Nexus
+                // Prepare release
                 sh "python ./release.py -f prepare --aip=${auto_increment_policy}"
+                release_tag = sh(
+                  returnStdout: true,
+                  script: 'log_file="release-${PWD##*/}.log" && source ../$log_file && echo -n $TAG'
+                )
+                if (fileExists(".nuxeo-s2i")) {
+                  def props = readProperties file: ".nuxeo-s2i"
+                  packagePathRegExp = props["NUXEO_PACKAGE_DIR"].replaceAll("\\*", release_tag)
+                } else {
+                  packagePathRegExp = "*(marketplace|package)-${release_tag}.zip"
+                }
+                def files = findFiles(glob: "**/${packagePathRegExp}")
+                if (files.length == 0) {
+                  echo "WARNING: Release marketplace zip file not found."
+                }
+                stash name:"marketplace", includes:"${files[0]}"
+
+                // Perform release and deploy artifacts to Nexus
                 sh "python ./release.py perform"
               }
             }
@@ -121,5 +144,48 @@ pipeline {
       }
     }
 
+    stage('Build and tag release Docker image') {
+      steps {
+        script {
+          openshift.withCluster() {
+            openshift.withProject() {
+              // Prepare build
+              unstash name: "marketplace"
+              def files = findFiles(glob: "**/${packagePathRegExp}")
+              if (files.length == 0) {
+                echo "WARNING: Release marketplace zip file not found."
+              }
+              if (fileExists("source")) {
+                sh "rm -rf source"
+              }
+              sh "mkdir -p source"
+              fileOperations([
+                fileCopyOperation(
+                  includes: "${files[0].path}",
+                  targetLocation: "source",
+                  flattenFiles: true,
+                ),
+                fileRenameOperation(
+                  source: "source/${files[0].name}",
+                  destination: "source/marketplace.zip"
+                )
+              ])
+
+              // Build docker image
+              openshift.selector("bc", nuxeo_image_build).startBuild("--from-dir='source'", "--wait")
+              def builds = openshift.selector("bc", nuxeo_image_build).related('builds')
+              timeout(10) {
+                builds.untilEach(1) {
+                  return (it.object().status.phase == "Complete")
+                }
+              }
+
+              // Tag release image
+              openshift.tag("${nuxeo_image_name}:latest", "${nuxeo_image_name}:${release_tag}")
+            }
+          }
+        }
+      }
+    }
   }
 }
