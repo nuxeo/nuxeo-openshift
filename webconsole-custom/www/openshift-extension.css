@@ -29,16 +29,16 @@
 
 
 .project-bar{background-color:#091e32}
-.project-bar .catalog-search .landing-search-form .search-pf-input-group .form-control{background-color:#73D2CF;border-color:whitewhite;color:#0066ff}
-.project-bar .add-to-project>.btn-link{background-color:#73D2CF;border:1px solid #030303}
+.project-bar .catalog-search .landing-search-form .search-pf-input-group .form-control{background-color:white;border-color:whitewhite;color:#0066ff}
+.project-bar .add-to-project>.btn-link{background-color:white;border:1px solid #030303}
 .project-bar .add-to-project>.btn-link{color:#0066ff}
 
 .nav-pf-vertical{background-color: #222c39;}
 .nav-pf-vertical .list-group-item>a .fa,.nav-pf-vertical .list-group-item>a .pficon{color:#bcbfbf}
 .nav-pf-vertical .list-group-item.active>a,.nav-pf-vertical .list-group-item.is-hover>a,.nav-pf-vertical .list-group-item>a:focus{background-color:#404040;color:#fff!important}
 
-.nav-pf-vertical .list-group-item.active>a:before{background:#73D2CF}
-.nav-pf-vertical .list-group-item.active>a .fa,.nav-pf-vertical .list-group-item.active>a .pficon,.nav-pf-vertical .list-group-item.is-hover>a .fa,.nav-pf-vertical .list-group-item.is-hover>a .pficon,.nav-pf-vertical .list-group-item>a:focus .fa,.nav-pf-vertical .list-group-item>a:focus .pficon{color:#73D2CF}
+.nav-pf-vertical .list-group-item.active>a:before{background:white}
+.nav-pf-vertical .list-group-item.active>a .fa,.nav-pf-vertical .list-group-item.active>a .pficon,.nav-pf-vertical .list-group-item.is-hover>a .fa,.nav-pf-vertical .list-group-item.is-hover>a .pficon,.nav-pf-vertical .list-group-item>a:focus .fa,.nav-pf-vertical .list-group-item>a:focus .pficon{color:white}
 
 
 .nav-pf-vertical .nav-pf-secondary-nav{background:#404040;}
