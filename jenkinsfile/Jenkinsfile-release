@@ -123,17 +123,7 @@ pipeline {
                   returnStdout: true,
                   script: 'log_file="release-${PWD##*/}.log" && source ../$log_file && echo -n $TAG'
                 )
-                if (fileExists(".nuxeo-s2i")) {
-                  def props = readProperties file: ".nuxeo-s2i"
-                  packagePathRegExp = props["NUXEO_PACKAGE_DIR"].replaceAll("\\*", release_tag)
-                } else {
-                  packagePathRegExp = "*(marketplace|package)-${release_tag}.zip"
-                }
-                def files = findFiles(glob: "**/${packagePathRegExp}")
-                if (files.length == 0) {
-                  echo "WARNING: Release marketplace zip file not found."
-                }
-                stash name:"marketplace", includes:"${files[0]}"
+                nuxeo_openshift_lib.stash_package release_tag
 
                 // Perform release and deploy artifacts to Nexus
                 sh "python ./release.py perform"
@@ -149,27 +139,11 @@ pipeline {
         script {
           openshift.withCluster() {
             openshift.withProject() {
-              // Prepare build
-              unstash name: "marketplace"
-              def files = findFiles(glob: "**/${packagePathRegExp}")
-              if (files.length == 0) {
-                echo "WARNING: Release marketplace zip file not found."
-              }
               if (fileExists("source")) {
                 sh "rm -rf source"
               }
               sh "mkdir -p source"
-              fileOperations([
-                fileCopyOperation(
-                  includes: "${files[0].path}",
-                  targetLocation: "source",
-                  flattenFiles: true,
-                ),
-                fileRenameOperation(
-                  source: "source/${files[0].name}",
-                  destination: "source/marketplace.zip"
-                )
-              ])
+              nuxeo_openshift_lib.unstash_package()
 
               // Build docker image
               openshift.selector("bc", nuxeo_image_build).startBuild("--from-dir='source'", "--wait")
@@ -180,8 +154,8 @@ pipeline {
                 }
               }
 
-              // Tag release image
-              openshift.tag("${nuxeo_image_name}:latest", "${nuxeo_image_name}:${release_tag}")
+              // Promote to release version
+              openshift.tag("${nuxeo_image_name}:latest", "${nuxeo_image_name}:v${release_tag}")
             }
           }
         }

@@ -70,20 +70,7 @@ pipeline {
               )
             ]) {
               sh "mvn clean package"
-
-              // Should be done in a library function like nuxeo.openshift.stashPackage("marketplace")
-              if (fileExists(".nuxeo-s2i")) {
-                  def props = readProperties file: ".nuxeo-s2i"
-                  packagePathRegExp = props["NUXEO_PACKAGE_DIR"]
-              } else {
-                  packagePathRegExp = "*(marketplace|package)-*.zip"
-              }
-              def files = findFiles(glob: "**/${packagePathRegExp}")
-              if (files.length == 0) {
-                  echo "Marketplace zip file not found."
-              }
-
-              stash name:"marketplace", includes:"${files[0]}"
+              nuxeo_openshift_lib.stash_package "*"
             }
           }
         }
@@ -96,27 +83,11 @@ pipeline {
         script {
           openshift.withCluster() {
             openshift.withProject() {
-
-              unstash name: "marketplace"
-              def files = findFiles(glob: "**/${packagePathRegExp}")
-              if (files.length == 0) {
-                  echo "Marketplace zip file not found."
-              }
               if (fileExists("source")) {
                 sh "rm -rf source"
               }
               sh "mkdir -p source"
-              fileOperations([
-                  fileCopyOperation(
-                      includes: "${files[0].path}",
-                      targetLocation: "source",
-                      flattenFiles: true,
-                  ),
-                  fileRenameOperation(
-                      source: "source/${files[0].name}",
-                      destination: "source/marketplace.zip"
-                  )
-              ])
+              nuxeo_openshift_lib.unstash_package()
 
               // Build docker image
               openshift.selector("bc", nuxeo_image_build).startBuild("--from-dir='source'", "--wait")

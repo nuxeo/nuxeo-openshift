@@ -35,6 +35,6 @@ jenkins_dc_name: jenkins
 jenkins_service_name: jenkins
 jenkins_jnlp_service_name: jenkins-jnlp
 jenkins_route_name: jenkins
-jenkins_maven_config_name: "{{ name }}-maven-config"
+jenkins_config_name: "{{ name }}-config"
 jenkins_git_config_name: "{{ name }}-git-config"
 clid_secret_name: "{{ name }}-clid"

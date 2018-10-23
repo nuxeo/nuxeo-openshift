@@ -23,7 +23,7 @@
     - name: nexus_pv.yml.j2
     - name: nexus_dc.yml.j2
     - name: jenkins_git_config.yml.j2
-    - name: jenkins_maven_config.yml.j2
+    - name: jenkins_config.yml.j2
     - name: jenkins_slave_config.yml.j2
     - name: jenkins_route.yml.j2
     - name: jenkins_dc.yml.j2

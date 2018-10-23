@@ -8,28 +8,6 @@ def nuxeo_image_build = ""
 def app_name = ""
 def nuxeo_image_name = ""
 
-def stash_package() {
-  def package_paths = []
-  def package_files = []
-  if (fileExists(".nuxeo-s2i")) {
-    def props = readProperties file: ".nuxeo-s2i"
-    package_paths.push(props["NUXEO_PACKAGE_DIR"])
-  }
-  package_paths.push("*/target/*package-*.zip")
-  package_paths.push("*/target/*marketplace-*.zip")
-  package_paths.each { package_path ->
-    package_files = findFiles(glob: "**/${package_path}")
-    if (package_files.length != 0) {
-      echo package_path
-      stash name:"marketplace", includes:"${package_files[0]}"
-      return
-    }
-  }
-  if (package_files.length == 0) {
-    echo "WARNING: Marketplace zip file not found."
-  }
-}
-
 pipeline {
   agent {
     node {
@@ -89,7 +67,7 @@ pipeline {
               )
             ]) {
               sh "mvn clean package"
-              stash_package()
+              nuxeo_openshift_lib.stash_package "*"
             }
           }
         }
@@ -102,27 +80,11 @@ pipeline {
         script {
           openshift.withCluster() {
             openshift.withProject() {
-
-              unstash name: "marketplace"
-              def files = findFiles(glob: "**/${packagePathRegExp}")
-              if (files.length == 0) {
-                echo "WARNING: Marketplace zip file not found."
-              }
               if (fileExists("source")) {
                 sh "rm -rf source"
               }
               sh "mkdir -p source"
-              fileOperations([
-                fileCopyOperation(
-                  includes: "${files[0].path}",
-                  targetLocation: "source",
-                  flattenFiles: true,
-                ),
-                fileRenameOperation(
-                  source: "source/${files[0].name}",
-                  destination: "source/marketplace.zip"
-                )
-              ])
+              nuxeo_openshift_lib.unstash_package()
 
               // Build docker image
               openshift.selector("bc", nuxeo_image_build).startBuild("--from-dir='source'", "--wait")
