@@ -21,36 +21,37 @@ pipeline {
   }
 
   stages {
+
     stage('Initialize') {
       steps {
         script {
           openshift.withCluster() {
             openshift.withProject() {
-                app_name = env.APP_NAME
-                echo "Using project: ${openshift.project()} with app: ${app_name}"
-                project = openshift.project()
-                project_git_repo = env.PROJECT_GIT_REPO
-                project_git_ref = env.PROJECT_GIT_REF
-                github_ssh_key_name = env.GITHUB_SSH_KEY_NAME
-                connect_secret_basic_name = env.CONNECT_SECRET_BASIC_NAME
-                nuxeo_image_build = env.NUXEO_IMAGE_BUILD
-                nuxeo_image_name = env.NUXEO_IMAGE_NAME
-
+              app_name = env.APP_NAME
+              echo "Using project: ${openshift.project()} with app: ${app_name}"
+              project = openshift.project()
+              project_git_repo = env.PROJECT_GIT_REPO
+              project_git_ref = env.PROJECT_GIT_REF
+              github_ssh_key_name = env.GITHUB_SSH_KEY_NAME
+              connect_secret_basic_name = env.CONNECT_SECRET_BASIC_NAME
+              nuxeo_image_build = env.NUXEO_IMAGE_BUILD
+              nuxeo_image_name = env.NUXEO_IMAGE_NAME
             }
           }
         }
       }
     }
+
     stage('Checkout repository') {
       steps {
         script {
-            openshift.withCluster() {
-                openshift.withProject() {
-                  git url: "${project_git_repo}",
-                  branch: "${project_git_ref}",
-                  credentialsId: "${project}-${github_ssh_key_name}"
-                }
+          openshift.withCluster() {
+            openshift.withProject() {
+              git url: "${project_git_repo}",
+              branch: "${project_git_ref}",
+              credentialsId: "${project}-${github_ssh_key_name}"
             }
+          }
         }
       }
     }
@@ -61,24 +62,23 @@ pipeline {
           withMaven() {
             withCredentials([
               usernamePassword(
-                  credentialsId: "${project}-${connect_secret_basic_name}",
-                  usernameVariable: "NUXEO_CONNECT_USERNAME",
-                  passwordVariable: "NUXEO_CONNECT_PASSWORD"
+                credentialsId: "${project}-${connect_secret_basic_name}",
+                usernameVariable: "NUXEO_CONNECT_USERNAME",
+                passwordVariable: "NUXEO_CONNECT_PASSWORD"
               )
             ]) {
-
               sh "mvn clean package"
 
               // Should be done in a library function like nuxeo.openshift.stashPackage("marketplace")
               if (fileExists(".nuxeo-s2i")) {
-                  def props = readProperties file: ".nuxeo-s2i"
-                  packagePathRegExp = props["NUXEO_PACKAGE_DIR"]
+                def props = readProperties file: ".nuxeo-s2i"
+                packagePathRegExp = props["NUXEO_PACKAGE_DIR"]
               } else {
-                  packagePathRegExp = "*(marketplace|package)-*.zip"
+                packagePathRegExp = "*(marketplace|package)-*.zip"
               }
               def files = findFiles(glob: "**/${packagePathRegExp}")
               if (files.length == 0) {
-                  echo "WARNING: Marketplace zip file not found."
+                echo "WARNING: Marketplace zip file not found."
               }
 
               stash name:"marketplace", includes:"${files[0]}"
@@ -98,24 +98,25 @@ pipeline {
               unstash name: "marketplace"
               def files = findFiles(glob: "**/${packagePathRegExp}")
               if (files.length == 0) {
-                  echo "WARNING: Marketplace zip file not found."
+                echo "WARNING: Marketplace zip file not found."
               }
               if (fileExists("source")) {
-                  sh "rm -rf source"
+                sh "rm -rf source"
               }
               sh "mkdir -p source"
               fileOperations([
-                  fileCopyOperation(
-                      includes: "${files[0].path}",
-                      targetLocation: "source",
-                      flattenFiles: true,
-                  ),
-                  fileRenameOperation(
-                      source: "source/${files[0].name}",
-                      destination: "source/marketplace.zip"
-                  )
+                fileCopyOperation(
+                  includes: "${files[0].path}",
+                  targetLocation: "source",
+                  flattenFiles: true,
+                ),
+                fileRenameOperation(
+                  source: "source/${files[0].name}",
+                  destination: "source/marketplace.zip"
+                )
               ])
 
+              // Build docker image
               openshift.selector("bc", nuxeo_image_build).startBuild("--from-dir='source'", "--wait")
               def builds = openshift.selector("bc", nuxeo_image_build).related('builds')
               timeout(10) {
@@ -135,16 +136,16 @@ pipeline {
     stage('Deploy DEV') {
       steps {
         script {
-            openshift.withCluster() {
-                openshift.withProject() {
-                  openshiftDeploy(deploymentConfig: "${app_name}-dev-interactive")
-                  timeout(5) {
-                    openshift.selector("dc", "${app_name}-dev-interactive").related('pods').untilEach(1) {
-                      return (it.object().status.phase == "Running")
-                    }
-                  }
+          openshift.withCluster() {
+            openshift.withProject() {
+              openshiftDeploy(deploymentConfig: "${app_name}-dev-interactive")
+              timeout(5) {
+                openshift.selector("dc", "${app_name}-dev-interactive").related('pods').untilEach(1) {
+                  return (it.object().status.phase == "Running")
                 }
+              }
             }
+          }
         }
       }
     }
@@ -168,17 +169,18 @@ pipeline {
       steps {
         script {
           openshift.withCluster() {
-              openshift.withProject() {
-                openshiftDeploy(deploymentConfig: "${app_name}-uat-interactive")
-                timeout(5) {
-                  openshift.selector("dc", "${app_name}-uat-interactive").related('pods').untilEach(1) {
-                    return (it.object().status.phase == "Running")
-                  }
+            openshift.withProject() {
+              openshiftDeploy(deploymentConfig: "${app_name}-uat-interactive")
+              timeout(5) {
+                openshift.selector("dc", "${app_name}-uat-interactive").related('pods').untilEach(1) {
+                  return (it.object().status.phase == "Running")
                 }
               }
+            }
           }
         }
       }
     }
+
   }
 }
