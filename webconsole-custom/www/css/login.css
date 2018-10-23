@@ -1,0 +1,653 @@
+/* Nuxeo Fonts */
+@font-face {
+  font-family: "Aregular";
+  font-style: normal;
+  font-weight: 400;
+}
+
+@font-face {
+  font-family: "Ademi";
+  font-style: normal;
+  font-weight: 400;
+}
+
+@font-face {
+  font-family: "nuxeo-icons";
+  font-style: normal;
+  font-weight: 400;
+}
+
+#cas {
+  font-family: 'Aregular', Arial, sans-serif;
+  -webkit-transition: margin 0.2s ease, -webkit-transform 0.2s ease /*rtl:append:,padding 0.2s ease*/;
+  -moz-transition: margin 0.2s ease, -moz-transform 0.2s ease /*rtl:append:,padding 0.2s ease*/;
+  transition: margin 0.2s ease, transform 0.2s ease /*rtl:append:,padding 0.2s ease*/;
+}
+
+#cas .container {
+  width: 50%;
+  margin: 0 auto;
+  padding-top: 0;
+}
+
+#cas fieldset {
+  border: 0;
+  margin: 0;
+  padding: 0;
+  float: left;
+  clear: none;
+  width: auto;
+}
+
+#cas fieldset legend {
+  display: none;
+}
+
+div.login {
+  width: 350px;
+  margin: 0 auto;
+}
+
+#cas #login {
+  margin: 0;
+  box-shadow: 0 1px 0 rgba(0, 0, 0, 0.2);
+  border: 0;
+  padding: 35px 44px;
+  width: 350px;
+  background-color: #FFF;
+  box-sizing: border-box;
+  height: 505px;
+  position: relative;
+}
+
+#cas #login h2 {
+  border-bottom: 1px solid #ddd;
+  padding: 3px 0;
+  font: normal 400 17px 'Aregular', Arial, sans-serif;;
+  color: #333;
+}
+
+#cas #login #sidebar {
+  padding: 0;
+}
+
+#cas #login .id-field input:focus {
+  border-color: #00ADED;
+}
+
+#cas #login .id-field label {
+  display: inline;
+  font-size: 15px;
+  padding-top: .2em;
+  width: 130px;
+  font-weight: 700;
+}
+
+#cas #login label span.accesskey {
+  text-decoration: none;
+}
+
+#cas #login input {
+  letter-spacing: 0;
+  width: 100%;
+  padding: .8em;
+  box-sizing: border-box;
+}
+
+#cas #login .row.check {
+  padding: 1em 0 .1em;
+}
+
+#cas #login .check input {
+  margin: 0 0.3em;
+  padding: 0;
+  vertical-align: bottom;
+}
+
+#cas #login .check label {
+  float: none;
+  font-size: 11px;
+  line-height: 1.8;
+  vertical-align: middle;
+  width: auto;
+}
+
+#cas #login .btn-row {
+  padding-top: 10px;
+  border-bottom: 1px solid #fff;
+  width: 100%;
+  height: 58px;
+  margin: 0 auto;
+}
+
+#cas #login .btn-row .btn-submit {
+  background-color: #0066FF;
+  width: 100%;
+  height: 75%;
+  line-height: 20px;
+  border: none;
+  border-radius: unset;
+  float: none;
+  clear: none;
+  color: #fff;
+  cursor: pointer;
+  padding: .7em .5em;
+  letter-spacing: 0;
+  margin: .5em auto;
+  font-weight: bold;
+}
+
+#cas #login .btn-row .btn-submit:hover {
+  background-color: #1F28BF;
+}
+
+#cas #login .btn-reset.password {
+  display: block;
+  text-align: right;
+  text-decoration: none;
+  color: #777;
+  padding-top: .4em;
+  font-size: 13px;
+}
+
+#cas #login .btn-row .btn-reset:hover {
+  color: #00adff;
+}
+
+#cas #login .alt-signin {
+  text-align: center;
+  width: 68%;
+  margin: 0 auto;
+}
+
+#cas #login .alt-signin img {
+  width: 100%;
+  margin-top: .5em;
+}
+
+#cas #block_container {
+  border: none;
+  height: 100%;
+  overflow: auto;
+  visibility: visible;
+  width: 600px;
+  box-shadow: 0 1px 0 rgba(0, 0, 0, 0.2);
+}
+
+#cas #sidebar {
+  padding: 10px;
+}
+
+#cas #sidebar h3 {
+  font: normal 400 14px 'Aregular', Arial, sans-serif;
+  color: #555;
+  margin: 18px 0 0;
+  padding: 6px 0 3px;
+}
+
+#cas #sidebar p {
+  margin: 0 0 1.2em 2.3em;
+  padding: 0;
+  color: #777;
+  font-size: 11px;
+}
+
+#cas #list-languages ul {
+  margin: 0;
+  padding: 0;
+  line-height: 1.5;
+  list-style: none;
+}
+
+#cas #list-languages ul li {
+  display: inline;
+  padding: 0 5px;
+  border-right: 1px solid #ccc;
+}
+
+#cas #list-languages ul li.first {
+  padding-left: 0;
+}
+
+#cas #list-languages ul li.last {
+  padding-right: 0;
+  border: 0;
+}
+
+#cas #list-languages a,
+#cas #list-languages a:visited,
+#cas #list-languages a:hover {
+  color: #fff;
+}
+
+#cas #footer p {
+  margin: 0 0 1em 0;
+  padding: 0;
+}
+
+p.nav {
+  margin-top: 25px;
+  text-align: center;
+}
+
+/* RESET --------------------------------- */
+/* reset some properties for elements since defaults are not crossbrowser
+http://meyerweb.com/eric/thoughts/2007/05/01/reset-reloaded/ */
+html, body, div, span, h1, h2, h3, p,
+a, img, ul, li, fieldset, form, label, legend {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  outline: 0;
+  font-weight: inherit;
+  font-style: inherit;
+  font-size: 100%;
+  font-family: inherit;
+  vertical-align: baseline;
+}
+
+:focus {
+  outline: 0;
+}
+
+ul {
+  list-style: none;
+  font-size: 11px;
+  padding: 0 0 18px 40px;
+}
+
+/* browser default font-size is 16px which is too big so we make it 16px x 62.5% = 10px */
+body {
+  font: normal 400 62.5%/1.0 'Aregular', Arial, sans-serif;
+  min-width: 960px;
+  background: url(../img/login_bg.jpg) no-repeat fixed center top #2029bf;
+  color: #333;
+  display: block;
+}
+
+
+.error {
+  color: red;
+  font-size: 13px;
+  margin-bottom: 10px;
+}
+
+/*
+ - used to clear or contain floats within a non-floated container
+ - this ruleset is used by UAs that handle :after - not IE - see ie_cas.css for IE fix
+http://www.positioniseverything.net/easyclearing.html and http://www.ejeliot.com/blog/59 */
+#header:after,
+#content:after,
+#footer:after,
+.clearfix:after {
+  content: ".";
+  clear: both;
+  display: block;
+  height: 0;
+  visibility: hidden;
+}
+
+/* HEADER --------------------------------- */
+#header {
+  position: relative;
+  top: 0;
+  left: 0;
+  background-color: #fff;
+  padding: 20px 40px;
+  box-sizing: border-box;
+  height: 60px;
+}
+
+#header .row {
+  display: table-row;
+}
+
+.labelCorp {
+  margin: 0;
+  text-align: right;
+  float: right;
+  height: 20px;
+}
+
+.labelCorp a {
+  text-decoration: none;
+  font: bold 1.2em 'Aregular', Arial, sans-serif;
+  line-height: 25px;
+}
+
+.label {
+  position: relative;
+  padding: 3px 0 0 10px;
+  height: 100%;
+  vertical-align: middle;
+}
+
+.label p {
+  font: 300 20px Helvetica, Aregular, Arial, sans-serif;
+  line-height: 20px;
+  letter-spacing: -.4px;
+}
+
+.logo {
+  display: table-cell;
+  vertical-align: middle;
+}
+
+.logo img {
+  height: 20px;
+}
+
+/* CONTENT --------------------------------- */
+#content {
+  clear: both;
+  padding: 1px 0;
+}
+
+a {
+  color: #06F;
+  text-decoration-line: none;
+}
+
+a:hover {
+  text-decoration: underline;
+}
+
+a:visited {
+  color: #1F28BF;
+  text-decoration-line: none;
+}
+
+h1#app-name {
+  clear: both;
+  padding: 0 0 10px;
+  background: #fff;
+  color: #333;
+  font: normal 400 2.8em/2.5em 'Aregular', Arial, sans-serif;
+  text-align: center;
+}
+
+.alert h1 {
+  margin: 0 0 .5em 0;
+  font-size: 16px;
+  font-weight: 400;
+  color: #000;
+  letter-spacing: 0;
+  width: 100%;
+  box-sizing: border-box;
+  padding: 15px 18px;
+}
+
+#content h2 {
+  margin: 0 0 .5em 0;
+  font-size: 16px;
+  font-weight: 400;
+  color: #000;
+  letter-spacing: 0;
+  width: 100%;
+  box-sizing: border-box;
+  padding: 15px 18px;
+}
+
+#content h3 {
+  font: 1em 'Aregular', Arial, sans-serif;
+  font-weight: 400;
+}
+
+#content p {
+  line-height: 1.5;
+  font-size: 14px;
+  padding: 0 0 18px;
+}
+
+#content td {
+  height: 600px;
+}
+
+#content td.left {
+  width: 40%;
+  padding-right: 15px;
+  vertical-align: top;
+}
+
+#content td.right {
+  width: 60%;
+  padding-left: 15px;
+  vertical-align: top;
+}
+
+/* FOOTER --------------------------------- */
+#footer {
+  clear: both;
+  margin: 0;
+  color: rgba(255, 255, 255, 0.4);
+  position: fixed;
+  bottom: 10px;
+  width: 100%;
+  text-align: center;
+  padding: 0;
+}
+
+#footer img#logo {
+  position: absolute;
+  right: 0;
+  top: 0;
+  margin-top: 10px;
+}
+
+#footer div {
+  clear: left;
+  padding: 1em 5px .5em;
+  overflow: hidden;
+  text-align: center;
+}
+
+#footer #copyrights a {
+  color: rgba(255, 255, 255, 0.6);
+  text-decoration: none;
+}
+
+#footer #copyrights a:hover {
+  color: rgba(255, 255, 255, 1);
+}
+
+/* MESSAGES --------------------------------- */
+.info,
+.errors,
+.success,
+.alert {
+  clear: both;
+  margin: 50px auto;
+  max-width: 45em;
+  padding: 0;
+  font-size: 11px;
+  line-height: 1.5;
+  background: #FFF;
+  color: #000;
+}
+
+.errors {
+  background: #fff;
+  color: #d21033;
+  padding-bottom: 40px;
+}
+
+.box .info,
+.box .errors,
+.box .success,
+.box .alert {
+  margin: 0;
+  padding: 0;
+}
+
+#content .errors h2,
+#content .success h2,
+#content .alert h2 {
+  font-family: 'Aregular', Arial, sans-serif;
+  font-size: 21px;
+  font-weight: 400;
+  margin: 0 18px 0 0;
+  background-color: #1F28BF;
+  color: #FFF;
+}
+
+#content .alert h1 {
+  font-family: 'Aregular', Arial, sans-serif;
+  font-size: 21px;
+  font-weight: 400;
+  margin: 0 18px 0 0;
+  background-color: #1F28BF;
+  color: #FFF;
+}
+
+/* static messages */
+#content #msg p,
+#content .alert-danger p,
+#content .alert-success p {
+  padding: 15px 18px 15px 18px;
+}
+
+
+/* FORMS --------------------------------- */
+label {
+  cursor: pointer;
+  font-size: 11px;
+  color: #203f7d;
+}
+
+input {
+  border-width: 1px;
+  font-family: 'Aregular', Arial, sans-serif;
+  font-size: 13px;
+  color: #000;
+  padding: 3px;
+  min-height: 1.5em;
+}
+
+a.btn-submit {
+  border-width: 1px;
+  font-family: 'Aregular', Arial, sans-serif;
+  font-size: 13px;
+  color: #000;
+  padding: 3px;
+  min-height: 1.5em;
+}
+
+
+input.btn-submit a.btn-submit{
+  border-width: 2px;
+}
+
+
+
+.fm-v.header {
+  box-sizing: border-box;
+  height: 70px;
+  background-color: #1F28BF;
+  color: #FFF;
+  padding: 16px;
+  font-size: 21px;
+  width: 100%;
+  text-align: left;
+}
+
+.fm-v.header h1 {
+  vertical-align: middle;
+  height: 100%;
+  display: flex;
+  align-items: center;
+}
+
+.fm-v div.row {
+  margin: 0;
+  padding: .5em 0;
+  width: 100%;
+}
+
+.fm-v div.row label {
+  float: left;
+  width: 100%;
+  line-height: 1.5;
+}
+
+.fm-v div.row input.btn-submit a.btn-submit {
+  display: block;
+  margin: 0;
+}
+
+.fm-v div.row.text {
+  text-align: center;
+  font-size: 13px;
+}
+
+/* highlight errors */
+input.error {
+  background: #ffefef;
+  color: #b00;
+}
+
+/* mark as required */
+#login input[type="text"],
+#login input[type="password"] {
+  background: #fff;
+  border: 1px solid #bbb;
+  padding: .4em;
+}
+
+input {
+  line-height: 20px
+}
+
+.error {
+  background: #ffefef;
+  border-color: #f00;
+}
+
+/* cookie disclaimer */
+
+.cookie a {
+  color: #00adff;
+  text-decoration: none;
+  transition: all .2s ease-in-out;
+}
+
+.cookie a:hover, .cookie a:focus {
+  color: #0079b3;
+  cursor: pointer;
+}
+
+.cookie {
+  background-color: rgba(222, 222, 222, 0.95);
+  border: 1px solid rgba(10, 10, 10, 0.25);
+  padding: 10px 20px;
+  position: relative;
+}
+
+.cookie .close-button {
+  background: none;
+  position: absolute;
+  right: 20px;
+  top: 0;
+  border-style: none;
+  cursor: pointer;
+  font-size: 200%;
+}
+
+.cookie .close-button:focus {
+  outline: 0;
+}
+
+@media screen and (min-width: 1400px) {
+  #cas .container {
+    margin-top: 20px;
+    padding-top: 50px;
+  }
+
+  div.login {
+    width: 400px;
+  }
+
+  #cas #login {
+    padding: 40px 50px;
+    width: 400px;
+  }
+}

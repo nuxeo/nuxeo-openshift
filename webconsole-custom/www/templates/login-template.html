@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<!--
+
+This template can be modified and used to customize the login page. To replace
+the login page, set master configuration option oauthConfig.templates.login to
+the path of the template file. Don't remove parameters in curly braces below.
+
+oauthConfig:
+  templates:
+    login: templates/login-template.html
+
+-->
+<html class="gr__sso_nuxeo_com">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <title>Nuxeo Dev environment login</title>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="./css/login.css">
+    <link rel="icon" href="https://sso.nuxeo.com/cas/favicon.ico" type="image/x-icon">
+    <script type="text/javascript" src="js/jquery.min.js"></script>
+    <script type="text/javascript" src="js/jquery.cookie.js"></script>
+    <script type="text/javascript" src="js/privacy_manager.js"></script>
+
+
+</head>
+
+<body id="cas" data-gr-c-s-loaded="true">
+<header id="header">
+  <div class="labelCorp">
+    <a href="https://www.nuxeo.com/">nuxeo.com</a>
+  </div>
+  <div class="row">
+    <div class="logo">
+      <a href="https://connect.nuxeo.com/nuxeo">
+        <img alt="Nuxeo" src="./img/logo_nuxeo_white.png"></a>
+    </div>
+    <div class="label">
+      <p>Development Console</p>
+    </div>
+  </div>
+</header>
+
+<div id="content">
+
+
+
+
+<table class="container">
+        <tbody><tr>
+          <td class="left">
+            <div class="login">
+              <div class="fm-v header">
+                <h1>Welcome</h1>
+              </div>
+
+              <form action="{{ .Action }}" method="POST" class="fm-v clearfix">
+
+  <div class="box" id="login">
+    {{ if .Error }}
+      <div class="error">{{ .Error }}</div>
+      <!-- Error code: {{ .ErrorCode }} -->
+    {{ end }}
+    <!-- Identity provider name: {{ .ProviderName }} -->
+
+      <input type="hidden" name="{{ .Names.Then }}" value="{{ .Values.Then }}">
+      <input type="hidden" name="{{ .Names.CSRF }}" value="{{ .Values.CSRF }}">
+
+
+
+      <div class="row id-field">
+        <!-- <label for="username" th:utext="#{screen.welcome.label.netid}"/> --><div>
+          <input type="text" id="inputUsername" autofocus="autofocus" type="text" name="{{ .Names.Username }}" value="{{ .Values.Username }}" placeholder="Username" autocomplete="off">
+
+      </div>
+
+      <div class="row id-field">
+        <div>
+          <input type="password" id="inputPassword" type="password" name="{{ .Names.Password }}" value="" size="25" tabindex="2" accesskey="p" placeholder="Password" autocomplete="off" >
+        </div>
+    </div>
+
+    <section class="row btn-row">
+        <input class="btn btn-submit btn-block" name="submit" accesskey="l" value="LOGIN" tabindex="6" type="submit">
+    </section>
+
+
+
+<script type="text/javascript">
+    var i = "One moment please..."
+    $("#fm1").submit(function () {
+        $(":submit").attr("disabled", true);
+        $(":submit").attr("value", i);
+        return true;
+    });
+</script>
+</div></form>
+          </div></td>
+
+          <td class="right">
+            <iframe src="https://www.nuxeo.com/login-page-embedded" onload="javascript:this.style.visibility=&#39;visible&#39;;" id="block_container" style="visibility: visible;"></iframe>
+          </td>
+
+        </tr>
+      </tbody></table>
+<div id="footer">
+  <div id="copyrights">
+    <span>Copyright © 2015-2018 Nuxeo and respective authors. </span>
+    <span>| <a href="https://www.nuxeo.com/">Nuxeo.com</a></span>
+  </div>
+</div>
+  </body>
+</html>
