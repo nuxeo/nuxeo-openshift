@@ -8,7 +8,6 @@ def nuxeo_image_build = ""
 def app_name = ""
 def nuxeo_image_name = ""
 
-
 pipeline {
   agent {
     node {
@@ -69,19 +68,25 @@ pipeline {
             ]) {
               sh "mvn clean package"
 
-              // Should be done in a library function like nuxeo.openshift.stashPackage("marketplace")
+              def package_paths = []
+              def package_files = []
               if (fileExists(".nuxeo-s2i")) {
                 def props = readProperties file: ".nuxeo-s2i"
-                packagePathRegExp = props["NUXEO_PACKAGE_DIR"]
-              } else {
-                packagePathRegExp = "*(marketplace|package)-*.zip"
+                package_paths.push(props["NUXEO_PACKAGE_DIR"])
               }
-              def files = findFiles(glob: "**/${packagePathRegExp}")
-              if (files.length == 0) {
+              package_paths.push("*/target/*package-*.zip")
+              package_paths.push("*/target/*marketplace-*.zip")
+              package_paths.each { package_path ->
+                package_files = findFiles(glob: "**/${package_path}")
+                if (package_files.length != 0) {
+                  echo package_path
+                  stash name:"marketplace", includes:"${package_files[0]}"
+                  return
+                }
+              }
+              if (package_files.length == 0) {
                 echo "WARNING: Marketplace zip file not found."
               }
-
-              stash name:"marketplace", includes:"${files[0]}"
             }
           }
         }
