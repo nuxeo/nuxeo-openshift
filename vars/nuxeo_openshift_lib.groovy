@@ -1,3 +1,7 @@
+/*
+ * Looks for a nuxeo marketplace package zip file, given a specific version or "*" for any,
+ * then stashes it as "package" if found.
+ */
 def stash_package(version) {
   def package_paths = []
   def package_files = []
@@ -20,6 +24,10 @@ def stash_package(version) {
   }
 }
 
+/*
+ * Unstashes "package" and checks it is the expected nuxeo marketplace package zip file,
+ * then renames it as "marketplace.zip" and moves it to "source" folder.
+ */
 def unstash_package() {
   unstash name: "package"
   def package_files = findFiles(glob: "**/${env.PACKAGE_PATH_REGEX}")
