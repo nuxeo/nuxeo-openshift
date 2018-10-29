@@ -1,6 +1,6 @@
+def nuxeo_package_helper = evaluate readTrusted('src/org/nuxeo/openshift/library/NuxeoPackageHelper.groovy')
 def project = ""
 def pipeline_name = ""
-def packagePathRegExp = ""
 def project_git_repo = ""
 def project_git_ref = ""
 def github_ssh_key_name = ""
@@ -8,6 +8,7 @@ def connect_secret_basic_name = ""
 def nuxeo_image_build = ""
 def app_name = ""
 def nuxeo_image_name = ""
+def package_path = ""
 
 
 pipeline {
@@ -70,7 +71,7 @@ pipeline {
               )
             ]) {
               sh "mvn clean package"
-              nuxeo_openshift_lib.stash_package "*"
+              package_path = nuxeo_package_helper.stash "*"
             }
           }
         }
@@ -87,7 +88,7 @@ pipeline {
                 sh "rm -rf source"
               }
               sh "mkdir -p source"
-              nuxeo_openshift_lib.unstash_package()
+              nuxeo_package_helper.unstash package_path
 
               // Build docker image
               openshift.selector("bc", nuxeo_image_build).startBuild("--from-dir='source'", "--wait")
