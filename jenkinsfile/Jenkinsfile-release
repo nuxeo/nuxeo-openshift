@@ -1,8 +1,9 @@
+def nuxeo_package_helper = evaluate readTrusted('src/org/nuxeo/openshift/library/NuxeoPackageHelper.groovy')
 def project = ""
-def packagePathRegExp = ""
 def nuxeo_image_build = ""
 def nuxeo_image_name = ""
 def release_tag = ""
+def package_path = ""
 
 pipeline {
   agent {
@@ -123,7 +124,7 @@ pipeline {
                   returnStdout: true,
                   script: 'log_file="release-${PWD##*/}.log" && source ../$log_file && echo -n $TAG'
                 )
-                nuxeo_openshift_lib.stash_package release_tag
+                package_path = nuxeo_package_helper.stash release_tag
 
                 // Perform release and deploy artifacts to Nexus
                 sh "python ./release.py perform"
@@ -143,7 +144,7 @@ pipeline {
                 sh "rm -rf source"
               }
               sh "mkdir -p source"
-              nuxeo_openshift_lib.unstash_package()
+              nuxeo_package_helper.unstash package_path
 
               // Build docker image
               openshift.selector("bc", nuxeo_image_build).startBuild("--from-dir='source'", "--wait")
