@@ -42,18 +42,3 @@ data:
         </profile>
       </profiles>
     </settings>
-  jenkins.yaml: |-
-    jenkins:
-      mode: NORMAL
-    unclassified:
-      globalLibraries:
-        libraries:
-          - name: 'nuxeo_package_helper'
-            defaultVersion: 'master'
-            implicit: true
-            retriever:
-              modernSCM:
-                scm:
-                  git:
-                    remote: 'git@github.com:nuxeo/nuxeo-openshift.git'
-                    credentialsId: {{ project_name }}-{{ github_ssh_key_name }}
