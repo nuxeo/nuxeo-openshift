@@ -46,9 +46,7 @@ spec:
               value: |-
                 maven-plugin, pipeline-maven, file-operations,
                 apache-httpcomponents-client-4-api, junit-attachments,
-                tasks, configuration-as-code
-            - name: CASC_JENKINS_CONFIG
-              value: /var/lib/jenkins/configuration/jenkins.yaml
+                tasks
           image: nuxeo/nuxeo-dev-apb-jenkin-master:latest
           imagePullPolicy: Always
           livenessProbe:
@@ -91,8 +89,6 @@ spec:
             items:
               - key: settings.xml
                 path: settings.xml
-              - key: jenkins.yaml
-                path: jenkins.yaml
             name: {{ jenkins_config_name }}
   triggers:
     - type: ConfigChange
