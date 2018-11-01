@@ -8,7 +8,6 @@ def connect_secret_basic_name = ""
 def nuxeo_image_build = ""
 def app_name = ""
 def nuxeo_image_name = ""
-def package_path = ""
 
 
 pipeline {
@@ -71,7 +70,7 @@ pipeline {
               )
             ]) {
               sh "mvn clean package"
-              package_path = nuxeo_package_helper.stash "*"
+              nuxeo_package_helper.stash_nuxeo_package "*"
             }
           }
         }
@@ -88,7 +87,7 @@ pipeline {
                 sh "rm -rf source"
               }
               sh "mkdir -p source"
-              nuxeo_package_helper.unstash package_path
+              nuxeo_package_helper.unstash_nuxeo_package "*"
 
               // Build docker image
               openshift.selector("bc", nuxeo_image_build).startBuild("--from-dir='source'", "--wait")
