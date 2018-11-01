@@ -1,10 +1,21 @@
 package org.nuxeo.openshift.library
 
-def stash(String version) {
+def stash_nuxeo_package(version) {
+    def nuxeoPackageFile = find(version)
+    stashContent("package", nuxeoPackageFile)
+}
+
+def unstash_nuxeo_package(version) {
+    unstashContent("package")
+    def nuxeoPackageFile = find(version)
+    moveAndRenameFile(nuxeoPackageFile, "source", "marketplace.zip")
+}
+
+def find(version) {
     def package_paths = []
     def package_files = []
     if (fileExists(".nuxeo-s2i")) {
-      def props = readProperties file: ".nuxeo-s2i"
+      def props = readProperties file:".nuxeo-s2i"
       package_paths.push(props["NUXEO_PACKAGE_DIR"].replaceAll("\\*", version))
     }
     package_paths.push("*/target/*package-${version}.zip")
@@ -13,8 +24,7 @@ def stash(String version) {
       def package_path = (String) package_paths[i]
       package_files = findFiles(glob: "**/${package_path}")
       if (package_files.size() != 0) {
-        stash name:"package", includes:"${package_files[0]}"
-        return package_path
+        return package_files[0]
       }
     }
     if (package_files.size() == 0) {
@@ -23,27 +33,25 @@ def stash(String version) {
     return null
 }
 
-def unstash(String package_path) {
-    if (package_path == null) {
-      echo "WARNING: No marketplace package zip file was found."
-      return
-    }
-    unstash name: "package"
-    def package_files = findFiles(glob: "**/${package_path}")
-    if (package_files.length == 0) {
-      echo "WARNING: Marketplace package zip file not found."
-      return
-    }
+protected stashContent(stashName, includes) {
+    stash name:stashName, includes:"${includes}"
+}
+
+protected unstashContent(stashName) {
+    unstash name:stashName
+}
+
+protected moveAndRenameFile(file, targetDirName, targetFileName) {
     fileOperations([
-      fileCopyOperation(
-        includes: "${package_files[0].path}",
-        targetLocation: "source",
-        flattenFiles: true,
-      ),
-      fileRenameOperation(
-        source: "source/${package_files[0].name}",
-        destination: "source/marketplace.zip"
-      )
+        fileCopyOperation(
+          includes: file.getPath(),
+          targetLocation: targetDirName,
+          flattenFiles: true,
+        ),
+        fileRenameOperation(
+          source: targetDirName + "/" + file.getName(),
+          destination: targetDirName + "/" + targetFileName
+        )
     ])
 }
 
