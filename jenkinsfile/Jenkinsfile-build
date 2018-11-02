@@ -127,6 +127,52 @@ pipeline {
       }
     }
 
+    stage('Run functional tests') {
+      agent {
+        label 'node-chrome'
+      }
+      steps {
+        script {
+          openshift.withCluster() {
+            openshift.withProject() {
+              git url: "${project_git_repo}",
+              branch: "${project_git_ref}",
+              credentialsId: "${project}-${github_ssh_key_name}"
+            }
+          }
+        }
+        script {
+          openshift.withCluster() {
+            openshift.withProject() {
+              def packageJsonFiles = findFiles(glob: "**/*-ftest/**/package.json")
+              if (packageJsonFiles.length == 0) {
+                echo "WARNING: No NodeJs functional tests to run."
+              } else {
+                def parts = packageJsonFiles[0].path.split("/")
+                def ftestDir = ""
+                if (parts.length > 1) {
+                  ftestDir = parts[parts.length - 2]
+                }
+                if (!ftestDir.contains("-ftest")) {
+                  echo "WARNING: No functional test module (*-ftest) was found."
+                }
+                def nuxeoUrl = "https://" + openshift.selector("route/${app_name}-dev-route").object().spec.host + "/nuxeo/"
+                def dcLatestVersion = openshift.selector("dc", "${app_name}-dev-interactive").object().status.latestVersion
+                def rc = openshift.selector('rc', "${app_name}-dev-interactive-${dcLatestVersion}")
+                rc.untilEach(1){
+                  def rcMap = it.object()
+                  return (rcMap.status.replicas.equals(rcMap.status.readyReplicas))
+                }
+                withEnv(["NUXEO_URL=${nuxeoUrl}"]) {
+                  sh "mvn verify -pl=${ftestDir} -DskipNodeITs=false"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+
     stage('User validation') {
       steps {
         script {
