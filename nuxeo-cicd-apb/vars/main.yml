@@ -21,6 +21,16 @@ ready_replicas_query: "[spec.replicas, status.readyReplicas]"
 nexus_dc_query: "{{ nexus_dc_lookup | json_query(ready_replicas_query) | unique | count == 1 }}"
 jenkins_dc_query: "{{ jenkins_dc_lookup | json_query(ready_replicas_query) | unique | count == 1 }}"
 
+global_config_map: "{{
+  lookup(
+    'k8s',
+    kind='ConfigMap',
+    namespace=namespace,
+    resource_name=global_config_name
+  )
+}}"
+
+global_config: "{{ global_config_map.data }}"
 
 
 app_name: "{{ name }}"
@@ -38,3 +48,4 @@ jenkins_route_name: jenkins
 jenkins_config_name: "{{ name }}-config"
 jenkins_git_config_name: "{{ name }}-git-config"
 clid_secret_name: "{{ name }}-clid"
+global_config_name: "{{ name }}-global-config"
