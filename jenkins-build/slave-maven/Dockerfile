@@ -1,10 +1,10 @@
 FROM docker.io/openshift/jenkins-agent-maven-35-centos7:v4.0
-# Install Chrome
+
 USER root
+
 # Install Git
 RUN yum -y install http://opensource.wandisco.com/centos/7/git/x86_64/wandisco-git-release-7-2.noarch.rpm && \
     yum -y install git
-
 
 ENV NODE_VERSION=6.14.4 \
     NPM_CONFIG_PREFIX=$HOME/.npm-global \
