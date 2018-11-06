@@ -12,3 +12,12 @@ metadata:
     apb_service_instance_id: '{{ _apb_service_instance_id }}'
 spec:
   dockerImageRepository: "nuxeo/nuxeo"
+  tags:
+{% for environment in pipeline.environments %}
+  - name: {{ environment }}
+    from:
+      kind: DockerImage
+      name: nuxeo/nuxeo:{{ global_config.nuxeo_version }}
+    referencePolicy:
+      type: Source
+{% endfor %}
