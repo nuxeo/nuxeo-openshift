@@ -35,6 +35,7 @@ spec:
     connectExistingSecret: "{{ global_config.connect_secret_name}} "
     nuxeoJavaOpts: "-Xms512m -Xmx1024m -Djava.net.preferIPv4Stack=true"
     resources: "{'limits': {'cpu': '2','memory': '2Gi'},'requests': {'cpu': '1','memory': '1Gi'}}"
+    connectInstallHotfix: false
 {% if global_config.deploy_mongo %}
     useExternalMongoDB: true
     mongoServiceName: "{{ global_config.mongodb_service_name }}"
