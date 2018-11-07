@@ -36,5 +36,7 @@ binaries_pv_storage_class: shared
 nuxeo_studio_project: ""
 nuxeo_connect_username: ""
 nuxeo_connect_token: ""
+hotfix_release_username: nuxeo
+hotfix_release_password: nuxeo
 
 testing: false

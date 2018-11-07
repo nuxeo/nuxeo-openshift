@@ -33,6 +33,7 @@ pipeline {
               project_git_ref = env.PROJECT_GIT_REF
               github_ssh_key_name = env.GITHUB_SSH_KEY_NAME
               connect_secret_basic_name = env.CONNECT_SECRET_BASIC_NAME
+              hotfix_release_secret_name = env.HOTFIX_RELEASE_SECRET_NAME
               nuxeo_image_build = env.NUXEO_IMAGE_BUILD
               nuxeo_image_name = env.NUXEO_IMAGE_NAME
             }
@@ -61,10 +62,16 @@ pipeline {
           withMaven() {
             withCredentials([
               usernamePassword(
+                credentialsId: "${project}-${hotfix_release_secret_name}",
+                usernameVariable: "HOTFIX_RELEASE_USERNAME",
+                passwordVariable: "HOTFIX_RELEASE_PASSWORD"
+              ),
+              usernamePassword(
                 credentialsId: "${project}-${connect_secret_basic_name}",
                 usernameVariable: "NUXEO_CONNECT_USERNAME",
                 passwordVariable: "NUXEO_CONNECT_PASSWORD"
               )
+
             ]) {
               sh "mvn clean package"
               nuxeo_package_helper.stash_nuxeo_package "*"

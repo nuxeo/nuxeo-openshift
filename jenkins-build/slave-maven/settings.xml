@@ -8,8 +8,8 @@
     </server>
     <server>
       <id>hotfix-releases</id>
-      <username>${env.NUXEO_CONNECT_USERNAME}</username>
-      <password>${env.NUXEO_CONNECT_PASSWORD}</password>
+      <username>${env.HOTFIX_RELEASE_USERNAME}</username>
+      <password>${env.HOTFIX_RELEASE_PASSWORD}</password>
     </server>
     <server>
       <id>external-releases</id>
