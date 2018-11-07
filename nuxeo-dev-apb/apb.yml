@@ -88,7 +88,7 @@ plans:
       - name: nuxeo_version
         default: '9.10'
         type: enum
-        enum: ['9.10', '10.2', 'master']
+        enum: ['8.10','9.10', '10.2', 'master']
         title: Nuxeo version to use
         display_group: Nuxeo Configuration
 
