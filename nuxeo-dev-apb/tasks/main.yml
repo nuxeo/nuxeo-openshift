@@ -14,6 +14,7 @@
     - name: global-config.yml.j2
     - name: connect-secret.yml.j2
     - name: connect-secret-basic.yml.j2
+    - name: hotfix-secret.yml.j2
     - name: ssh-secret.yml.j2
       apply: "{{ github_need_ssh }}"
 

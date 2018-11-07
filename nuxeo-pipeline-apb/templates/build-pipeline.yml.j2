@@ -31,6 +31,8 @@ spec:
 {% endif %}
       - name: CONNECT_SECRET_BASIC_NAME
         value: {{ global_config.connect_secret_basic_name }}
+      - name: HOTFIX_RELEASE_SECRET_NAME
+        value: {{ global_config.hotfix_release_secret_name }}
       - name: NUXEO_IMAGE_BUILD
         value: {{ nuxeo_image_build }}
       - name: NUXEO_IMAGE_NAME
