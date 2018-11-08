@@ -16,6 +16,19 @@ ENV NODE_VERSION=6.14.4 \
 COPY contrib/bin/scl_enable /usr/local/bin/scl_enable
 ADD settings.xml $HOME/.m2/
 
+# Install Nuxeo 3rd party
+RUN yum -y upgrade && yum -y install \
+    perl \
+    ImageMagick \
+    ffmpeg \
+    ffmpeg2theora \
+    ufraw \
+    poppler-utils \
+    libreoffice \
+    libwpd-tools \
+    perl-Image-ExifTool \
+    ghostscript
+
 # Install NodeJS
 RUN yum install -y centos-release-scl-rh && \
     yum -y install gcc-c++ make && \
