@@ -162,4 +162,12 @@ pipeline {
       }
     }
   }
+
+  post {
+    always {
+      // Clean workspace
+      cleanWs()
+    }
+  }
+
 }

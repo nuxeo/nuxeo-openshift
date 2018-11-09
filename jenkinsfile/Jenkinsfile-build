@@ -81,7 +81,6 @@ pipeline {
       }
     }
 
-
     stage('Build Docker image') {
       steps {
         script {
@@ -206,6 +205,13 @@ pipeline {
         }
       }
     }
-
   }
+
+  post {
+    always {
+      // Clean workspace
+      cleanWs()
+    }
+  }
+
 }
