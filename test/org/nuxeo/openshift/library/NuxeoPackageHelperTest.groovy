@@ -111,6 +111,8 @@ class NuxeoPackageHelperTest extends GroovyTestCase {
             "source" in map && "destination" in map ? fileRenameOperation(map["source"], map["destination"]) : false
         }
         nuxeoPackageHelper.metaClass.fileOperations = {}
+        nuxeoPackageHelper.metaClass.sh = { command -> return command }
+        nuxeoPackageHelper.metaClass.readJSON = { json -> return json }
 
         // Set up directory structure
         baseDir = new File(System.getProperty("java.io.tmpdir"))

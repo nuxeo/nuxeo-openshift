@@ -1,0 +1,24 @@
+[
+  {
+    "id": "3af696w1-8682-3320-q657-s3fy278ab8dp",
+    "projects": [
+      {
+        "symbolicName": "studio-project-1"
+      },
+      {
+        "symbolicName": "studio-project-2"
+      }
+    ]
+  },
+  {
+    "id": "1b979653-5483-4329-16bf-a2fe259ac7dk",
+    "projects": [
+      {
+        "symbolicName": "my-project"
+      },
+      {
+        "symbolicName": "studio-project-3"
+      }
+    ]
+  }
+]
