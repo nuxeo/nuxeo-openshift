@@ -5,14 +5,14 @@ import org.junit.Test
 import org.apache.commons.io.FileUtils
 import java.io.File
 import java.nio.file.Files
-import java.nio.file.FileSystem;
-import java.nio.file.FileSystems;
-import java.io.FileWriter;
+import java.nio.file.FileSystem
+import java.nio.file.FileSystems
+import java.io.FileWriter
 import java.nio.file.Path
-import java.nio.file.PathMatcher;
+import java.nio.file.PathMatcher
 import java.nio.file.Paths
-import java.util.HashMap;
-import java.util.Map;
+import java.util.HashMap
+import java.util.Map
 import static groovy.test.GroovyAssert.assertEquals
 import static groovy.test.GroovyAssert.assertNotNull
 import static groovy.test.GroovyAssert.assertNull
@@ -28,9 +28,9 @@ class NuxeoPackageHelperTest extends GroovyTestCase {
     private Map<String, String> stash
 
     private matchesPackageFilePath(String glob) {
-        FileSystem fileSystem = FileSystems.getDefault();
-        PathMatcher pathMatcher = fileSystem.getPathMatcher("glob:" + glob);
-        Path packageFilePath = Paths.get(packageFile.getPath());
+        FileSystem fileSystem = FileSystems.getDefault()
+        PathMatcher pathMatcher = fileSystem.getPathMatcher("glob:" + glob)
+        Path packageFilePath = Paths.get(packageFile.getPath())
         return packageFile.exists() && pathMatcher.matches(packageFilePath)
     }
 
@@ -38,9 +38,9 @@ class NuxeoPackageHelperTest extends GroovyTestCase {
         def file = new File(workspaceDir.getPath() + "/" + fileName)
         Map props = new HashMap<String, String>()
         if (file.exists()) {
-            def allLines = Files.readAllLines(Paths.get(file.getPath()));
+            def allLines = Files.readAllLines(Paths.get(file.getPath()))
             for (String line : allLines) {
-                String[] parts = line.split("=");
+                String[] parts = line.split("=")
                 if (parts.size() == 2) {
                     props.put(parts[0], parts[1])
                 }
@@ -168,7 +168,7 @@ class NuxeoPackageHelperTest extends GroovyTestCase {
     void test_should_find_package_when_nuxeo_s2i_provided() {
         // Given a .nuxeo-s2i file is provided
         nuxeoS2iFile.createNewFile()
-        FileWriter writer = new FileWriter(nuxeoS2iFile);
+        FileWriter writer = new FileWriter(nuxeoS2iFile)
         writer.write("NUXEO_PACKAGE_DIR=ps-estelle-package/target/ps-estelle-package-*.zip")
         writer.close()
         assertEquals true, nuxeoS2iFile.exists()
