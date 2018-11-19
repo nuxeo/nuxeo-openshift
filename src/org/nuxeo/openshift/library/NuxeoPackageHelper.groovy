@@ -5,10 +5,16 @@ def stash_nuxeo_package(version) {
   stashContent("package", nuxeoPackageFile)
 }
 
-def unstash_nuxeo_package(version, dirName) {
+def unstash_and_move_nuxeo_package(version, dirName) {
   unstashContent("package")
   def nuxeoPackageFile = find(version)
-  moveAndRenameFile(nuxeoPackageFile, dirName, "marketplace.zip")
+  copyMoveAndRenameFile(nuxeoPackageFile, dirName, "marketplace.zip")
+}
+
+def unstash_and_get_nuxeo_package(version) {
+  unstashContent("package")
+  def nuxeoPackageFile = find(version)
+  return nuxeoPackageFile.getPath()
 }
 
 def find(version) {
@@ -48,17 +54,17 @@ protected unstashContent(stashName) {
   unstash name:stashName
 }
 
-protected moveAndRenameFile(file, targetDirName, targetFileName) {
+protected copyMoveAndRenameFile(file, targetDirName, targetFileName) {
   fileOperations([
-      fileCopyOperation(
-        includes: file.getPath(),
-        targetLocation: targetDirName,
-        flattenFiles: true,
-      ),
-      fileRenameOperation(
-        source: targetDirName + "/" + file.getName(),
-        destination: targetDirName + "/" + targetFileName
-      )
+    fileCopyOperation(
+      includes: file.getPath(),
+      targetLocation: targetDirName,
+      flattenFiles: true,
+    ),
+    fileRenameOperation(
+      source: targetDirName + "/" + file.getName(),
+      destination: targetDirName + "/" + targetFileName
+    )
   ])
 }
 

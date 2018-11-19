@@ -85,7 +85,7 @@ pipeline {
           openshift.withCluster() {
             openshift.withProject() {
               nuxeo_package_helper.set_build_directory "source"
-              nuxeo_package_helper.unstash_nuxeo_package("*", "source")
+              nuxeo_package_helper.unstash_and_move_nuxeo_package("*", "source")
 
               // Build docker image
               openshift_image_manager.build(nuxeo_image_build, "source")
