@@ -1,4 +1,5 @@
 def nuxeo_package_helper = evaluate readTrusted('src/org/nuxeo/openshift/library/NuxeoPackageHelper.groovy')
+def connect_client = evaluate readTrusted('src/org/nuxeo/openshift/library/ConnectClient.groovy')
 def project = ""
 def nuxeo_image_build = ""
 def nuxeo_image_name = ""
@@ -41,6 +42,7 @@ pipeline {
               project = openshift.project()
               project_git_repo = env.PROJECT_GIT_REPO
               project_git_ref = env.PROJECT_GIT_REF
+              studio_project = env.STUDIO_PROJECT
               github_ssh_key_name = env.GITHUB_SSH_KEY_NAME
               git_username = env.GIT_USERNAME
               git_email = env.GIT_EMAIL
@@ -156,11 +158,56 @@ pipeline {
 
               // Promote to release version
               openshift.tag("${nuxeo_image_name}:latest", "${nuxeo_image_name}:v${release_tag}")
+
+              nuxeo_package_helper.stash_nuxeo_package release_tag
             }
           }
         }
       }
     }
+
+    stage('Choose to deploy to Connect Marketplace or not') {
+      steps {
+        script {
+          openshift.withCluster() {
+            openshift.withProject() {
+              timeout(10) {
+                input message: "Do you want to deploy the release artifacts to Nuxeo Connect Marketplace?", id: "deployToConnect"
+              }
+            }
+          }
+        }
+      }
+    }
+
+    stage('Deploy to Connect Marketplace') {
+      steps {
+        script {
+          openshift.withCluster() {
+            openshift.withProject() {
+              // For now, it only works with the Connect Password and does not with the Connect Token
+              withCredentials([
+                usernamePassword(
+                  credentialsId: "${project}-${connect_secret_basic_name}",
+                  usernameVariable: "NUXEO_CONNECT_USERNAME",
+                  passwordVariable: "NUXEO_CONNECT_PASSWORD"
+                )
+              ]) {
+                def package_file_path = nuxeo_package_helper.unstash_and_get_nuxeo_package release_tag
+                def client_id = connect_client.getClientIdByStudioProject(NUXEO_CONNECT_USERNAME, NUXEO_CONNECT_PASSWORD, studio_project)
+                def package_file_arg = "package=@${package_file_path}"
+                def upload_url = "https://connect.nuxeo.com/nuxeo/site/marketplace/upload?batch=true\\&project=${studio_project}\\&owner=${client_id}\\&client=${client_id}"
+
+                if (client_id != null) {
+                  sh "curl -u ${NUXEO_CONNECT_USERNAME}:${NUXEO_CONNECT_PASSWORD} -i -n -F ${package_file_arg} ${upload_url}"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+
   }
 
   post {
