@@ -252,12 +252,14 @@ class NuxeoPackageHelperTest extends GroovyTestCase {
     void test_should_move_and_rename_file() {
         // Given the nuxeo marketplace package file is in its initial state
         assertEquals workspaceDir.getPath() + "/ps-estelle-package/target/ps-estelle-package-1.4.0-SNAPSHOT.zip", packageFile.getPath()
+        assertTrue packageFile.exists()
         assertFalse marketplaceFile.exists()
 
-        // When moving and renaming it
-        nuxeoPackageHelper.moveAndRenameFile(packageFile, "source", "marketplace.zip")
+        // When copying, moving and renaming it
+        nuxeoPackageHelper.copyMoveAndRenameFile(packageFile, "source", "marketplace.zip")
 
-        // Then the package file is moved to source folder and renamed as "marketplace.zip"
+        // Then the package file is copied, moved to "source" folder and renamed as "marketplace.zip"
+        assertTrue packageFile.exists()
         assertTrue marketplaceFile.exists()
     }
 
