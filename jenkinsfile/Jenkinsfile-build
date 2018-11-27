@@ -73,7 +73,7 @@ pipeline {
               )
 
             ]) {
-              sh "mvn clean package"
+              sh "mvn clean package -Dmaven.test.failure.ignore=true"
               nuxeo_package_helper.stash_nuxeo_package "*"
             }
           }
