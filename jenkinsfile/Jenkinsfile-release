@@ -194,13 +194,8 @@ pipeline {
                 )
               ]) {
                 def package_file_path = nuxeo_package_helper.unstash_and_get_nuxeo_package release_tag
-                def client_id = connect_client.getClientIdByStudioProject(NUXEO_CONNECT_USERNAME, NUXEO_CONNECT_PASSWORD, studio_project)
-                def package_file_arg = "package=@${package_file_path}"
-                def upload_url = "https://connect.nuxeo.com/nuxeo/site/marketplace/upload?batch=true\\&project=${studio_project}\\&owner=${client_id}\\&client=${client_id}"
 
-                if (client_id != null) {
-                  sh "curl -u ${NUXEO_CONNECT_USERNAME}:${NUXEO_CONNECT_PASSWORD} -i -n -F ${package_file_arg} ${upload_url}"
-                }
+                connect_client.deployPackageToConnect(NUXEO_CONNECT_USERNAME, NUXEO_CONNECT_PASSWORD, studio_project, package_file_path)
               }
             }
           }
