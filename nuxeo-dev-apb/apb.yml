@@ -156,44 +156,55 @@ plans:
         default: shared
         display_group: Backend storages
 
-  # TODO: Make studio-only plan work before showing it available.
-  #
-  # - name: studio-only
-  #   description: Development with Studio project only
-  #   free: true
-  #   metadata: {}
-  #   parameters:
-  #     - name: project_name
-  #       type: string
-  #       title: Project Name
+  - name: studio-only
+    description: Development with Studio project only
+    free: true
+    metadata: {}
+    parameters:
+      - name: project_name
+        type: string
+        title: Project Name
 
-  #     - name: nuxeo_connect_username
-  #       type: string
-  #       title: |
-  #         A Nuxeo Connect userId used to register the instance, pull
-  #         studio project etc...
+      - name: nuxeo_connect_username
+        type: string
+        title: |
+          A Nuxeo Connect userId used to register the instance, pull
+          studio project etc...
 
-  #     - name: nuxeo_connect_token
-  #       type: string
-  #       title: |
-  #         A token for the Connect account
-  #         ( https://connect.nuxeo.com/nuxeo/site/connect/tokens )
-  #       display_type: password
+      - name: nuxeo_connect_token
+        type: string
+        title: |
+          A token for the Connect account
+          ( https://connect.nuxeo.com/nuxeo/site/connect/tokens )
+        display_type: password
 
-  #     - name: nuxeo_studio_project
-  #       type: string
-  #       title: The name of the studio project to register to
+      - name: nuxeo_studio_project
+        type: string
+        title: The name of the studio project to register to
 
-  #     - name: nuxeo_studio_version
-  #       type: string
-  #       title: The name of the studio project to register to
+      - name: nuxeo_studio_version
+        type: string
+        title: The version of the studio project to register to
 
-  #     - name: backend_pv_storage_class
-  #       type: string
-  #       title: Storage class for backend persistence volumes
-  #       default: gp2
+      - name: nuxeo_version
+        default: '9.10'
+        type: enum
+        enum: ['8.10','9.10', '10.2', 'master']
+        title: Nuxeo version to use
+        display_group: Nuxeo Configuration
 
-  #     - name: binaries_pv_storage_class
-  #       type: string
-  #       title: Storage class for backend persistence volumes
-  #       default: shared
+      - name: nuxeo_packages
+        default: 'nuxeo-web-ui'
+        type: string
+        title: List of Nuxeo packages to install at startup
+        display_group: Nuxeo Configuration
+
+      - name: backend_pv_storage_class
+        type: string
+        title: Storage class for backend persistence volumes
+        default: gp2
+
+      - name: binaries_pv_storage_class
+        type: string
+        title: Storage class for backend persistence volumes
+        default: shared

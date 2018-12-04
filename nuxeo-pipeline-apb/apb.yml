@@ -35,5 +35,5 @@ plans:
       - name: pipeline_definition
         default: 'uat-dev'
         type: enum
-        enum: ['uat-dev','single']
+        enum: ['uat-dev','single', 'studio']
         title: Pipeline definition to use

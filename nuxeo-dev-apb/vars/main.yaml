@@ -56,6 +56,7 @@ pod_name: "{{ lookup('env', 'POD_NAME') }}"
 pod_namespace: "{{ lookup('env', 'POD_NAMESPACE') }}"
 in_cluster: "{{ True if (pod_name and pod_namespace) else False }}"
 
+studio_only: "{{ True if (_apb_plan_id == 'studio-only') else False }}"
 
 default_pipeline_name: "default"
 global_config_name: "{{ app_name }}-global-config"

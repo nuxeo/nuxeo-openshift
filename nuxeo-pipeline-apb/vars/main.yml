@@ -24,6 +24,15 @@ pipeline_map:
       path: jenkinsfile/Jenkinsfile-single
     environments:
       - "{{ pipeline_name }}"
+  studio:
+    jenkinsfile:
+      git:
+        uri: "https://github.com/nuxeo/nuxeo-openshift"
+        ref: master
+      path: jenkinsfile/Jenkinsfile-studio
+    environments:
+      - dev
+      - uat
 
 pipeline: "{{ pipeline_map[pipeline_definition] }}"
 

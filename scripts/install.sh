@@ -18,12 +18,12 @@ function fixRights() {
 
 echo "---> Installing what has been built"
 find /build
+ADDITIONAL_NUXEO_PACKAGES=""
 
 if [ "$(ls -A /build/artifacts 2>/dev/null)" ]; then
     echo "---> Copying JAR artifacts in bundles directory"
     cp -v /build/artifacts/*.jar $NUXEO_HOME/nxserver/bundles
 fi
-
 
 if [ -f /build/nuxeo.conf ]; then
     echo "---> Copying nuxeo.conf"
@@ -42,6 +42,12 @@ if [ -f /opt/nuxeo/connect/connect.properties ]; then
     /docker-entrypoint.sh nuxeoctl mp-hotfix
   fi
 
+  if [ -n "$NUXEO_STUDIO_PROJECT_VERSION" ]; then
+    STUDIO_PACKAGE=$NUXEO_STUDIO_PROJECT-$NUXEO_STUDIO_PROJECT_VERSION
+  else
+    STUDIO_PACKAGE=$NUXEO_STUDIO_PROJECT-0.0.0-SNAPSHOT
+  fi
+
 else
   echo "---> No connect.properties found"
 fi
@@ -53,12 +59,25 @@ if [ "$(ls -A /build/marketplace 2>/dev/null)" ]; then
   /docker-entrypoint.sh nuxeoctl mp-init
   /docker-entrypoint.sh $NUXEO_HOME/bin/nuxeoctl mp-install /build/marketplace/$PACKAGE
 else
-    echo "---> No Nuxeo Package found"
+  echo "---> No Nuxeo Package found"
 fi
 
 if [ -n "$NUXEO_PACKAGES" ]; then
-  echo "---> Installing additional packages $NUXEO_PACKAGES"
-  /docker-entrypoint.sh $NUXEO_HOME/bin/nuxeoctl mp-install $NUXEO_PACKAGES
+  ADDITIONAL_NUXEO_PACKAGES=$NUXEO_PACKAGES
+fi
+
+if [ -n "$FORCE_STUDIO_PACKAGE_INSTALL" ]; then
+  echo "---> Forcing installation of Studio Package $STUDIO_PACKAGE"
+  ADDITIONAL_NUXEO_PACKAGES="$ADDITIONAL_NUXEO_PACKAGES $STUDIO_PACKAGE"
+else
+  echo "---> No forcing of Studio Package installation"
+fi
+
+if [ "$ADDITIONAL_NUXEO_PACKAGES" != "" ]; then
+  echo "---> Installing additional packages $ADDITIONAL_NUXEO_PACKAGES"
+  /docker-entrypoint.sh $NUXEO_HOME/bin/nuxeoctl mp-install $ADDITIONAL_NUXEO_PACKAGES
+else
+  echo "---> No additional Nuxeo Package to install"
 fi
 
 echo "---> Resetting image configuration"
