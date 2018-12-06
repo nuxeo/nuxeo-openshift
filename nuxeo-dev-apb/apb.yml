@@ -109,28 +109,36 @@ plans:
       - name: backend_repository_type
         default: 'DBS'
         type: enum
-        enum: ['DBS', 'VCS_Postgres']
+        # TODO: Make Postgres work before showing it as available.
+        # enum: ['DBS', 'VCS_Postgres']
+        enum: ['DBS']
         title: Repository type
         display_group: Backend storages
 
       - name: backend_stream_type
         default: 'Chronicle'
         type: enum
-        enum: ['Chronicle', 'Kafka']
+        # TODO: Make Kafka work before showing it as available.
+        # enum: ['Chronicle', 'Kafka']
+        enum: ['Chronicle']
         title: Stream type
         display_group: Backend storages
 
       - name: backend_pubsub_type
         default: inmemory
         type: enum
-        enum: ['inmemory', 'stream', 'redis']
+        # TODO: Make Stream and Redis work before showing them as available.
+        # enum: ['inmemory', 'stream', 'redis']
+        enum: ['inmemory']
         title: Stream type
         display_group: Backend storages
 
       - name: backend_binaries_type
         default: fs
         type: enum
-        enum: ['fs', 'minio', 's3']
+        # TODO: Make Minio and S3 work before showing them as available.
+        # enum: ['fs', 'minio', 's3']
+        enum: ['fs']
         title: Binaries storage type
         display_group: Backend storages
 
@@ -148,42 +156,44 @@ plans:
         default: shared
         display_group: Backend storages
 
-  - name: studio-only
-    description: Development with Studio project only
-    free: true
-    metadata: {}
-    parameters:
-      - name: project_name
-        type: string
-        title: Project Name
+  # TODO: Make studio-only plan work before showing it available.
+  #
+  # - name: studio-only
+  #   description: Development with Studio project only
+  #   free: true
+  #   metadata: {}
+  #   parameters:
+  #     - name: project_name
+  #       type: string
+  #       title: Project Name
 
-      - name: nuxeo_connect_username
-        type: string
-        title: |
-          A Nuxeo Connect userId used to register the instance, pull
-          studio project etc...
+  #     - name: nuxeo_connect_username
+  #       type: string
+  #       title: |
+  #         A Nuxeo Connect userId used to register the instance, pull
+  #         studio project etc...
 
-      - name: nuxeo_connect_token
-        type: string
-        title: |
-          A token for the Connect account
-          ( https://connect.nuxeo.com/nuxeo/site/connect/tokens )
-        display_type: password
+  #     - name: nuxeo_connect_token
+  #       type: string
+  #       title: |
+  #         A token for the Connect account
+  #         ( https://connect.nuxeo.com/nuxeo/site/connect/tokens )
+  #       display_type: password
 
-      - name: nuxeo_studio_project
-        type: string
-        title: The name of the studio project to register to
+  #     - name: nuxeo_studio_project
+  #       type: string
+  #       title: The name of the studio project to register to
 
-      - name: nuxeo_studio_version
-        type: string
-        title: The name of the studio project to register to
+  #     - name: nuxeo_studio_version
+  #       type: string
+  #       title: The name of the studio project to register to
 
-      - name: backend_pv_storage_class
-        type: string
-        title: Storage class for backend persistence volumes
-        default: gp2
+  #     - name: backend_pv_storage_class
+  #       type: string
+  #       title: Storage class for backend persistence volumes
+  #       default: gp2
 
-      - name: binaries_pv_storage_class
-        type: string
-        title: Storage class for backend persistence volumes
-        default: shared
+  #     - name: binaries_pv_storage_class
+  #       type: string
+  #       title: Storage class for backend persistence volumes
+  #       default: shared
