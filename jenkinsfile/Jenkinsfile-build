@@ -94,10 +94,11 @@ pipeline {
 
               // Build docker image
               openshift.selector("bc", nuxeo_image_build).startBuild("--from-dir='source'", "--wait")
-              def builds = openshift.selector("bc", nuxeo_image_build).related('builds')
+              def build_last_version = openshift.selector("bc", nuxeo_image_build).object().status.lastVersion
+              def last_build = openshift.selector("builds", "${nuxeo_image_build}-${build_last_version}")
               timeout(10) {
-                builds.untilEach(1) {
-                  return (it.object().status.phase == "Complete")
+                waitUntil {
+                  last_build.object().status.phase == "Complete"
                 }
               }
 
