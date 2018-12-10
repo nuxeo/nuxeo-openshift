@@ -19,9 +19,14 @@ class ConnectClientTest extends GroovyTestCase {
     connectClient = Mockito.spy(new ConnectClient())
 
     // Mock Http response when querying Connect application clients
-    File jsonFile = new File("test/resources/applicableClients.json");
-    ArrayList applicableClients = new ObjectMapper().readValue(new FileInputStream(jsonFile), ArrayList.class)
+    File applicableClientsFile = new File("test/resources/applicableClients.json");
+    ArrayList applicableClients = new ObjectMapper().readValue(new FileInputStream(applicableClientsFile), ArrayList.class)
     Mockito.when(connectClient.queryConnectApplicableClients("myusername", "mypassword")).thenReturn(applicableClients)
+
+    // Mock Jenkins error() method
+    connectClient.metaClass.error = { message ->
+      print(message + "\n")
+    }
   }
 
   @Test
@@ -49,5 +54,15 @@ class ConnectClientTest extends GroovyTestCase {
     clientId = connectClient.getClientIdByStudioProject("myusername", "mypassword", "wrong-project")
     // Then no result
     assertEquals null, clientId
+  }
+
+  @Test
+  void test_should_return_http_status_200() {
+    // Given an HTTP response from Connect
+    def connectResponseFile = new File("test/resources/connectResponse")
+    // When trying to handle the response
+    def httpStatus = connectClient.handleResponse(connectResponseFile)
+    // Then getting the HTTP status
+    assertEquals "200", httpStatus
   }
 }

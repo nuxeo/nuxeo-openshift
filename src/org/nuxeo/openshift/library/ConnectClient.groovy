@@ -2,7 +2,9 @@ package org.nuxeo.openshift.library
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import java.util.ArrayList
+import java.util.regex.Pattern
 import groovy.lang.Closure
+import org.apache.commons.io.FileUtils
 import org.apache.http.auth.UsernamePasswordCredentials
 import org.apache.http.client.methods.HttpPost
 import org.apache.http.entity.StringEntity
@@ -23,9 +25,10 @@ def deployPackageToConnect(connectUsername, connectPassword, studioProject, pack
   def uploadUrl = connectUrl + "/nuxeo/site/marketplace/upload?batch=true\\&project=${studioProject}\\&owner=${clientId}\\&client=${clientId}"
   def format = "CONNECT_HTTP_STATUS: %{http_code}"
   def packageFileArg = "package=@${packageFilePath}"
-  def connectResponseFile = "connect_response.txt"
+  def connectResponseFileName = "connectResponse"
+  def connectResponseFile = new File(connectResponseFileName)
 
-  sh "curl -w '${format}' -u ${connectUsername}:${connectPassword} -i -n -F ${packageFileArg} ${uploadUrl} > ${connectResponseFile}"
+  sh "curl -w '${format}' -u ${connectUsername}:${connectPassword} -i -n -F ${packageFileArg} ${uploadUrl} > ${connectResponseFileName}"
   handleResponse(connectResponseFile)
 }
 
@@ -37,13 +40,18 @@ protected getClientIdByStudioProject(connectUsername, connectPassword, studioPro
 }
 
 protected handleResponse(connectResponseFile) {
-  def httpStatusFile = "http_status.txt"
-  sh "cat ${connectResponseFile} | grep CONNECT_HTTP_STATUS |  awk '{print \$2}' > ${httpStatusFile}"
-  def httpStatus = readFile(httpStatusFile).trim()
+  def httpStatus = null
+  def connectResponse = FileUtils.readFileToString(connectResponseFile, "UTF-8")
+  def pattern = Pattern.compile("(CONNECT_HTTP_STATUS:\\s)(\\d{3})")
+  def matcher = pattern.matcher(connectResponse)
+  if (matcher.find()) {
+    httpStatus = matcher.group(2)
+  }
   if (httpStatus != "200") {
-    def connectResponse = readFile(connectResponseFile).trim()
     error(connectResponse)
   }
+
+  return httpStatus
 }
 
 protected queryConnectApplicableClients(connectUsername, connectPassword, connectUrl='https://connect.nuxeo.com') {
