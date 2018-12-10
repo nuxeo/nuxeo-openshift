@@ -3,7 +3,7 @@ def connect_client = evaluate readTrusted('src/org/nuxeo/openshift/library/Conne
 def project = ""
 def nuxeo_image_build = ""
 def nuxeo_image_name = ""
-def release_tag = ""
+def release_version = ""
 
 pipeline {
   agent {
@@ -72,7 +72,7 @@ pipeline {
       }
     }
 
-    stage("Build Release") {
+    stage("Perform Release") {
       steps {
         script {
           openshift.withCluster() {
@@ -121,14 +121,18 @@ pipeline {
 
                 // Prepare release
                 sh "python ./release.py -f prepare --aip=${auto_increment_policy}"
-                release_tag = sh(
+                release_version = sh(
                   returnStdout: true,
                   script: 'log_file="release-${PWD##*/}.log" && source ../$log_file && echo -n $TAG'
                 )
-                nuxeo_package_helper.stash_nuxeo_package release_tag
+                nuxeo_package_helper.stash_nuxeo_package release_version
+
+                // Release Studio project
+                connect_client.releaseStudioProject(NUXEO_CONNECT_USERNAME, NUXEO_CONNECT_PASSWORD, studio_project, release_version)
 
                 // Perform release and deploy artifacts to Nexus
-                sh "python ./release.py perform"
+                def studio_version_to_replace = "0.0.0-SNAPSHOT/${release_version}/0.0.0-SNAPSHOT,master-SNAPSHOT/${release_version}/master-SNAPSHOT"
+                sh "python ./release.py perform --arv=${studio_version_to_replace}
               }
             }
           }
@@ -145,7 +149,7 @@ pipeline {
                 sh "rm -rf source"
               }
               sh "mkdir -p source"
-              nuxeo_package_helper.unstash_and_move_nuxeo_package release_tag
+              nuxeo_package_helper.unstash_and_move_nuxeo_package release_version
 
               // Build docker image
               openshift.selector("bc", nuxeo_image_build).startBuild("--from-dir='source'", "--wait")
@@ -157,9 +161,9 @@ pipeline {
               }
 
               // Promote to release version
-              openshift.tag("${nuxeo_image_name}:latest", "${nuxeo_image_name}:v${release_tag}")
+              openshift.tag("${nuxeo_image_name}:latest", "${nuxeo_image_name}:v${release_version}")
 
-              nuxeo_package_helper.stash_nuxeo_package release_tag
+              nuxeo_package_helper.stash_nuxeo_package release_version
             }
           }
         }
@@ -193,7 +197,7 @@ pipeline {
                   passwordVariable: "NUXEO_CONNECT_PASSWORD"
                 )
               ]) {
-                def package_file_path = nuxeo_package_helper.unstash_and_get_nuxeo_package release_tag
+                def package_file_path = nuxeo_package_helper.unstash_and_get_nuxeo_package release_version
 
                 connect_client.deployPackageToConnect(NUXEO_CONNECT_USERNAME, NUXEO_CONNECT_PASSWORD, studio_project, package_file_path)
               }

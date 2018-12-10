@@ -61,7 +61,7 @@ class ConnectClientTest extends GroovyTestCase {
     // Given an HTTP response from Connect
     def connectResponseFile = new File("test/resources/connectResponse")
     // When trying to handle the response
-    def httpStatus = connectClient.handleResponse(connectResponseFile)
+    def httpStatus = connectClient.handleHttpResponse(connectResponseFile)
     // Then getting the HTTP status
     assertEquals "200", httpStatus
   }
