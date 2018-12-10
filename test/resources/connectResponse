@@ -1,0 +1,19 @@
+HTTP/1.1 100 Continue
+
+HTTP/1.1 200 OK
+Cache-Control: no-cache
+Cache-control: no-cache="set-cookie"
+Content-Security-Policy: img-src data: blob: 'self' *.nuxeo.com www.google-analytics.com www.google.com www.google.fr *.amazonaws.com *.evergage.com *.intercomcdn.com *.intercomassets.com *.doubleclick.net; default-src blob: *; script-src 'unsafe-inline' 'unsafe-eval' data: *; style-src 'unsafe-inline' *; font-src data: *
+Content-Type: text/html;charset=UTF-8
+Date: Mon, 10 Dec 2018 10:10:34 GMT
+Referrer-Policy: same-origin
+Server: Apache-Coyote/1.1
+Set-Cookie: JSESSIONID=E0435934C592EEFFD1A794FE882E731E.test1; Path=/nuxeo; HttpOnly;HttpOnly;Secure
+Set-Cookie: AWSELB=23D56BAF18D0623E05488EF842FE08178880FEA6AD93A3C554224CA3D9AD254E602A50E948270E90B0BA6CBDF897D2766F1BA430A79D378516090A7A138D8CA82C6F1C1A39;PATH=/
+Strict-Transport-Security: max-age=63072000; includeSubdomains;
+X-Content-Type-Options: nosniff
+X-UA-Compatible: IE=10; IE=11
+X-XSS-Protection: 1; mode=block
+Content-Length: 0
+
+CONNECT_HTTP_STATUS: 200
