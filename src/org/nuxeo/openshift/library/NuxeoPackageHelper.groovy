@@ -5,10 +5,10 @@ def stash_nuxeo_package(version) {
     stashContent("package", nuxeoPackageFile)
 }
 
-def unstash_nuxeo_package(version) {
+def unstash_nuxeo_package(version, dirName) {
     unstashContent("package")
     def nuxeoPackageFile = find(version)
-    moveAndRenameFile(nuxeoPackageFile, "source", "marketplace.zip")
+    moveAndRenameFile(nuxeoPackageFile, dirName, "marketplace.zip")
 }
 
 def find(version) {
@@ -31,6 +31,13 @@ def find(version) {
       echo "WARNING: Marketplace package zip file not found."
     }
     return null
+}
+
+def set_build_directory(dirName) {
+    if (fileExists(dirName)) {
+      sh "rm -rf ${dirName}"
+    }
+    sh "mkdir -p ${dirName}"
 }
 
 protected stashContent(stashName, includes) {

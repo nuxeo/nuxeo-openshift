@@ -1,4 +1,5 @@
 def nuxeo_package_helper = evaluate readTrusted('src/org/nuxeo/openshift/library/NuxeoPackageHelper.groovy')
+def openshift_image_manager = evaluate readTrusted('src/org/nuxeo/openshift/library/OpenshiftImageManager.groovy')
 def project = ""
 def nuxeo_image_build = ""
 def nuxeo_image_name = ""
@@ -139,24 +140,14 @@ pipeline {
         script {
           openshift.withCluster() {
             openshift.withProject() {
-              if (fileExists("source")) {
-                sh "rm -rf source"
-              }
-              sh "mkdir -p source"
-              nuxeo_package_helper.unstash_nuxeo_package release_tag
+              nuxeo_package_helper.set_build_directory "source"
+              nuxeo_package_helper.unstash_nuxeo_package(release_tag, "source")
 
               // Build docker image
-              openshift.selector("bc", nuxeo_image_build).startBuild("--from-dir='source'", "--wait")
-              def build_last_version = openshift.selector("bc", nuxeo_image_build).object().status.lastVersion
-              def last_build = openshift.selector("builds", "${nuxeo_image_build}-${build_last_version}")
-              timeout(10) {
-                waitUntil {
-                  last_build.object().status.phase == "Complete"
-                }
-              }
+              openshift_image_manager.build(nuxeo_image_build, "source")
 
-              // Promote to release version
-              openshift.tag("${nuxeo_image_name}:latest", "${nuxeo_image_name}:v${release_tag}")
+              // Promote docker image to the release tag
+              openshift_image_manager.tag(nuxeo_image_name, "v${release_tag}")
             }
           }
         }
