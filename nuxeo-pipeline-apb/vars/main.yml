@@ -57,7 +57,7 @@ docker_image_lookup: "{{
 }}"
 
 
-app_name: "{{ project_name if project_name is defined else global_config.appname }}"
+app_name: "{{ project_name }}"
 global_config_name: "{{ app_name }}-global-config"
 base_image_name: "{{ app_name }}-base"
 nuxeo_image_name: "{{ app_name }}-{{ pipeline_name }}-nuxeo"
