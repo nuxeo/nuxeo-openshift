@@ -16,5 +16,6 @@ spec:
   clusterServicePlanExternalName: default
   parameters:
     app_name: "{{ app_name }}"
+    project_name: "{{ app_name }}"
     pipeline_git_ref: "{{ project_git_ref }}"
     pipeline_definition: "{{ 'studio' if studio_only else 'uat-dev' }}"
