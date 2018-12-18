@@ -208,3 +208,57 @@ plans:
         type: string
         title: Storage class for backend persistence volumes
         default: shared
+
+  - name: nuxeo-only
+    description: Development with Nuxeo only
+    free: true
+    metadata: {}
+    parameters:
+      - name: project_name
+        type: string
+        title: Project Name
+        display_group: Project properties
+
+      - name: hotfix_release_username
+        type: string
+        title: Username to access hotfix releases repository (Optional)
+        display_group: Connect properties
+
+      - name: hotfix_release_password
+        type: string
+        title: Password to access hotfix releases repository (Optional)
+        display_type: password
+        display_group: Connect properties
+
+      - name: nuxeo_version
+        default: '9.10'
+        type: enum
+        enum: ['8.10','9.10', '10.2', 'master']
+        title: Nuxeo version to use
+        display_group: Nuxeo Configuration
+
+      - name: nuxeo_packages
+        default: 'nuxeo-web-ui'
+        type: string
+        title: List of Nuxeo packages to install at startup
+        display_group: Nuxeo Configuration
+
+      - name: nuxeo_templates
+        default: ''
+        type: string
+        title: |
+          Comma separated list of Nuxeo templates to be added to the
+          configuration
+        display_group: Nuxeo Configuration
+
+      - name: backend_pv_storage_class
+        type: string
+        title: Storage class for backend persistence volumes
+        default: gp2
+        display_group: Backend storages
+
+      - name: binaries_pv_storage_class
+        type: string
+        title: Storage class for backend persistence volumes (if fs used)
+        default: shared
+        display_group: Backend storages

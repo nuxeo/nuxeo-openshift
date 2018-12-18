@@ -1,0 +1,49 @@
+---
+apiVersion: servicecatalog.k8s.io/v1beta1
+kind: ServiceInstance
+metadata:
+  labels:
+    app: "{{ app_name }}"
+    apb_name: "{{ apb_name }}"
+    apb_plan_id: "{{ _apb_plan_id }}"
+    apb_service_class_id: "{{ _apb_service_class_id }}"
+    apb_service_instance_id: "{{ _apb_service_instance_id }}"
+    component: nuxeo
+    environment: "{{ app_name }}"
+  name: "{{ app_name }}-nuxeo-service"
+  namespace: "{{ namespace }}"
+spec:
+  clusterServiceClassExternalName: nuxeo-nuxeo-apb
+  clusterServicePlanExternalName: nuxeo-cluster
+  parameters:
+    app_name: {{ app_name }}
+    interactive_replicas: 1
+    worker_replicas: 0
+    image_repository: "{{ base_image }}"
+    image_tag: "{{ app_name }}"
+    image_pullPolicy: Always
+    binaries_persistentVolume_enabled: true
+    binaries_persistentVolume_storageClass: "{{ binaries_pv_storage_class }}"
+    binaries_persistentVolume_size: "10Gi"
+    transientstore_persistentVolume_enabled: false
+    data_persistentVolume_enabled: false
+    applicationUrl: "{{ app_name }}.{{ domain_suffix }}"
+    nuxeoPackages: "{{ nuxeo_packages }}"
+    nuxeoTemplates: "{{ nuxeo_templates }}"
+    connect_enabled: false
+    nuxeoJavaOpts: "-Xms512m -Xmx1024m -Djava.net.preferIPv4Stack=true"
+    resources: "{'limits': {'cpu': '2','memory': '2Gi'},'requests': {'cpu': '1','memory': '1Gi'}}"
+    connectInstallHotfix: false
+{% if deploy_mongo %}
+    useExternalMongoDB: true
+    mongoServiceName: "{{ mongodb_service_name }}"
+{% else %}
+    useExternalMongoDB: false
+{% endif %}
+{% if deploy_elasticsearch %}
+    useExternalElasticsearch: true
+    elasticsearchServiceName: "{{ elasticsearch_service_name }}"
+{% else %}
+    useExternalElasticsearch: false
+{% endif %}
+    useKafkaForStream: false

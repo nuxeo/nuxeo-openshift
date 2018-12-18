@@ -26,7 +26,6 @@ elasticsearch_xpack_map:
   "6.3.2": false
 elasticsearch_configure_xpack: "{{ elasticsearch_xpack_map[elasticsearch_version] }}"
 
-
 mongodb_service_lookup: "{{
   lookup(
     'k8s',
@@ -47,7 +46,6 @@ elasticsearch_service_lookup: "{{
 }}"
 elasticsearch_service_query: "{{elasticsearch_service_lookup | json_query('status.asyncOpInProgress') }}"
 
-
 deploy_mongo: "{{ True if backend_repository_type == 'DBS' else False }}"
 deploy_elasticsearch: True
 
@@ -57,6 +55,16 @@ pod_namespace: "{{ lookup('env', 'POD_NAMESPACE') }}"
 in_cluster: "{{ True if (pod_name and pod_namespace) else False }}"
 
 studio_only: "{{ True if (_apb_plan_id == 'studio-only') else False }}"
+nuxeo_only: "{{ True if (_apb_plan_id == 'nuxeo-only') else False }}"
+
+base_image_lookup: "{{
+  lookup(
+    'k8s',
+    kind='ImageStream',
+    namespace=namespace,
+    resource_name=base_image_name
+  ).status.dockerImageRepository
+}}"
 
 default_pipeline_name: "default"
 global_config_name: "{{ app_name }}-global-config"
@@ -65,6 +73,7 @@ elasticsearch_service_name: "{{ app_name }}-elasticsearch"
 cicd_service_name: "{{ app_name }}-cicd"
 connect_secret_name: "{{ app_name }}-connect-secret"
 connect_secret_basic_name: "{{ connect_secret_name }}-basic"
+need_connect_credentials: "{{ not nuxeo_only }}"
 hotfix_release_secret_name: "{{ app_name }}-hotfix-secret"
 nexus_creds_name: "{{ app_name }}-cicd-nexus-credentials"
 github_need_ssh: "{{ True if project_git_ssh is defined else False }}"

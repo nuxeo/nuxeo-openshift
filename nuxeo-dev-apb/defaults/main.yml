@@ -40,4 +40,5 @@ hotfix_release_username: nuxeo
 hotfix_release_password: nuxeo
 
 studio_only: false
+nuxeo_only: false
 testing: false
