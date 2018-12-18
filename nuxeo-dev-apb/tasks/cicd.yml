@@ -4,14 +4,14 @@
   k8s:
     state: "{{ state }}"
     definition: "{{ lookup('template', item.name) | from_yaml }}"
-  when: item.apply | default(True)
+  when: not nuxeo_only and (item.apply | default(True))
   loop:
      - name: cicd-service.yml.j2
 
 - name: "Wait for CI/CD to be ready"
   pause:
     minutes: 3
-  when: state == "present"
+  when: not nuxeo_only and state == "present"
 
 - name: "Create build configuration objects state={{ state }}"
   k8s:

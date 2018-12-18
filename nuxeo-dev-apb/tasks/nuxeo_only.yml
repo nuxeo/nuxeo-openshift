@@ -1,0 +1,10 @@
+---
+
+- name: "Get the docker base image name"
+  set_fact:
+    base_image: "{{ base_image_lookup }}"
+
+- name: "Instantiating Nuxeo only application"
+  k8s:
+    state: "{{ state }}"
+    definition: "{{ lookup('template', 'nuxeo-only-service.yml.j2') | from_yaml }}"
