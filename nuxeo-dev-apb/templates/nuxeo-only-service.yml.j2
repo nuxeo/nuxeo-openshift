@@ -30,7 +30,8 @@ spec:
     applicationUrl: "{{ app_name }}.{{ domain_suffix }}"
     nuxeoPackages: "{{ nuxeo_packages }}"
     nuxeoTemplates: "{{ nuxeo_templates }}"
-    connect_enabled: false
+    connect_enabled: true
+    connectExistingSecret: "{{ connect_secret_name }}"
     nuxeoJavaOpts: "-Xms512m -Xmx1024m -Djava.net.preferIPv4Stack=true"
     resources: "{'limits': {'cpu': '2','memory': '2Gi'},'requests': {'cpu': '1','memory': '1Gi'}}"
     connectInstallHotfix: false
