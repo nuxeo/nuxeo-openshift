@@ -13,9 +13,7 @@
   loop:
     - name: global-config.yml.j2
     - name: connect-secret.yml.j2
-      apply: "{{ need_connect_credentials }}"
     - name: connect-secret-basic.yml.j2
-      apply: "{{ need_connect_credentials }}"
     - name: hotfix-secret.yml.j2
     - name: ssh-secret.yml.j2
       apply: "{{ github_need_ssh }}"
