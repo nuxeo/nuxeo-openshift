@@ -22,7 +22,7 @@ domain_suffix: apps.prod.nuxeo.io
 jenkins_git_release_username: openshift
 jenkins_git_release_email: openshift@nuxeo.com
 
-nuxeo_version: "9.10"
+nuxeo_version: "10.10"
 nuxeo_packages: nuxeo-web-ui
 nuxeo_templates: ''
 

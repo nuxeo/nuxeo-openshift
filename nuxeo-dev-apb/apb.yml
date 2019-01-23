@@ -88,7 +88,7 @@ plans:
       - name: nuxeo_version
         default: '9.10'
         type: enum
-        enum: ['8.10','9.10', '10.2', 'master']
+        enum: ['8.10', '9.10', '10.2', '10.3', '10.10', 'master']
         title: Nuxeo version to use
         display_group: Nuxeo Configuration
 
@@ -187,9 +187,9 @@ plans:
         title: The version of the studio project to register to
 
       - name: nuxeo_version
-        default: '9.10'
+        default: '10.10'
         type: enum
-        enum: ['8.10','9.10', '10.2', 'master']
+        enum: ['8.10', '9.10', '10.2', '10.3', '10.10', 'master']
         title: Nuxeo version to use
         display_group: Nuxeo Configuration
 
@@ -237,7 +237,7 @@ plans:
       - name: nuxeo_version
         default: '9.10'
         type: enum
-        enum: ['8.10','9.10', '10.2', 'master']
+        enum: ['8.10', '9.10', '10.2', '10.3', '10.10', 'master']
         title: Nuxeo version to use
         display_group: Nuxeo Configuration
 
