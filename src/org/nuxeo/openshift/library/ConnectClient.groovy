@@ -16,13 +16,14 @@ import static org.apache.http.auth.AuthScope.ANY
 
 // For now, this method only works with the Connect Password and does not with the Connect Token
 def deployPackageToConnect(connectUsername, connectPassword, studioProject, packageFilePath, connectUrl='https://connect.nuxeo.com') {
-  def clientId = getClientIdByStudioProject(connectUsername, connectPassword, studioProject)
-  if (clientId == null) {
-    error("No clientId found with user '" + connectUsername + "' for Studio project '" + studioProject + "'.").
-    return
-  }
+  //def clientId = getClientIdByStudioProject(connectUsername, connectPassword, studioProject)
+  //if (clientId == null) {
+  //  error("No clientId found with user '" + connectUsername + "' for Studio project '" + studioProject + "'.").
+  //  return
+  //}
 
-  def uploadUrl = connectUrl + "/nuxeo/site/marketplace/upload?batch=true\\&project=${studioProject}\\&owner=${clientId}\\&client=${clientId}"
+  //def uploadUrl = connectUrl + "/nuxeo/site/marketplace/upload?batch=true\\&project=${studioProject}\\&owner=${clientId}\\&client=${clientId}"
+  def uploadUrl = connectUrl + "/nuxeo/site/marketplace/uploadOS?studio_project=${studioProject}"
   def format = "CONNECT_HTTP_STATUS: %{http_code}"
   def packageFileArg = "package=@${packageFilePath}"
   def connectResponseFileName = "connectResponse"
