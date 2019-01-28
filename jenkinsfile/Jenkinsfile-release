@@ -53,6 +53,7 @@ pipeline {
               auto_increment_policy = "auto_" + env.RELEASE_SCOPE
               nuxeo_image_build = env.NUXEO_IMAGE_BUILD
               nuxeo_image_name = env.NUXEO_IMAGE_NAME
+              hotfix_release_secret_name = env.HOTFIX_RELEASE_SECRET_NAME
             }
           }
         }
@@ -93,6 +94,11 @@ pipeline {
               fileOperations(operations)
 
               withCredentials([
+                usernamePassword(
+                  credentialsId: "${project}-${hotfix_release_secret_name}",
+                  usernameVariable: "HOTFIX_RELEASE_USERNAME",
+                  passwordVariable: "HOTFIX_RELEASE_PASSWORD"
+                ),
                 usernamePassword(
                   credentialsId: "${project}-${connect_secret_basic_name}",
                   usernameVariable: "NUXEO_CONNECT_USERNAME",
