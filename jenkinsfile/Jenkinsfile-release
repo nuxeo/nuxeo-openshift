@@ -6,6 +6,8 @@ def nuxeo_image_build = ""
 def nuxeo_image_name = ""
 def release_tag = ""
 
+def deployScriptFolder = "/home/jenkins/deployScript"
+
 pipeline {
   agent {
     node {
@@ -14,7 +16,7 @@ pipeline {
   }
 
   options {
-    timeout(time: 60, unit: 'MINUTES')
+    timeout(time: 480, unit: 'MINUTES')
   }
 
   stages {
@@ -80,14 +82,16 @@ pipeline {
           openshift.withCluster() {
             openshift.withProject() {
               // Download release script
-              def operations = []
+              def operations = [
+               folderCreateOperation(folderPath: deployScriptFolder)
+              ]
               def release_files = ["release.py", "requirements.txt", "IndentedHelpFormatterWithNL.py", "nxutils.py", "terminalsize.py"]
               release_files.each { file -> operations.add(
                 fileDownloadOperation(
                   url: "https://raw.githubusercontent.com/nuxeo/nuxeo/release-${nuxeo_version}/scripts/${file}",
                   userName: "",
                   password: "",
-                  targetLocation: "",
+                  targetLocation: deployScriptFolder,
                   targetFileName: "${file}"
                 )
               )}
@@ -127,15 +131,14 @@ pipeline {
                 env.EXTERNAL_RELEASES_URL = "http://" + nexusRoute.spec.host + nexusRoute.spec.path + "/content/repositories/releases"
 
                 // Prepare release
-                sh "python ./release.py -f prepare --aip=${auto_increment_policy}"
-                release_tag = sh(
-                  returnStdout: true,
-                  script: 'log_file="release-${PWD##*/}.log" && source ../$log_file && echo -n $TAG'
-                )
+                sh "python ${deployScriptFolder}/release.py -f prepare --aip=${auto_increment_policy}"
+
+                def props = readProperties  file: '/tmp/workspace/' + project + '/release-' + env.JOB_BASE_NAME +'.log'
+                release_tag = props['TAG']
                 nuxeo_package_helper.stash_nuxeo_package release_tag
 
                 // Perform release and deploy artifacts to Nexus
-                sh "python ./release.py perform"
+                sh "python ${deployScriptFolder}/release.py perform"
               }
             }
           }
