@@ -58,6 +58,6 @@ RUN source /usr/local/bin/generate_container_user && \
     chown -R 1001:0 $HOME/.m2 && \
     chmod -R g+rw $HOME/.m2
 
-RUN chown -R 1001:0  $HOME/{.npm,.npm-global,.config} && \
-    chmod -R g+rw $HOME/{.npm,.npm-global,.config} && \
+RUN chown -R 1001:0  $HOME/{.cache,.npm,.npm-global,.config} && \
+    chmod -R g+rw $HOME/{.cache,.npm,.npm-global,.config} && \
     rm -rf $HOME/.config
