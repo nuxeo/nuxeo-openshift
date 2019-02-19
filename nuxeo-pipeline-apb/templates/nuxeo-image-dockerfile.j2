@@ -1,7 +1,7 @@
 FROM {{ base_image_name }}:latest
 # Set up the /build folder with the install script, the marketplace package and the studio credentials
 USER root
-{% if not global_config.studio_only %}
+{% if not global_config.studio_only == 'True' %}
 COPY marketplace.zip /build/marketplace
 {% endif %}
 RUN chmod -R 777 /build
