@@ -7,6 +7,7 @@ def github_ssh_key_name = ""
 def connect_secret_basic_name = ""
 def nuxeo_image_build = ""
 def app_name = ""
+def mvn_opts = ""
 def nuxeo_image_name = ""
 
 pipeline {
@@ -37,6 +38,7 @@ pipeline {
               hotfix_release_secret_name = env.HOTFIX_RELEASE_SECRET_NAME
               nuxeo_image_build = env.NUXEO_IMAGE_BUILD
               nuxeo_image_name = env.NUXEO_IMAGE_NAME
+              mvn_opts = env.MVN_OPTS
             }
           }
         }
@@ -74,7 +76,7 @@ pipeline {
               )
 
             ]) {
-              sh "mvn clean package"
+              sh "mvn clean package ${mvn_opts}"
               nuxeo_package_helper.stash_nuxeo_package "*"
             }
           }
