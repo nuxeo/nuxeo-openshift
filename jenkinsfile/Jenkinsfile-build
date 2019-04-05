@@ -38,7 +38,7 @@ pipeline {
               hotfix_release_secret_name = env.HOTFIX_RELEASE_SECRET_NAME
               nuxeo_image_build = env.NUXEO_IMAGE_BUILD
               nuxeo_image_name = env.NUXEO_IMAGE_NAME
-              mvn_opts = env.MVN_OPTS
+              mvn_opts = env.MVN_OPTS?:""
             }
           }
         }
