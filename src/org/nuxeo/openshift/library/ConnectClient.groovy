@@ -16,21 +16,13 @@ import static org.apache.http.auth.AuthScope.ANY
 
 // For now, this method only works with the Connect Password and does not with the Connect Token
 def deployPackageToConnect(connectUsername, connectPassword, studioProject, packageFilePath, connectUrl='https://connect.nuxeo.com') {
-  //def clientId = getClientIdByStudioProject(connectUsername, connectPassword, studioProject)
-  //if (clientId == null) {
-  //  error("No clientId found with user '" + connectUsername + "' for Studio project '" + studioProject + "'.").
-  //  return
-  //}
-
-  //def uploadUrl = connectUrl + "/nuxeo/site/marketplace/upload?batch=true\\&project=${studioProject}\\&owner=${clientId}\\&client=${clientId}"
   def uploadUrl = connectUrl + "/nuxeo/site/marketplace/uploadOS?studio_project=${studioProject}"
-  def format = "CONNECT_HTTP_STATUS: %{http_code}"
   def packageFileArg = "package=@${packageFilePath}"
-  def connectResponseFileName = "connectResponse"
-  def connectResponseFile = new File(connectResponseFileName)
-
-  sh "curl -w '${format}' -u ${connectUsername}:${connectPassword} -i -n -F ${packageFileArg} ${uploadUrl} > ${connectResponseFileName}"
-  handleResponse(connectResponseFile)
+   sh '''
+        http_response=$(curl -u ''' + connectUsername + ''':''' + connectPassword + ''' -sni -o output.txt -w '%{http_code}' -F ''' + packageFileArg + ''' ''' + uploadUrl + ''')
+        cat output.txt
+        if [ $http_response -ge 400 ] ; then exit 1 ; fi
+    '''
 }
 
 protected getClientIdByStudioProject(connectUsername, connectPassword, studioProject) {
