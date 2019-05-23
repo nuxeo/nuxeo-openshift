@@ -222,6 +222,7 @@ plans:
       - name: nuxeo_studio_project
         type: string
         title: The name of the studio project that is used to register the instance
+        display_group: Connect properties
 
       - name: nuxeo_connect_username
         type: string
