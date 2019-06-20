@@ -27,7 +27,7 @@ spec:
     binaries_persistentVolume_size: "10Gi"
     transientstore_persistentVolume_enabled: false
     data_persistentVolume_enabled: false
-    applicationUrl: "https://{{ app_name }}-{{ item }}.apps.prod.nuxeo.io/nuxeo"
+    applicationUrl: "{{ app_name }}-{{ item }}.apps.prod.nuxeo.io"
     nuxeoPackages: "{{ global_config.nuxeo_packages }}"
     nuxeoTemplates: "{{ global_config.nuxeo_templates }}"
     nuxeoStudioProject:
