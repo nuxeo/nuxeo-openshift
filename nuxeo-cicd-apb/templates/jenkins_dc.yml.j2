@@ -47,7 +47,7 @@ spec:
                 maven-plugin, pipeline-maven, file-operations, apache-httpcomponents-client-4-api, junit-attachments, ws-cleanup, permissive-script-security, tasks
             - name: JENKINS_JAVA_OVERRIDES
               value: -Dpermissive-script-security.enabled=true
-          image: nuxeo/nuxeo-dev-apb-jenkin-master:latest
+          image: nuxeo/nuxeo-dev-apb-jenkins-master:latest
           imagePullPolicy: Always
           livenessProbe:
             failureThreshold: 30
