@@ -16,12 +16,15 @@ ENV NODE_VERSION=6.14.4 \
 COPY contrib/bin/scl_enable /usr/local/bin/scl_enable
 ADD settings.xml $HOME/.m2/
 
+# Install ffmpeg rpm
+RUN yum -y install epel-release && \
+    rpm -Uvh http://li.nux.ro/download/nux/dextop/el7/x86_64/nux-dextop-release-0-5.el7.nux.noarch.rpm && \
+    yum -y install ffmpeg ffmpeg-devel
+
 # Install Nuxeo 3rd party
 RUN yum -y upgrade && yum -y install \
     perl \
     ImageMagick \
-    ffmpeg \
-    ffmpeg2theora \
     ufraw \
     poppler-utils \
     libreoffice \
