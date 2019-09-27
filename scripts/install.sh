@@ -8,6 +8,11 @@
 #
 
 
+# Don't use case sensitive match (only used for True or False here)
+shopt -s nocasematch
+
+
+
 function fixRights() {
   dir=$1
   mkdir -p $dir \
@@ -38,8 +43,11 @@ if [ -f /opt/nuxeo/connect/connect.properties ]; then
     echo "---> Configuring connect credentials"
     /docker-entrypoint.sh nuxeoctl register $NUXEO_CONNECT_USERNAME $NUXEO_STUDIO_PROJECT dev openshift $NUXEO_CONNECT_PASSWORD
 
-    echo "---> Installing hotfixes"
-    /docker-entrypoint.sh nuxeoctl mp-hotfix
+
+    if [ ! -n "$NUXEO_HOTFIX_VERSION" -a "False" != "$INSTALL_HOTFIX" ]; then
+      echo "---> Installing hotfixes"
+      /docker-entrypoint.sh nuxeoctl mp-hotfix
+    fi
   fi
 
   if [ -n "$NUXEO_STUDIO_PROJECT_VERSION" ]; then
@@ -64,6 +72,10 @@ fi
 
 if [ -n "$NUXEO_PACKAGES" ]; then
   ADDITIONAL_NUXEO_PACKAGES=$NUXEO_PACKAGES
+fi
+
+if [ -n "$NUXEO_HOTFIX_VERSION" -a "False" != "$INSTALL_HOTFIX" ]; then
+  ADDITIONAL_NUXEO_PACKAGES="$ADDITIONAL_NUXEO_PACKAGES nuxeo-$NUXEO_HOTFIX_VERSION"
 fi
 
 if [ "$FORCE_STUDIO_PACKAGE_INSTALL" == "True" ]; then
