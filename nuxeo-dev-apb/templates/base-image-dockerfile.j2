@@ -8,6 +8,6 @@ RUN apt-get update && \
     apt-get install -y --no-install-recommends vim && \
     mkdir -p /build/marketplace && \
     curl -fsSL "https://raw.githubusercontent.com/nuxeo/nuxeo-openshift/master/scripts/install.sh" -o /build/install.sh && \
-    echo "9bab1dee22d891c608083ba0c4531eaf /build/install.sh" | md5sum -c - && \
+    echo "04f8d23f0f81c19e95e44c8e141c6d44 /build/install.sh" | md5sum -c - && \
     echo Finished
 USER 1000
