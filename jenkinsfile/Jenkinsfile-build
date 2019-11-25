@@ -154,7 +154,23 @@ pipeline {
                   return (rcMap.status.replicas.equals(rcMap.status.readyReplicas))
                 }
                 withEnv(["NUXEO_URL=${nuxeoUrl}"]) {
-                  sh "mvn verify -pl=${ftestDir} -DskipNodeITs=false"
+                    withMaven() {
+                        withCredentials([
+                          usernamePassword(
+                            credentialsId: "${project}-${hotfix_release_secret_name}",
+                            usernameVariable: "HOTFIX_RELEASE_USERNAME",
+                            passwordVariable: "HOTFIX_RELEASE_PASSWORD"
+                          ),
+                          usernamePassword(
+                            credentialsId: "${project}-${connect_secret_basic_name}",
+                            usernameVariable: "NUXEO_CONNECT_USERNAME",
+                            passwordVariable: "NUXEO_CONNECT_PASSWORD"
+                          )
+
+                        ]) {
+                            sh "mvn verify -pl=${ftestDir} -DskipNodeITs=false"
+                        }
+                      }
                 }
               }
             }
