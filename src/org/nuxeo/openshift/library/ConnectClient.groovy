@@ -18,6 +18,12 @@ import static org.apache.http.auth.AuthScope.ANY
 def deployPackageToConnect(connectUsername, connectPassword, studioProject, packageFilePath, connectUrl='https://connect.nuxeo.com') {
   def uploadUrl = connectUrl + "/nuxeo/site/marketplace/uploadOS?studio_project=${studioProject}"
   def packageFileArg = "package=@${packageFilePath}"
+  sh "echo connectUsername: ${connectUsername}"
+  sh "echo studioProject: ${studioProject}"
+  sh "echo packageFilePath: ${packageFilePath}"
+  sh "echo connectUrl: ${connectUrl}"
+
+  sh "echo Using URL: ${uploadUrl} with ${packageFileArg}"
    sh '''
         http_response=$(curl -u ''' + connectUsername + ''':''' + connectPassword + ''' -sni -o output.txt -w '%{http_code}' -F ''' + packageFileArg + ''' ''' + uploadUrl + ''')
         cat output.txt
