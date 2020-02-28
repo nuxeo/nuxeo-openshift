@@ -12,6 +12,11 @@
       <password>${env.HOTFIX_RELEASE_PASSWORD}</password>
     </server>
     <server>
+      <id>maven-hotfix-releases</id>
+      <username>${env.HOTFIX_RELEASE_USERNAME}</username>
+      <password>${env.HOTFIX_RELEASE_PASSWORD}</password>
+    </server>
+    <server>
       <id>external-releases</id>
       <username>${env.NEXUS_ADMIN_USERNAME}</username>
       <password>${env.NEXUS_ADMIN_PASSWORD}</password>
