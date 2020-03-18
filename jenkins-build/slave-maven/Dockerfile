@@ -21,8 +21,9 @@ RUN yum -y install epel-release && \
     rpm -Uvh http://li.nux.ro/download/nux/dextop/el7/x86_64/nux-dextop-release-0-5.el7.nux.noarch.rpm && \
     yum -y install ffmpeg ffmpeg-devel
 
-# Install exiftool
-RUN yum install -y perl-Image-ExifTool
+# Install exiftool and wkhtmltopdf
+RUN yum install -y perl-Image-ExifTool && \
+    yum install -y https://github.com/wkhtmltopdf/wkhtmltopdf/releases/download/0.12.5/wkhtmltox-0.12.5-1.centos7.x86_64.rpm
 
 # Install Nuxeo 3rd party
 RUN yum -y upgrade && yum -y install \
