@@ -16,6 +16,21 @@
       <username>${env.NEXUS_ADMIN_USERNAME}</username>
       <password>${env.NEXUS_ADMIN_PASSWORD}</password>
     </server>
+    <server>
+      <id>maven-hotfix</id>
+      <username>${env.HOTFIX_RELEASE_USERNAME}</username>
+      <password>${env.HOTFIX_RELEASE_PASSWORD}</password>
+    </server>
+    <server>
+      <id>maven-private</id>
+      <username>${env.HOTFIX_RELEASE_USERNAME}</username>
+      <password>${env.HOTFIX_RELEASE_PASSWORD}</password>
+    </server>
+    <server>
+      <id>maven-internal</id>
+      <username>${env.HOTFIX_RELEASE_USERNAME}</username>
+      <password>${env.HOTFIX_RELEASE_PASSWORD}</password>
+    </server>
   </servers>
   <profiles>
     <profile>
