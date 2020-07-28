@@ -21,5 +21,11 @@ spec:
     type: Dockerfile
   strategy:
     type: Docker
+    dockerStrategy:
+      from:
+        kind: ImageStreamTag
+        name: 'nuxeo:{{ nuxeo_version }}'
+        namespace: common-infra
   triggers:
   - type: ConfigChange
+  - type: ImageChange
