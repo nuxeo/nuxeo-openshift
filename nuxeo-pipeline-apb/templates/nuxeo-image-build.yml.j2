@@ -25,6 +25,8 @@ spec:
       env:
         - name: FORCE_STUDIO_PACKAGE_INSTALL
           value: '{{ global_config.studio_only }}'
+        - name: INSTALL_HOTFIX
+          value: False
       forcePull: true
       from:
         kind: ImageStreamTag

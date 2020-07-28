@@ -1,13 +1,5 @@
 FROM nuxeo/nuxeo:{{ nuxeo_version }}
 USER root
-# Reinstall ImageMagick with the RSVG delegate
-RUN apt-get update && \
-    apt-get remove -y imagemagick && \
-    apt-get install -y --no-install-recommends librsvg2-bin && \
-    apt-get install -y imagemagick && \
-    apt-get install -y --no-install-recommends vim && \
-    mkdir -p /build/marketplace && \
-    curl -fsSL "https://raw.githubusercontent.com/nuxeo/nuxeo-openshift/master/scripts/install.sh" -o /build/install.sh && \
-    echo "a3b9faeaf5ed86e63855da8d5f4502a0 /build/install.sh" | md5sum -c - && \
-    echo Finished
-USER 1000
+# Add your custome packag install here
+# RUN yum install -y mypackage
+USER 900
