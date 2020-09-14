@@ -1,0 +1,74 @@
+openshift-pipeline:1.0.54
+openshift-login:1.0.5
+openshift-client:1.0.7
+
+
+# kubernetes plugin - https://wiki.jenkins-ci.org/display/JENKINS/Kubernetes+Plugin
+kubernetes:1.2
+
+# fabric8 openshift sync
+openshift-sync:1.0.7
+
+# explicitly pull in plugins previously pulled in by dependencies because of
+# security advisories  ...exclude plugins from
+# advisories that were not previously pulled in by what is listed above
+# also, as the plugins above raise their dependency levels for these plugins let's see about removing
+# items from the list below
+#
+# processed sec adv https://jenkins.io/blog/2017/07/10/security-advisory/
+# processed sec adv https://jenkins.io/security/advisory/2017-08-07/
+# processed sec adv https://jenkins.io/security/advisory/2018-01-22/
+# processed sec adv https://jenkins.io/security/advisory/2018-02-05/
+# processed sec adv https://jenkins.io/security/advisory/2018-02-14/
+# processed sec adv https://jenkins.io/security/advisory/2018-02-26/
+#
+config-file-provider:2.17
+docker-commons:1.11
+job-dsl:1.68
+parameterized-trigger:2.35.2
+pipeline-build-step:2.7
+pipeline-input-step:2.8
+script-security:1.41
+credentials-binding:1.15
+junit:1.24
+workflow-durable-task-step:2.18
+workflow-support:2.18
+git:3.8.0
+mercurial:2.3
+subversion:2.10.3
+
+# Legacy stuff
+mapdb-api:1.0.9.0
+
+# remote loader https://wiki.jenkins-ci.org/display/JENKINS/Pipeline+Remote+Loader+Plugin
+workflow-remote-loader:1.4
+
+matrix-project:1.12
+ssh-credentials:1.13
+
+# Pipeline Utility Steps Plugin - https://wiki.jenkins-ci.org/display/JENKINS/Pipeline+Utility+Steps+Plugin
+pipeline-utility-steps:1.5.1
+
+# some plugins helpful for global shared libs were broken out of workflow aggregator
+pipeline-github-lib:1.0
+github-organization-folder:1.6
+
+# Jenkins v2 specific
+matrix-auth:2.2
+blueocean:1.4.1
+
+# Pipeline plugin - https://wiki.jenkins-ci.org/display/JENKINS/Pipeline+Plugin
+# 2.5 now includes pipeline-model-definition (declaritive pipeline)
+# 2.4 brought in pipeline-milestone-step
+workflow-aggregator:2.5
+
+
+# Added for Nuxeo
+maven-plugin:3.7
+pipeline-maven:3.9.2
+file-operations:1.11
+apache-httpcomponents-client-4-api:4.5.10-2.0
+junit-attachments:1.6
+ws-cleanup:0.38
+permissive-script-security:0.6
+tasks:4.53
