@@ -40,6 +40,9 @@ pipeline {
               nuxeo_image_build = env.NUXEO_IMAGE_BUILD
               nuxeo_image_name = env.NUXEO_IMAGE_NAME
               mvn_opts = env.MVN_OPTS?:""
+
+              env.JAVA_HOME="/usr/lib/jvm/java-11/"
+              env.PATH="${env.JAVA_HOME}/bin:${env.PATH}"
             }
           }
         }
@@ -77,6 +80,11 @@ pipeline {
               )
 
             ]) {
+              sh "env"
+              sh 'echo $HOTFIX_RELEASE_USERNAME | base64'
+              sh 'echo $HOTFIX_RELEASE_PASSWORD | base64'
+              sh "echo Username HotFix: $HOTFIX_RELEASE_USERNAME"
+              sh "echo Username Connect: $NUXEO_CONNECT_USERNAME"
               sh "mvn clean package ${mvn_opts}"
               nuxeo_package_helper.stash_nuxeo_package "*"
             }
