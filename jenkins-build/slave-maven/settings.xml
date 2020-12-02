@@ -44,8 +44,8 @@
     <mirror>
       <id>public-mirror</id>
       <name>public mirror</name>
-      <url>https://maven-ncp.packages.nuxeo.com/repository/maven-public</url> 
-      <mirrorOf>public</mirrorOf>
+      <url>https://maven-ncp.packages.nuxeo.com/repository/maven-public</url>
+      <mirrorOf>public,maven-public</mirrorOf>
     </mirror>
   </mirrors>
 </settings>
