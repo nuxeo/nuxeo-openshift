@@ -33,7 +33,7 @@ plans:
         title: Git reference for that pipeline (optional)
         display_group: Project properties
       - name: pipeline_definition
-        default: 'uat-dev'
+        default: 'test-dev'
         type: enum
-        enum: ['uat-dev','single', 'studio']
+        enum: ['test-dev','single', 'studio']
         title: Pipeline definition to use

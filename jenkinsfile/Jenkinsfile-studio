@@ -2,6 +2,10 @@ def openshift_image_manager = evaluate readTrusted('src/org/nuxeo/openshift/libr
 def nuxeo_image_build = ""
 def app_name = ""
 def nuxeo_image_name = ""
+def first_env_name = ""
+def second_env_name = ""
+
+
 
 pipeline {
   agent {
@@ -25,6 +29,9 @@ pipeline {
               echo "Using project: ${openshift.project()} with app: ${app_name}"
               nuxeo_image_build = env.NUXEO_IMAGE_BUILD
               nuxeo_image_name = env.NUXEO_IMAGE_NAME
+
+              first_env_name = env.FIRST_ENV_NAME?:"dev"
+              second_env_name = env.SECOND_ENV_NAME?:"uat"
             }
           }
         }
@@ -40,7 +47,7 @@ pipeline {
               openshift_image_manager.build nuxeo_image_build
 
               // Promote docker image to dev
-              openshift_image_manager.tag(nuxeo_image_name, "dev")
+              openshift_image_manager.tag(nuxeo_image_name, first_env_name)
             }
           }
         }
@@ -52,7 +59,7 @@ pipeline {
         script {
           openshift.withCluster() {
             openshift.withProject() {
-              openshift_image_manager.deploy "${app_name}-dev-interactive"
+              openshift_image_manager.deploy "${app_name}-${first_env_name}-interactive"
             }
           }
         }
@@ -65,8 +72,8 @@ pipeline {
           openshift.withCluster() {
             openshift.withProject() {
               timeout(60) {
-                input message: "Do you want to deploy to UAT environment too?", id: "approval"
-                openshift_image_manager.tag(nuxeo_image_name, "uat")
+                input message: "Do you want to deploy to ${second_env_name} environment too?", id: "approval"
+                openshift_image_manager.tag(nuxeo_image_name, ${second_env_name})
               }
             }
           }
@@ -79,7 +86,7 @@ pipeline {
         script {
           openshift.withCluster() {
             openshift.withProject() {
-              openshift_image_manager.deploy "${app_name}-uat-interactive"
+              openshift_image_manager.deploy "${app_name}-${second_env_name}-interactive"
             }
           }
         }

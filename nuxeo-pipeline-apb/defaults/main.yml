@@ -17,5 +17,5 @@ component: pipeline
 project_name: nuxeo
 pipeline_name: default
 pipeline_git_ref: master
-pipeline_definition: uat-dev
+pipeline_definition: test-dev
 
