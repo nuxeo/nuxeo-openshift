@@ -10,6 +10,10 @@
       apply: "{{ deploy_mongo }}"
     - name: elasticsearch-service.yml.j2
       apply: "{{ deploy_elasticsearch }}"
+    - name: kafka-service.yml.j2
+      apply: "{{ deploy_kafka }}"
+    - name: minio-service.yml.j2
+      apply: "{{ deploy_minio }}"
 
 - name: "Wait for backend storage to be ready"
   pause:

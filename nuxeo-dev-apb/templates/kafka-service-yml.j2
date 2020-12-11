@@ -1,0 +1,25 @@
+---
+apiVersion: servicecatalog.k8s.io/v1beta1
+kind: ServiceInstance
+metadata:
+  labels:
+    app: {{ app_name }}
+    apb_name: '{{ apb_name }}'
+    apb_plan_id: '{{ _apb_plan_id }}'
+    apb_service_class_id: '{{ _apb_service_class_id }}'
+    apb_service_instance_id: '{{ _apb_service_instance_id }}'
+    component: kafka
+  name: "{{ kafka_service_name }}"
+  namespace: {{ namespace }}
+spec:
+  clusterServiceClassExternalName: nuxeo-nuxeo-kafka-apb
+  clusterServicePlanExternalName: clustered
+  parameters:
+    app_name: "{{ kafka_service_name }}"
+    replicas: 1
+    persistentVolume_size: 5Gi
+    persistentVolume_storageClass: "{{ backend_pv_storage_class }}"
+    zookeeper_replicas: 1
+    zookeeper_persistentVolume_size: 5Gi
+    zookeeper_persistentVolume_storageClass: "{{ backend_pv_storage_class }}"
+

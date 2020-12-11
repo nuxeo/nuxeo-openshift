@@ -67,6 +67,8 @@ elasticsearch_service_query: "{{elasticsearch_service_lookup | json_query('statu
 
 deploy_mongo: "{{ True if backend_repository_type == 'DBS' else False }}"
 deploy_elasticsearch: True
+deploy_kafka: "{{ True if backend_stream_type == 'Kafka' else False }}"
+deploy_minio: "{{ True if backend_binaries_type == 'minio' else False }}"
 
 # Whether we are in a cluster or not.
 pod_name: "{{ lookup('env', 'POD_NAME') }}"
@@ -89,6 +91,8 @@ default_pipeline_name: "default"
 global_config_name: "{{ app_name }}-global-config"
 mongodb_service_name: "{{ app_name }}-mongodb"
 elasticsearch_service_name: "{{ app_name }}-elasticsearch"
+kafka_service_name: "{{ app_name }}-kafka"
+minio_service_name: "{{ app_name }}-minio"
 cicd_service_name: "{{ app_name }}-cicd"
 connect_secret_name: "{{ app_name }}-connect-secret"
 connect_secret_basic_name: "{{ connect_secret_name }}-basic"

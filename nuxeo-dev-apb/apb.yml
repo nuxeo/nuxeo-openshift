@@ -125,9 +125,7 @@ plans:
       - name: backend_stream_type
         default: 'Chronicle'
         type: enum
-        # TODO: Make Kafka work before showing it as available.
-        # enum: ['Chronicle', 'Kafka']
-        enum: ['Chronicle']
+        enum: ['Chronicle', 'Kafka']
         title: Stream type
         display_group: Backend storages
 
@@ -141,11 +139,11 @@ plans:
         display_group: Backend storages
 
       - name: backend_binaries_type
-        default: fs
+        default: minio
         type: enum
         # TODO: Make Minio and S3 work before showing them as available.
         # enum: ['fs', 'minio', 's3']
-        enum: ['fs']
+        enum: ['fs','minio']
         title: Binaries storage type
         display_group: Backend storages
 
@@ -154,7 +152,7 @@ plans:
       - name: backend_pv_storage_class
         type: string
         title: Storage class for backend persistence volumes
-        default: gp2
+        default: gp2encrypted
         display_group: Backend storages
 
       - name: binaries_pv_storage_class
@@ -162,6 +160,8 @@ plans:
         title: Storage class for backend persistence volumes (if fs used)
         default: shared
         display_group: Backend storages
+
+
 
   - name: studio-only
     description: Development with Studio project only
@@ -209,7 +209,7 @@ plans:
       - name: backend_pv_storage_class
         type: string
         title: Storage class for backend persistence volumes
-        default: gp2
+        default: gp2encrypted
 
       - name: binaries_pv_storage_class
         type: string
@@ -270,7 +270,7 @@ plans:
       - name: backend_pv_storage_class
         type: string
         title: Storage class for backend persistence volumes
-        default: gp2
+        default: gp2encrypted
         display_group: Backend storages
 
       - name: binaries_pv_storage_class

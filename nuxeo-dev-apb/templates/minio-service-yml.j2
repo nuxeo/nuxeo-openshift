@@ -1,0 +1,21 @@
+---
+apiVersion: servicecatalog.k8s.io/v1beta1
+kind: ServiceInstance
+metadata:
+  labels:
+    app: {{ app_name }}
+    apb_name: '{{ apb_name }}'
+    apb_plan_id: '{{ _apb_plan_id }}'
+    apb_service_class_id: '{{ _apb_service_class_id }}'
+    apb_service_instance_id: '{{ _apb_service_instance_id }}'
+    component: elasticsearch
+  name: "{{ minio_service_name }}"
+  namespace: {{ namespace }}
+spec:
+  clusterServiceClassExternalName: nuxeo-nuxeo-s3-apb
+  clusterServicePlanExternalName: minio
+  parameters:
+    project_name: "{{ minio_service_name }}"
+    minio_nodes: 1
+    minio_storage_class: "{{ backend_pv_storage_class }}"
+    minio_size: 10Gi
