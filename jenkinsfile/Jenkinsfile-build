@@ -118,7 +118,7 @@ pipeline {
       }
     }
 
-    stage('Deploy to ' + first_env_name) {
+    stage('Deploy to First environment') {
       steps {
         script {
           openshift.withCluster() {
@@ -215,7 +215,7 @@ pipeline {
       }
     }
 
-    stage('Deploy '  + second_env_name ) {
+    stage('Deploy Second environment' ) {
       steps {
         script {
           openshift.withCluster() {
