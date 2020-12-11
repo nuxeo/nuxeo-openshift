@@ -62,6 +62,13 @@ plans:
         title: The name of the studio project to register to
         display_group: Connect properties
 
+      - name: nuxeo_clid
+        type: string
+        title: |
+          A Nuxeo CLID used to register intances, build etc...
+        display_type: password
+        display_group: Connect properties
+
       - name: hotfix_release_username
         type: string
         title: Username to access hotfix releases repository (Optional)

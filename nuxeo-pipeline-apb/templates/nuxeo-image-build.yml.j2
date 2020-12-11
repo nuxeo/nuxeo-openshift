@@ -27,6 +27,11 @@ spec:
           value: '{{ global_config.studio_only }}'
         - name: INSTALL_HOTFIX
           value: 'False'
+        - name: NUXEO_CLID
+          valueFrom:
+            secretKeyRef:
+              key: instance.clid
+              name: {{ global_config.connect_secret_name }}
       forcePull: true
       from:
         kind: ImageStreamTag

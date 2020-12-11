@@ -10,6 +10,8 @@ RUN chmod 777 /opt/nuxeo/connect/connect.properties
 # Run the image build script
 USER 1000
 RUN /build/install.sh
+# Forcing MongoDB template
+RUN sed -i "s/nuxeo.templates=default/nuxeo.templates=default,mongodb/" $NUXEO_HOME/bin/nuxeo.conf
 # Clean the server
 USER root
 RUN rm -f /opt/nuxeo/connect/connect.properties && \
