@@ -21,5 +21,5 @@ spec:
     configure_xpack:  {{ elasticsearch_configure_xpack }}
     image_repository: "{{ elasticsearch_image }}"
     image_tag: "{{ elasticsearch_version }}"
-    client_java_opts: -Xms256m -Xmx512m -Djava.net.preferIPv4Stack=true
+    client_java_opts: "{{elasticsearch_client_java_opts}}"
     client_resources: "{limits: {cpu: 1, memory: 1Gi}, requests: {cpu: 500m, memory: 512m}}"
