@@ -1,4 +1,4 @@
-FROM nuxeo/nuxeo-dev-apb-jenkins-slave-maven:nuxeo11
+FROM nuxeo/nuxeo-dev-apb-jenkins-slave-maven:latest
 
 # Install Chrome
 USER root

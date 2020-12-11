@@ -11,24 +11,32 @@ app_name: "{{ project_name | lower }}"
 elasticsearch_image_map:
   "8.10": "elasticsearch"
   "9.10": "docker.elastic.co/elasticsearch/elasticsearch"
-  "10.2": "docker.elastic.co/elasticsearch/elasticsearch-oss"
-  "10.3": "docker.elastic.co/elasticsearch/elasticsearch-oss"
   "10.10": "docker.elastic.co/elasticsearch/elasticsearch-oss"
+  "11.3": "docker.elastic.co/elasticsearch/elasticsearch-oss"
+  "11.4": "docker.elastic.co/elasticsearch/elasticsearch-oss"
   "master": "docker.elastic.co/elasticsearch/elasticsearch-oss"
 elasticsearch_image: "{{ elasticsearch_image_map[nuxeo_version] }}"
 elasticsearch_version_map:
   "8.10": "2.4.6"
   "9.10": "5.6.9"
-  "10.2": "6.3.2"
-  "10.3": "6.3.2"
   "10.10": "6.3.2"
-  "master": "6.3.2"
+  "11.3": "6.3.2"
+  "11.4": "7.9.2"
+  "master": "7.9.2"
 elasticsearch_version: "{{ elasticsearch_version_map[nuxeo_version] }}"
 elasticsearch_xpack_map:
   "2.4.6": true
   "5.6.9": true
   "6.3.2": false
+  "7.9.2": false
 elasticsearch_configure_xpack: "{{ elasticsearch_xpack_map[elasticsearch_version] }}"
+
+java_version_map:
+  "8.10": "8"
+  "9.10": "8"
+  "10.10": "8"
+
+java_version: "{{ java_version_map[nuxeo_version] | default('11') }}"
 
 mongodb_service_lookup: "{{
   lookup(

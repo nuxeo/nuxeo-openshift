@@ -58,5 +58,5 @@ fi
 
 if [ "$ADDITIONAL_NUXEO_PACKAGES" != "" ]; then
   echo "---> Installing additional packages: $ADDITIONAL_NUXEO_PACKAGES"
-  /install-packages $CLID $CONNECT $ADDITIONAL_NUXEO_PACKAGES
+  /install-packages.sh $CLID $CONNECT $ADDITIONAL_NUXEO_PACKAGES
 fi

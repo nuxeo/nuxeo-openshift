@@ -6,7 +6,7 @@ CONFD_DIR=${CONFD_DIR:-/etc/nuxeo/conf.d}
 
 NUXEO_ENV_NAME=${NUXEO_ENV_NAME:-nuxeo}
 TRUSTSTORE_PATH=$NUXEO_DATA/cacerts
-
+DEBUG=${INIT_DEBUG:-false}
 
 importCert() {
   local tlsFile=${1}
@@ -57,6 +57,12 @@ EOT
 
   fi
 
+  if [ "true" == $DEBUG ]; then
+    echo 20-mongodb.conf
+    echo ===============
+    cat $CONFD_DIR/20-mongodb.conf
+  fi
+
 fi
 
 
@@ -95,6 +101,12 @@ EOT
 
   fi
 
+  if [ "true" == $DEBUG ]; then
+    echo 20-elasticsearch.conf
+    echo ===============
+    cat $CONFD_DIR/20-elasticsearch.conf
+  fi
+
 fi
 
 
@@ -125,5 +137,10 @@ EOT
 
   fi
 
+  if [ "true" == $DEBUG ]; then
+    echo 20-kafka.conf
+    echo ===============
+    cat $CONFD_DIR/20-kafka.conf
+  fi
 fi
 

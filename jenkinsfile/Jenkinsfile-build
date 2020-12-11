@@ -84,11 +84,6 @@ pipeline {
               )
 
             ]) {
-              sh "env"
-              sh 'echo $HOTFIX_RELEASE_USERNAME | base64'
-              sh 'echo $HOTFIX_RELEASE_PASSWORD | base64'
-              sh "echo Username HotFix: $HOTFIX_RELEASE_USERNAME"
-              sh "echo Username Connect: $NUXEO_CONNECT_USERNAME"
               sh "mvn clean package ${mvn_opts}"
               nuxeo_package_helper.stash_nuxeo_package "*"
             }
@@ -142,8 +137,10 @@ pipeline {
               branch: "${project_git_ref}",
               credentialsId: "${project}-${github_ssh_key_name}"
 
-              env.JAVA_HOME="/usr/lib/jvm/java-11-openjdk-11.0.9.11-0.el7_9.x86_64"
-              env.PATH="${env.JAVA_HOME}/bin:${env.PATH}"
+              if (env.JAVA_VERSION == "11") {
+                env.JAVA_HOME="/usr/lib/jvm/java-11-openjdk-11.0.9.11-0.el7_9.x86_64"
+                env.PATH="${env.JAVA_HOME}/bin:${env.PATH}"
+              }
             }
           }
         }
