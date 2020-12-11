@@ -39,6 +39,11 @@ pipeline {
               connect_secret_basic_name = env.CONNECT_SECRET_BASIC_NAME
               nuxeo_image_build = env.NUXEO_IMAGE_BUILD
               nuxeo_image_name = env.NUXEO_IMAGE_NAME
+
+              if (parts.JAVA_VERSION = 11) {
+                env.JAVA_HOME="/usr/lib/jvm/java-11-openjdk-11.0.9.11-0.el7_9.x86_64"
+                env.PATH="${env.JAVA_HOME}/bin:${env.PATH}"
+              }
             }
           }
         }
