@@ -144,3 +144,30 @@ EOT
   fi
 fi
 
+
+
+# Configure S3 bindings
+if [ -d $BINDINGS_DIR/s3 ]; then
+  echo "--> Generating bindings for s3"
+  ACCESS_KEY_ID=$(< $BINDINGS_DIR/s3/access)
+  SECRET_KEY_ID=$(< $BINDINGS_DIR/s3/secret)
+  REGION=$(< $BINDINGS_DIR/s3/region)
+  BUCKET=$(< $BINDINGS_DIR/s3/bucket)
+  ENDPOINT=$(< $BINDINGS_DIR/s3/endpoint)
+
+  cat > $CONFD_DIR/20-s3.conf <<EOT
+nuxeo.aws.accessKeyId=${ACCESS_KEY_ID}
+nuxeo.aws.secretKey=${SECRET_KEY_ID}
+nuxeo.aws.region=${REGION}
+nuxeo.s3storage.bucket=${BUCKET}
+nuxeo.s3storage.endpoint=${ENDPOINT}
+EOT
+
+  if [ "true" == $DEBUG ]; then
+    echo 20-kafka.conf
+    echo ===============
+    cat $CONFD_DIR/20-kafka.conf
+  fi
+fi
+
+

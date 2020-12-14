@@ -5,7 +5,7 @@ NUXEO_INIT_IMAGE_NAME="nuxeo-init"
 setUp() {
     rm -rf target
     mkdir target
-    cp -r test/{elasticsearch,mongodb,kafka} ./target
+    cp -r test/{elasticsearch,mongodb,kafka,s3} ./target
     mkdir -p target/conf.d
 }
 
@@ -25,7 +25,8 @@ testGenerateConfFiles() {
     runInit \
        -v $(pwd)/target/elasticsearch:/opt/nuxeo/bindings/elasticsearch \
        -v $(pwd)/target/mongodb:/opt/nuxeo/bindings/mongodb \
-       -v $(pwd)/target/kafka:/opt/nuxeo/bindings/kafka
+       -v $(pwd)/target/kafka:/opt/nuxeo/bindings/kafka \
+       -v $(pwd)/target/s3:/opt/nuxeo/bindings/s3
 
 
     assertTrue "Elastic configuration is found" '[[ -f "target/conf.d/20-elasticsearch.conf" ]]'
@@ -34,6 +35,8 @@ testGenerateConfFiles() {
     assertTrue "MongoDB configuration is correct" 'diff test/expected/20-mongodb.conf target/conf.d/20-mongodb.conf'
     assertTrue "Kafka configuration is found" '[[ -f "target/conf.d/20-kafka.conf" ]]'
     assertTrue "Kafka configuration is correct" 'diff test/expected/20-kafka.conf target/conf.d/20-kafka.conf'
+    assertTrue "S3 configuration is found" '[[ -f "target/conf.d/20-s3.conf" ]]'
+    assertTrue "S3 configuration is correct" 'diff test/expected/20-s3.conf target/conf.d/20-s3.conf'
 }
 
 testGenerateConfFilesWithSSL() {
@@ -83,6 +86,18 @@ testGenerateConfKafkaOnly() {
     assertFalse "MongoDB configuration is found" '[[ -f "target/conf.d/20-mongodb.conf" ]]'
     assertTrue "Kafka configuration is found" '[[ -f "target/conf.d/20-kafka.conf" ]]'
 }
+
+testGenerateConfS3Only() {
+    runInit -v $(pwd)/target/s3:/opt/nuxeo/bindings/s3
+
+
+    assertFalse "Elastic configuration is found" '[[ -f "target/conf.d/20-elasticsearch.conf" ]]'
+    assertFalse "MongoDB configuration is found" '[[ -f "target/conf.d/20-mongodb.conf" ]]'
+    assertFalse "Kafka configuration is found" '[[ -f "target/conf.d/20-kafka.conf" ]]'
+    assertTrue "S3 configuration is found" '[[ -f "target/conf.d/20-s3.conf" ]]'
+}
+
+
 
 
 testGenerateUserAndPasswordForES() {
