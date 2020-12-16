@@ -161,6 +161,7 @@ nuxeo.aws.secretKey=${SECRET_KEY_ID}
 nuxeo.aws.region=${REGION}
 nuxeo.s3storage.bucket=${BUCKET}
 nuxeo.s3storage.endpoint=${ENDPOINT}
+nuxeo.s3storage.pathstyleaccess=true
 EOT
 
   if [ "true" == $DEBUG ]; then
@@ -171,3 +172,14 @@ EOT
 fi
 
 
+if [ -d $BINDINGS_DIR/custom ]; then
+  cp $BINDINGS_DIR/custom/*.conf $CONFD_DIR/
+
+  if [ "true" == $DEBUG ]; then
+    for i in $BINDINGS_DIR/custom/*.conf; do
+      echo $i
+      echo ===============
+      cat $i
+    done
+  fi
+fi

@@ -5,7 +5,7 @@ NUXEO_INIT_IMAGE_NAME="nuxeo-init"
 setUp() {
     rm -rf target
     mkdir target
-    cp -r test/{elasticsearch,mongodb,kafka,s3} ./target
+    cp -r test/{elasticsearch,mongodb,kafka,s3,custom} ./target
     mkdir -p target/conf.d
 }
 
@@ -26,7 +26,8 @@ testGenerateConfFiles() {
        -v $(pwd)/target/elasticsearch:/opt/nuxeo/bindings/elasticsearch \
        -v $(pwd)/target/mongodb:/opt/nuxeo/bindings/mongodb \
        -v $(pwd)/target/kafka:/opt/nuxeo/bindings/kafka \
-       -v $(pwd)/target/s3:/opt/nuxeo/bindings/s3
+       -v $(pwd)/target/s3:/opt/nuxeo/bindings/s3 \
+       -v $(pwd)/target/custom:/opt/nuxeo/bindings/custom
 
 
     assertTrue "Elastic configuration is found" '[[ -f "target/conf.d/20-elasticsearch.conf" ]]'
@@ -37,6 +38,8 @@ testGenerateConfFiles() {
     assertTrue "Kafka configuration is correct" 'diff test/expected/20-kafka.conf target/conf.d/20-kafka.conf'
     assertTrue "S3 configuration is found" '[[ -f "target/conf.d/20-s3.conf" ]]'
     assertTrue "S3 configuration is correct" 'diff test/expected/20-s3.conf target/conf.d/20-s3.conf'
+    assertTrue "Custom configuration is found" '[[ -f "target/conf.d/99-nuxeo.conf" ]]'
+    assertTrue "Custom configuration is correct" 'diff test/expected/99-nuxeo.conf target/conf.d/99-nuxeo.conf'
 }
 
 testGenerateConfFilesWithSSL() {
