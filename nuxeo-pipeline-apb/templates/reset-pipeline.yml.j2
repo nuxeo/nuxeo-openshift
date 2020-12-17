@@ -1,0 +1,87 @@
+apiVersion: build.openshift.io/v1
+kind: BuildConfig
+metadata:
+  labels:
+    app: {{ app_name }}
+    apb_name: '{{ apb_name }}'
+    apb_plan_id: '{{ _apb_plan_id }}'
+    apb_service_class_id: '{{ _apb_service_class_id }}'
+    apb_service_instance_id: '{{ _apb_service_instance_id }}'
+  name: {{ reset_pipeline_name }}
+  namespace: {{ namespace }}
+spec:
+  strategy:
+    jenkinsPipelineStrategy:
+      - name: FIRST_ENV_NAME
+        value: "dev"
+      - name: SECOND_ENV_NAME
+        value: "test"
+      jenkinsfile: |-
+        properties([
+          [$class: 'BuildDiscarderProperty', strategy: [$class: 'LogRotator', daysToKeepStr: '5', numToKeepStr: '5', artifactNumToKeepStr: '1']]
+        ])
+
+        def environment = ""
+        try {
+          timeout(time: 60, unit: 'MINUTES') {
+            node {
+              stage("Select environment") {
+                first_env_name = env.FIRST_ENV_NAME?:"dev"
+                second_env_name = env.SECOND_ENV_NAME?:"uat"
+
+                script {
+                  environment = input message: "What environment do you want to reset data?",
+                    ok: "Reset data",
+                    parameters: [choice(
+                      name: "Choose environment",
+                      choices: "${first_env_name}\n${second_env_name}",
+                      description: "Choose the environment you want to reset"
+                    )]
+                }
+              }
+            }
+
+            node {
+              project = env.PROJECT_NAME
+              stage("stop nuxeo pod") {
+                sh "oc scale dc/{{ name }}-${environment}-interactive --replicas=0"
+              }
+              stage('drop db') {
+                sh "oc get pod -l component=mongodb --template='{{range .items}}{{.metadata.name}}{{end}}' > podname"
+                podMongo = readFile('podname').trim()
+                sh '''oc exec ''' + podMongo + ''' -- bash -c 'mongo {{ name }}-''' + environment + ''' --eval "printjson(db.dropDatabase())"'   '''
+              }
+              stage('drop es indexes') {
+                sh "oc get pod -l component=elasticsearch --template='{{range .items}}{{.metadata.name}}{{end}}' > podname"
+                podElastic = readFile('podname').trim()
+                sh '''oc exec ''' + podElastic + ''' -- bash -c "curl -XDELETE http://localhost:9200/{{ name }}-''' + environment + '''-uidgen"'''
+                sh '''oc exec ''' + podElastic + ''' -- bash -c "curl -XDELETE http://localhost:9200/{{ name }}-''' + environment + '''-audit"'''
+                sh '''oc exec ''' + podElastic + ''' -- bash -c "curl -XDELETE http://localhost:9200/{{ name }}-''' + environment + '''"'''
+              }
+              stage("restart nuxeo pod") {
+                sh "oc scale dc/{{ name }}-${environment}-interactive --replicas=1"
+              }
+              stage("wait for pod") {
+                  isAwait = true
+                  while (isAwait) {
+                    sh "oc get dc/{{ name }}-${environment}-interactive --template='{{.status.availableReplicas}}'  > status"
+                    status = readFile('status').trim()
+                    if (status.toString().equals("1")) {
+                        isAwait = false
+                    } else {
+                        sleep(time: 30, unit: 'SECONDS')
+                    }
+                  }
+                }
+            }
+          }
+        } catch (err) {
+           echo "in catch block"
+           echo "Caught: ${err}"
+           currentBuild.result = 'FAILURE'
+           throw err
+        }
+    type: JenkinsPipeline
+  triggers: []
+status:
+  lastVersion: 7

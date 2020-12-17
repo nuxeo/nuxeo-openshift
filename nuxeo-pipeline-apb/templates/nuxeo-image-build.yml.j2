@@ -32,6 +32,8 @@ spec:
             secretKeyRef:
               key: instance.clid
               name: {{ global_config.connect_secret_name }}
+        - name: NUXEO_PACKAGES
+          value: amazon-s3-online-storage nco-cloud
       forcePull: true
       from:
         kind: ImageStreamTag

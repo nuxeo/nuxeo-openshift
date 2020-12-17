@@ -22,9 +22,6 @@ spec:
     image_repository: "{{ docker_image }}"
     image_tag: "{{ item }}"
     image_pullPolicy: Always
-    binaries_persistentVolume_enabled: true
-    binaries_persistentVolume_storageClass: "{{ global_config.binaries_pv_storage_class }}"
-    binaries_persistentVolume_size: "10Gi"
     transientstore_persistentVolume_enabled: false
     data_persistentVolume_enabled: false
     applicationUrl: "{{ app_name }}-{{ item }}.apps.prod.nuxeo.io"
@@ -48,5 +45,17 @@ spec:
 {% else %}
     useExternalElasticsearch: false
 {% endif %}
+{% if global_config.deploy_kafka %}
+    useKafkaForStream: true
+    kafkaServiceName: "{{ global_config.kafka_service_name }}"
+{% else %}
     useKafkaForStream: false
-#    kafkaServiceName: "nuxeo-kafka
+{% endif %}
+{% if global_config.deploy_minio %}
+    useMinioForBinaries: true
+    minioServiceName: "{{ global_config.minio_service_name }}"
+{% else %}
+    binaries_persistentVolume_enabled: true
+    binaries_persistentVolume_storageClass: "{{ global_config.binaries_pv_storage_class }}"
+    binaries_persistentVolume_size: "10Gi"
+{% endif %}

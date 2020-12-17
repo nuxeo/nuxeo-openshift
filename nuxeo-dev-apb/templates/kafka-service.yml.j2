@@ -17,6 +17,8 @@ spec:
   parameters:
     app_name: "{{ kafka_service_name }}"
     replicas: 1
+    configurationOverrides_configmap: '{"offsets.topic.replication.factor": 1}'
+    external_enabled: false
     persistentVolume_size: 5Gi
     persistentVolume_storageClass: "{{ backend_pv_storage_class }}"
     zookeeper_replicas: 1
