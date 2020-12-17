@@ -19,6 +19,7 @@ spec:
     app_name: {{ app_name }}-{{ item }}
     interactive_replicas: 1
     worker_replicas: 0
+    nuxeoVersion: "{{ global_config.nuxeo_version }}"
     image_repository: "{{ docker_image }}"
     image_tag: "{{ item }}"
     image_pullPolicy: Always
