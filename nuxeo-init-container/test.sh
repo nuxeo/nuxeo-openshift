@@ -32,14 +32,20 @@ testGenerateConfFiles() {
 
     assertTrue "Elastic configuration is found" '[[ -f "target/conf.d/20-elasticsearch.conf" ]]'
     assertTrue "Elastic configuration is correct" 'diff test/expected/20-elasticsearch.conf target/conf.d/20-elasticsearch.conf'
+
     assertTrue "MongoDB configuration is found" '[[ -f "target/conf.d/20-mongodb.conf" ]]'
     assertTrue "MongoDB configuration is correct" 'diff test/expected/20-mongodb.conf target/conf.d/20-mongodb.conf'
+
     assertTrue "Kafka configuration is found" '[[ -f "target/conf.d/20-kafka.conf" ]]'
     assertTrue "Kafka configuration is correct" 'diff test/expected/20-kafka.conf target/conf.d/20-kafka.conf'
+
     assertTrue "S3 configuration is found" '[[ -f "target/conf.d/20-s3.conf" ]]'
     assertTrue "S3 configuration is correct" 'diff test/expected/20-s3.conf target/conf.d/20-s3.conf'
+
     assertTrue "Custom configuration is found" '[[ -f "target/conf.d/99-nuxeo.conf" ]]'
     assertTrue "Custom configuration is correct" 'diff test/expected/99-nuxeo.conf target/conf.d/99-nuxeo.conf'
+
+    assertFalse "Clustering configuration is not found" '[[ -f "target/conf.d/10-clustering.conf" ]]'
 }
 
 testGenerateConfFilesWithSSL() {
@@ -115,5 +121,23 @@ testGenerateUserAndPasswordForES() {
     assertContains "Elastic configuration contains username"  "$conf" "elasticsearch.restClient.username"
     assertContains "Elastic configuration contains username"  "$conf" "elasticsearch.restClient.password"
 
+
+}
+
+
+testClusteringOn() {
+    runInit -e NUXEO_CLUSTERING=true -e NUXEO_NODE_ID=nodeid
+
+    assertTrue "Clustering configuration is found" '[[ -f "target/conf.d/10-clustering.conf" ]]'
+    conf="$(cat target/conf.d/10-clustering.conf)"
+    assertContains "Clustering configuration is enabled"  "$conf" "nuxeo.cluster.enabled=true"
+    assertContains "Clustering configuration is enabled"  "$conf" "nuxeo.cluster.nodeid=nodeid"
+
+}
+
+testClusteringOff() {
+    runInit -e NUXEO_CLUSTER=false
+
+    assertFalse "Clustering configuration is not found" '[[ -f "target/conf.d/10-clustering.conf" ]]'
 
 }

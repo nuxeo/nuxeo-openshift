@@ -183,3 +183,11 @@ if [ -d $BINDINGS_DIR/custom ]; then
     done
   fi
 fi
+
+if [ ! -z "$NUXEO_CLUSTERING" ]; then
+  CONFFILE=$CONFD_DIR/10-clustering.conf
+  echo "nuxeo.cluster.enabled=true" > $CONFFILE
+  if [ ! -z "NUXEO_NODE_ID" ]; then
+    echo "nuxeo.cluster.nodeid=${NUXEO_NODE_ID}" >> $CONFFILE
+  fi
+fi
