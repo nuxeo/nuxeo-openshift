@@ -136,7 +136,7 @@ testClusteringOn() {
 }
 
 testClusteringOff() {
-    runInit -e NUXEO_CLUSTER=false
+    runInit -e NUXEO_CLUSTERING=false
 
     assertFalse "Clustering configuration is not found" '[[ -f "target/conf.d/10-clustering.conf" ]]'
 

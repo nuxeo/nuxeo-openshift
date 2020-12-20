@@ -124,6 +124,7 @@ pipeline {
           openshift.withCluster() {
             openshift.withProject() {
               openshift_image_manager.deploy "${app_name}-${first_env_name}-interactive"
+              openshift_image_manager.deploy "${app_name}-${first_env_name}-worker"
             }
           }
         }
@@ -174,6 +175,14 @@ pipeline {
                   def rcMap = it.object()
                   return (rcMap.status.replicas.equals(rcMap.status.readyReplicas))
                 }
+
+                dcLatestVersion = openshift.selector("dc", "${app_name}-${pipeline_name}-worker").object().status.latestVersion
+                rc = openshift.selector('rc', "${app_name}-${pipeline_name}-worker-${dcLatestVersion}")
+                rc.untilEach(1){
+                  def rcMap = it.object()
+                  return (rcMap.status.replicas.equals(rcMap.status.readyReplicas))
+                }
+
                 withEnv(["NUXEO_URL=${nuxeoUrl}"]) {
                     withMaven() {
                         withCredentials([
@@ -221,6 +230,7 @@ pipeline {
           openshift.withCluster() {
             openshift.withProject() {
               openshift_image_manager.deploy "${app_name}-${second_env_name}-interactive"
+              openshift_image_manager.deploy "${app_name}-${second_env_name}-worker"
             }
           }
         }

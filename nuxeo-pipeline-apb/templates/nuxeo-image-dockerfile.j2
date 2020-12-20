@@ -8,10 +8,14 @@ RUN chmod -R 777 /build
 COPY ./connect.properties /opt/nuxeo/connect/connect.properties
 RUN chmod 777 /opt/nuxeo/connect/connect.properties
 # Run the image build script
+{% if not nuxeo_version_post_11 %}
 USER 1000
+{% endif %}
 RUN /build/install.sh
 # Forcing MongoDB template
+{% if nuxeo_version_post_11 %}
 RUN sed -i "s/nuxeo.templates=default/nuxeo.templates=default,mongodb/" $NUXEO_HOME/bin/nuxeo.conf
+{% endif %}
 # Clean the server
 USER root
 RUN rm -f /opt/nuxeo/connect/connect.properties && \
