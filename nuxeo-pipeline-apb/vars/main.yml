@@ -58,6 +58,10 @@ docker_image_lookup: "{{
 
 nuxeo_version_post_11: "{{ global_config.nuxeo_version is match('[1-9][1-9]\\..*') }}"
 
+use_kafka: "{{ global_config.deploy_kafka == 'True' }}"
+use_mongodb: "{{ global_config.deploy_mongo == 'True' }}"
+use_elasticsearch: "{{ global_config.deploy_elasticsearch == 'True' }}"
+use_minio: "{{ global_config.deploy_minio == 'True' }}"
 
 app_name: "{{ project_name }}"
 global_config_name: "{{ app_name }}-global-config"

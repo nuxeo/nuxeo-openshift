@@ -18,7 +18,7 @@ spec:
   parameters:
     app_name: {{ app_name }}-{{ item }}
     interactive_replicas: 1
-    worker_replicas: 0
+    worker_replicas: {{ '1' if use_kafka else '0' }}
     nuxeoVersion: "{{ global_config.nuxeo_version }}"
     image_repository: "{{ docker_image }}"
     image_tag: "{{ item }}"
@@ -34,25 +34,25 @@ spec:
     nuxeoJavaOpts: "-Xms512m -Xmx1024m -Djava.net.preferIPv4Stack=true"
     resources: "{'limits': {'cpu': '2','memory': '2Gi'},'requests': {'cpu': '1','memory': '1Gi'}}"
     connectInstallHotfix: false
-{% if global_config.deploy_mongo %}
+{% if use_mongodb %}
     useExternalMongoDB: true
     mongoServiceName: "{{ global_config.mongodb_service_name }}"
 {% else %}
     useExternalMongoDB: false
 {% endif %}
-{% if global_config.deploy_elasticsearch %}
+{% if use_elasticsearch  %}
     useExternalElasticsearch: true
     elasticsearchServiceName: "{{ global_config.elasticsearch_service_name }}"
 {% else %}
     useExternalElasticsearch: false
 {% endif %}
-{% if global_config.deploy_kafka %}
+{% if use_kafka %}
     useKafkaForStream: true
     kafkaServiceName: "{{ global_config.kafka_service_name }}"
 {% else %}
     useKafkaForStream: false
 {% endif %}
-{% if global_config.deploy_minio %}
+{% if use_minio %}
     useMinioForBinaries: true
     minioServiceName: "{{ global_config.minio_service_name }}"
 {% else %}
