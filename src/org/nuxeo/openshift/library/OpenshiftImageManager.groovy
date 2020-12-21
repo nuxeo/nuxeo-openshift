@@ -22,11 +22,12 @@ def tag(imageName, tag) {
 
 def deploy(deploymentConfigName) {
   openshiftDeploy(deploymentConfig: deploymentConfigName)
+  def dc = openshift.selector("dc", deploymentConfigName)
 
   timeout(120) {
     waitUntil {
-      def dc = openshift.selector("dc", deploymentConfigName)
-      return dc.status.replicas.equals(dc.status.readyReplicas)
+
+      return dc.object().status.replicas.equals(dc.object().status.readyReplicas)
     }
   }
 }
