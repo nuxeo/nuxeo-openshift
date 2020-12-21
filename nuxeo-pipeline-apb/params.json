@@ -1,0 +1,7 @@
+{
+"namespace":"int-devsandbox-nuxeo11",
+"project_name":"nuxeo11-sandbox",
+"pipeline_name":"default",
+"pipeline_git_ref":"master",
+"pipeline_definition":"test-dev"
+}

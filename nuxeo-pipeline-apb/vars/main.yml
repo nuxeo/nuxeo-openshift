@@ -56,7 +56,7 @@ docker_image_lookup: "{{
   ).status.dockerImageRepository
 }}"
 
-nuxeo_version_post_11: "{{ global_config.nuxeoVersion is match('[1-9][1-9]\\..*') }}"
+nuxeo_version_post_11: "{{ global_config.nuxeo_version is match('[1-9][1-9]\\..*') }}"
 
 
 app_name: "{{ project_name }}"

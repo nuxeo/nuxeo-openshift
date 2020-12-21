@@ -12,6 +12,7 @@ metadata:
 spec:
   strategy:
     jenkinsPipelineStrategy:
+      env:
       - name: FIRST_ENV_NAME
         value: "dev"
       - name: SECOND_ENV_NAME
@@ -44,27 +45,27 @@ spec:
             node {
               project = env.PROJECT_NAME
               stage("stop nuxeo pod") {
-                sh "oc scale dc/{{ name }}-${environment}-interactive --replicas=0"
+                sh "oc scale dc/{{ app_name }}-${environment}-interactive --replicas=0"
               }
               stage('drop db') {
-                sh "oc get pod -l component=mongodb --template='{{range .items}}{{.metadata.name}}{{end}}' > podname"
+                sh "oc get pod -l component=mongodb --template='{{ '{{' }}range .items{{ '}} '}}{{ '{{' }}.metadata.name{{ '}} '}}{{ '{{' }}end{{ '}}'}}' > podname"
                 podMongo = readFile('podname').trim()
-                sh '''oc exec ''' + podMongo + ''' -- bash -c 'mongo {{ name }}-''' + environment + ''' --eval "printjson(db.dropDatabase())"'   '''
+                sh '''oc exec ''' + podMongo + ''' -- bash -c 'mongo {{ app_name }}-''' + environment + ''' --eval "printjson(db.dropDatabase())"'   '''
               }
               stage('drop es indexes') {
-                sh "oc get pod -l component=elasticsearch --template='{{range .items}}{{.metadata.name}}{{end}}' > podname"
+                sh "oc get pod -l component=elasticsearch --template='{{ '{{' }}range .items{{ '}}'}}{{ '{{' }}.metadata.name{{ '}}'}}{{ '{{' }}end{{ '}}'}}' > podname"
                 podElastic = readFile('podname').trim()
-                sh '''oc exec ''' + podElastic + ''' -- bash -c "curl -XDELETE http://localhost:9200/{{ name }}-''' + environment + '''-uidgen"'''
-                sh '''oc exec ''' + podElastic + ''' -- bash -c "curl -XDELETE http://localhost:9200/{{ name }}-''' + environment + '''-audit"'''
-                sh '''oc exec ''' + podElastic + ''' -- bash -c "curl -XDELETE http://localhost:9200/{{ name }}-''' + environment + '''"'''
+                sh '''oc exec ''' + podElastic + ''' -- bash -c "curl -XDELETE http://localhost:9200/{{ app_name }}-''' + environment + '''-uidgen"'''
+                sh '''oc exec ''' + podElastic + ''' -- bash -c "curl -XDELETE http://localhost:9200/{{ app_name }}-''' + environment + '''-audit"'''
+                sh '''oc exec ''' + podElastic + ''' -- bash -c "curl -XDELETE http://localhost:9200/{{ app_name }}-''' + environment + '''"'''
               }
               stage("restart nuxeo pod") {
-                sh "oc scale dc/{{ name }}-${environment}-interactive --replicas=1"
+                sh "oc scale dc/{{ app_name }}-${environment}-interactive --replicas=1"
               }
               stage("wait for pod") {
                   isAwait = true
                   while (isAwait) {
-                    sh "oc get dc/{{ name }}-${environment}-interactive --template='{{.status.availableReplicas}}'  > status"
+                    sh "oc get dc/{{ app_name }}-${environment}-interactive --template='{{ '{{' }}.status.availableReplicas{{ '}} '}}'  > status"
                     status = readFile('status').trim()
                     if (status.toString().equals("1")) {
                         isAwait = false
@@ -82,6 +83,3 @@ spec:
            throw err
         }
     type: JenkinsPipeline
-  triggers: []
-status:
-  lastVersion: 7

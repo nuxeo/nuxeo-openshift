@@ -5,7 +5,6 @@
     docker_image: "{{ docker_image_lookup }}"
   when: state == "absent"
 
-
 - name: "Create build configuration objects state={{ state }}"
   k8s:
     state: "{{ state }}"
