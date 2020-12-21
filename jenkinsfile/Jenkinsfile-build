@@ -176,13 +176,6 @@ pipeline {
                   return (rcMap.status.replicas.equals(rcMap.status.readyReplicas))
                 }
 
-                dcLatestVersion = openshift.selector("dc", "${app_name}-${pipeline_name}-worker").object().status.latestVersion
-                rc = openshift.selector('rc', "${app_name}-${pipeline_name}-worker-${dcLatestVersion}")
-                rc.untilEach(1){
-                  def rcMap = it.object()
-                  return (rcMap.status.replicas.equals(rcMap.status.readyReplicas))
-                }
-
                 withEnv(["NUXEO_URL=${nuxeoUrl}"]) {
                     withMaven() {
                         withCredentials([
