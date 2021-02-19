@@ -89,6 +89,10 @@ pipeline {
         script {
           openshift.withCluster() {
             openshift.withProject() {
+
+              def nuxeo_release_tag = Integer.parseInt(nuxeo_version.split(/\./)[0]) > 10 ? "v${nuxeo_version}" :
+              "release-${nuxeo_version}"
+
               // Download release script
               def operations = [
                folderCreateOperation(folderPath: deployScriptFolder)
@@ -96,7 +100,7 @@ pipeline {
               def release_files = ["release.py", "requirements.txt", "IndentedHelpFormatterWithNL.py", "nxutils.py", "terminalsize.py"]
               release_files.each { file -> operations.add(
                 fileDownloadOperation(
-                  url: "https://raw.githubusercontent.com/nuxeo/nuxeo/release-${nuxeo_version}/scripts/${file}",
+                  url: "https://raw.githubusercontent.com/nuxeo/nuxeo/${nuxeo_release_tag}/scripts/${file}",
                   userName: "",
                   password: "",
                   targetLocation: deployScriptFolder,
