@@ -16,7 +16,13 @@ import static org.apache.http.auth.AuthScope.ANY
 
 // For now, this method only works with the Connect Password and does not with the Connect Token
 def deployPackageToConnect(connectUsername, connectPassword, studioProject, packageFilePath, connectUrl='https://connect.nuxeo.com') {
+  echo "Deploying Package to Connect (${connectUrl})"
+  echo "  Attached Studio Project: ${studioProject}"
+  echo "  Package: ${packageFilePath}"
+
   def uploadUrl = connectUrl + "/nuxeo/site/marketplace/uploadOS?studio_project=${studioProject}"
+  echo "  URL: ${uploadUrl}"
+
   def packageFileArg = "package=@${packageFilePath}"
    sh '''
         http_response=$(curl -u ''' + connectUsername + ''':''' + connectPassword + ''' -sni -o output.txt -w '%{http_code}' -F ''' + packageFileArg + ''' ''' + uploadUrl + ''')
