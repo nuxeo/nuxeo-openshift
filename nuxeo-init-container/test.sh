@@ -138,6 +138,14 @@ testClusteringOn() {
 testClusteringOff() {
     runInit -e NUXEO_CLUSTERING=false
 
-    assertFalse "Clustering configuration is not found" '[[ -f "target/conf.d/10-clustering.conf" ]]'
+    conf="$(cat target/conf.d/10-clustering.conf)"
+    assertContains "Clustering configuration is enabled"  "$conf" "nuxeo.cluster.enabled=false"
 
+}
+
+
+testNuxeoUrl() {
+    runInit -e NUXEO_URL=https://mysite.com:8080/nuxeo    
+    conf="$(cat target/conf.d/10-url.conf)"
+    assertContains "Nuxeo URL is set"  "$conf" "nuxeo.url=https://mysite.com:8080/nuxeo"
 }
