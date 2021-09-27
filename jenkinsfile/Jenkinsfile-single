@@ -42,7 +42,7 @@ pipeline {
 
               if (env.JAVA_VERSION == "11") {
                 env.JAVA_TOOL_OPTIONS="-XX:+UnlockExperimentalVMOptions"
-                env.JAVA_HOME="/usr/lib/jvm/java-11-openjdk-11.0.9.11-0.el7_9.x86_64"
+                env.JAVA_HOME="/usr/lib/jvm/java-11-openjdk"
                 env.PATH="${env.JAVA_HOME}/bin:${env.PATH}"
               }
             }
