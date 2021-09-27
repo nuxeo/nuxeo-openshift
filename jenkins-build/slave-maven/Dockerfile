@@ -48,11 +48,11 @@ RUN curl -L --output /tmp/apache-maven-bin.zip  https://www-eu.apache.org/dist/m
 
 
 
-ENV LIBREOFFICE7_VERSION=7.0.3
+ENV LIBREOFFICE7_VERSION=7.2.1
 # Install LibreOffice7
 RUN mkdir -p /tmp/installoo && \
     curl -Ls  https://download.documentfoundation.org/libreoffice/stable/${LIBREOFFICE7_VERSION}/rpm/x86_64/LibreOffice_${LIBREOFFICE7_VERSION}_Linux_x86-64_rpm.tar.gz | tar zxf - -C /tmp/installoo/ && \
-    rpm -Uvh /tmp/installoo/LibreOffice_${LIBREOFFICE7_VERSION}.1_Linux_x86-64_rpm/RPMS/*.rpm && \
+    yum install -y /tmp/installoo/LibreOffice_${LIBREOFFICE7_VERSION}.2_Linux_x86-64_rpm/RPMS/*.rpm && \
     rm -rf /tmp/installoo/
 
 
@@ -77,7 +77,7 @@ RUN source /usr/local/bin/generate_container_user && \
     source /usr/bin/scl_source enable rh-maven35 && \
     mvn clean package || \
     cd .. && rm -rf nuxeo-dsl && \
-    export JAVA_HOME=/usr/lib/jvm/java-11-openjdk-11.0.9.11-0.el7_9.x86_64 && \
+    export JAVA_HOME=/usr/lib/jvm/java-11-openjdk && \
     git clone https://github.com/nuxeo-cloud/nuxeo-cloud-sample && \
     cd nuxeo-cloud-sample && git checkout main && \
     source /usr/bin/scl_source enable rh-maven35 && \
@@ -88,6 +88,7 @@ RUN source /usr/local/bin/generate_container_user && \
     chown -R 1001:0 $HOME/.m2 && \
     chmod -R g+rw $HOME/.m2
 
-RUN chown -R 1001:0  $HOME/{.npm,.npm-global,.config} && \
-    chmod -R g+rw $HOME/{.npm,.npm-global,.config} && \
+RUN mkdir -p $HOME/.cache && \
+    chown -R 1001:0  $HOME/{.npm,.npm-global,.config,.cache} && \
+    chmod -R g+rw $HOME/{.npm,.npm-global,.config,.cache} && \
     rm -rf $HOME/.config
