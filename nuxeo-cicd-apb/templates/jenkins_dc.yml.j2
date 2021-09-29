@@ -42,9 +42,6 @@ spec:
               value: jenkins
             - name: JNLP_SERVICE_NAME
               value: jenkins-jnlp
-            - name: INSTALL_PLUGINS
-              value: |-
-                maven-plugin, pipeline-maven, file-operations, apache-httpcomponents-client-4-api, junit-attachments, ws-cleanup, permissive-script-security, tasks
             - name: JENKINS_JAVA_OVERRIDES
               value: -Dpermissive-script-security.enabled=true
           image: nuxeo/nuxeo-dev-apb-jenkins-master:latest
