@@ -48,3 +48,4 @@ jenkins_route_name: jenkins
 jenkins_config_name: "{{ name }}-config"
 jenkins_git_config_name: "{{ name }}-git-config"
 clid_secret_name: "{{ name }}-clid"
+maven_repo_pvc_name: maven-repo
