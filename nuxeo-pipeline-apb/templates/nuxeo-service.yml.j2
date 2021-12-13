@@ -31,7 +31,7 @@ spec:
     nuxeoStudioProject:
     connect_enabled: true
     connectExistingSecret: "{{ global_config.connect_secret_name}} "
-    nuxeoJavaOpts: "-Xms512m -Xmx1024m -Djava.net.preferIPv4Stack=true"
+    nuxeoJavaOpts: "-Xms512m -Xmx1024m -Djava.net.preferIPv4Stack=true -Dlog4j2.formatMsgNoLookups=true"
     resources: "{'limits': {'cpu': '2','memory': '2Gi'},'requests': {'cpu': '1','memory': '1Gi'}}"
     connectInstallHotfix: false
 {% if use_mongodb %}

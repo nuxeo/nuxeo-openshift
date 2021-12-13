@@ -32,7 +32,7 @@ spec:
     nuxeoTemplates: "{{ nuxeo_templates }}"
     connect_enabled: true
     connectExistingSecret: "{{ connect_secret_name }}"
-    nuxeoJavaOpts: "-Xms512m -Xmx1024m -Djava.net.preferIPv4Stack=true"
+    nuxeoJavaOpts: "-Xms512m -Xmx1024m -Djava.net.preferIPv4Stack=true -Dlog4j2.formatMsgNoLookups=true"
     resources: "{'limits': {'cpu': '2','memory': '2Gi'},'requests': {'cpu': '1','memory': '1Gi'}}"
     connectInstallHotfix: false
 {% if deploy_mongo %}
