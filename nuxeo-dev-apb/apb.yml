@@ -93,9 +93,10 @@ plans:
         display_group: Git configuration
 
       - name: nuxeo_version
-        default: '9.10'
+        default: '2021.20'
         type: enum
-        enum: ['8.10', '9.10', '10.2', '10.3', '10.10', '11.3', '11.4', 'master']
+        enum: ['2021.20', '11.4', '10.10']
+
         title: Nuxeo version to use
         display_group: Nuxeo Configuration
 
