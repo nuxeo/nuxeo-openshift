@@ -25,6 +25,12 @@ plans:
         title: Project Name
         display_group: Project properties
 
+      - name: environment_type
+        type: string
+        default: "prod"
+        title: Environment Type
+        display_group: Project properties
+
       - name: project_git_repo
         type: string
         title: Address of the Git Repository
@@ -112,6 +118,12 @@ plans:
         title: |
           Comma separated list of Nuxeo templates to be added to the
           configuration
+        display_group: Nuxeo Configuration
+
+      - name: useCustomSecret
+        default: true
+        type: boolean
+        title: Use Custom configuration secret
         display_group: Nuxeo Configuration
 
       - name: backend_repository_type

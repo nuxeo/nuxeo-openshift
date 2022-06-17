@@ -23,6 +23,19 @@
     - name: ssh-secret.yml.j2
       apply: "{{ github_need_ssh }}"
 
+- ec2_metadata_facts:
+- name: "Get custom secret from AWS"
+  set_fact:
+    custom_secret: "{{ lookup('aws_secret', 'openshift/projects/{{ environment_type }}/{{ project_name }}', region=ansible_ec2_placement_region) }}"
+
+- name: "Set Nuxeo custom secret state={{ state }}"
+  k8s:
+    state: "{{ state }}"
+    definition: "{{ lookup('template', 'custom-secret.yml.j2') | from_yaml }}"
+  loop:
+    - dev
+    - test
+
 - name: "Instantiating backend storage"
   include_tasks: "backend_storage.yml"
   # As it requires APB and Ansible Service catalog
