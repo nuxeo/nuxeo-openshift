@@ -37,3 +37,8 @@ plans:
         type: enum
         enum: ['test-dev','single', 'studio']
         title: Pipeline definition to use
+      - name: useCustomSecret
+        default: true
+        type: boolean
+        title: Use Custom configuration secret
+        display_group: Project properties
