@@ -1,0 +1,16 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  labels:
+    app: {{ app_name }}
+    apb_name: '{{ apb_name }}'
+    apb_plan_id: '{{ _apb_plan_id }}'
+    apb_service_class_id: '{{ _apb_service_class_id }}'
+    apb_service_instance_id: '{{ _apb_service_instance_id }}'
+    component: {{ component }}
+  name: {{ project_name }}-{{ item }}-custom-bindings
+  namespace: {{ namespace }}
+data:
+  99-bindings-{{ item }}.conf: |-
+    elasticsearch.indexName={{ project_name }}-{{ item }}
+    mail.transport.host=aws-smtp-relay.common-infra.svc

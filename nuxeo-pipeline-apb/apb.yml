@@ -37,3 +37,8 @@ plans:
         type: enum
         enum: ['test-dev','single', 'studio']
         title: Pipeline definition to use
+      - name: useCustomBindings
+        default: true
+        type: boolean
+        title: Use Custom bindings
+        display_group: Project properties
