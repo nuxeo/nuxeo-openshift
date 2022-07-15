@@ -27,7 +27,7 @@ plans:
     - name: domain_suffix
       type: string
       title: Domain suffix for routes
-      default: apps.prod.nuxeo.io
+      default: apps.dev.va.nuxeocloud.com
       display_group: Project properties
     - name: nexus_admin_user
       type: string
