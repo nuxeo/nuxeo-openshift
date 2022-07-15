@@ -44,7 +44,7 @@ spec:
             - mountPath: /sonatype-work
               name: nexus-data
       initContainers:
-        - image: busybox
+        - image: public.ecr.aws/e0v6o2x1/busybox
           imagePullPolicy: IfNotPresent
           name: nexus-conf
           command:
