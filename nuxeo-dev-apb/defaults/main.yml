@@ -17,7 +17,7 @@ component: global
 project_name: nuxeo
 project_git_repo: https://github.com/dmetzler/nuxeo-dsl
 project_git_ref: master
-domain_suffix: apps.prod.nuxeo.io
+domain_suffix: apps.dev.va.nuxeocloud.com
 
 jenkins_git_release_username: openshift
 jenkins_git_release_email: openshift@nuxeo.com

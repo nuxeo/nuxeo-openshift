@@ -16,7 +16,7 @@ namespace: "{{ lookup('env','NAMESPACE') | default('hello-world', true) }}"
 testing: false
 
 
-domain_suffix: apps.prod.nuxeo.io
+domain_suffix: apps.dev.va.nuxeocloud.com
 nexus_admin_user: admin
 nexus_admin_email: devnull@nuxeo.com
 nexus_storage_class: shared
