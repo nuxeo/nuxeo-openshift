@@ -11,6 +11,15 @@
     definition: "{{ lookup('template', 'global-config.yml.j2') | from_yaml }}"
   when: state == 'present'
 
+- name: "Create custom bindings config map"
+  k8s:
+    state: "{{ state }}"
+    definition: "{{ lookup('template', 'custom-bindings.yml.j2') | from_yaml }}"
+  when: state == 'present'
+  loop:
+    - dev
+    - test
+
 - name: "Set Nuxeo Dev global objects state={{ state }}"
   k8s:
     state: "{{ state }}"
