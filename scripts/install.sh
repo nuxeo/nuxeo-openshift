@@ -44,10 +44,10 @@ if [ -f /opt/nuxeo/connect/connect.properties ]; then
     /docker-entrypoint.sh nuxeoctl register $NUXEO_CONNECT_USERNAME $NUXEO_STUDIO_PROJECT dev openshift $NUXEO_CONNECT_PASSWORD
 
 
-    if [ ! -n "$NUXEO_HOTFIX_VERSION" -a "False" != "$INSTALL_HOTFIX" ]; then
-      echo "---> Installing hotfixes"
-      /docker-entrypoint.sh nuxeoctl mp-hotfix
-    fi
+#    if [ ! -n "$NUXEO_HOTFIX_VERSION" -a "False" != "$INSTALL_HOTFIX" ]; then
+#      echo "---> Installing hotfixes"
+#      /docker-entrypoint.sh nuxeoctl mp-hotfix
+#    fi
   fi
 
   if [ -n "$NUXEO_STUDIO_PROJECT_VERSION" ]; then
