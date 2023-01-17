@@ -6,4 +6,5 @@ RUN  touch /var/run/nginx.pid && \
      chown -R nginx:nginx /var/cache/nginx /var/run/nginx.pid
 EXPOSE 8081
 USER nginx
-COPY --chown=nginx:nginx www /usr/share/nginx/html
+COPY www /usr/share/nginx/html
+RUN chown -R nginx:nginx /usr/share/nginx/html
